@@ -535,7 +535,7 @@ async function renderHotLeads(){
       const normPhone=phone.replace(/\D/g,'');
       const matchedConv=normPhone?allConvs.find(c=>{const cp=((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'').replace(/\D/g,'');return cp===normPhone||cp.endsWith(normPhone)||normPhone.endsWith(cp);}):null;
       const convId=matchedConv?matchedConv.id:'';
-      html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" onclick="openHotChat(this)">';
+      html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" data-phone="'+escH(phone)+'" onclick="openHotChat(this)">';
       html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
       html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
       html+='</div>';
@@ -565,20 +565,21 @@ async function renderHotLeads(){
 }
 
 function openHotChat(el){
-  // Highlight selected
   document.querySelectorAll('.hot-lead-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
-  const convId=el.dataset.convid;
+  let convId=el.dataset.convid||'';
   const name=el.dataset.name||'Lead';
   const att=el.dataset.att||'';
   const ts=el.dataset.ts||'';
-  // Update header
-  document.getElementById('hotChatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(att)+(ts?' &bull; '+timeAgo(ts):'')+'</div>';
-  // Load messages into hotChatMessages
-  if(!convId){
-    document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Conversa nao encontrada</div></div>';
-    return;
+  const phone=el.dataset.phone||'';
+  // Fallback: resolve convId via phone match if not set
+  if(!convId&&phone){
+    const normPhone=phone.replace(/\D/g,'');
+    const matched=normPhone?allConvs.find(c=>{const cp=((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'').replace(/\D/g,'');return cp===normPhone||cp.endsWith(normPhone)||normPhone.endsWith(cp);}):null;
+    if(matched)convId=matched.id;
   }
+  document.getElementById('hotChatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(att)+(ts?' &bull; '+timeAgo(ts):'')+'</div>';
+  if(!convId){document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Conversa nao encontrada para este lead</div></div>';return;}
   loadHotMessages(convId);
 }
 
