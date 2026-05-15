@@ -2,81 +2,712 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dashboard LN Marketing</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#0a0d14;color:#e2e8f0;min-height:100vh;font-size:14px}
-:root{--accent:#f97316;--accent2:#3b82f6;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--purple:#a855f7;--bg2:#111827;--bg3:#1f2937;--border:#374151}
-.header{background:linear-gradient(135deg,#111827,#1f2937);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border)}
-.header h1{font-size:1.1rem;font-weight:700;color:#f97316}.header .sub{font-size:0.7rem;color:#6b7280}.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-size:0.75rem;font-weight:600;transition:all .2s}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#ea6c00}.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.filters-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.filter-group{display:flex;align-items:center;gap:6px}.filter-label{font-size:0.7rem;color:#6b7280;white-space:nowrap}
-.filter-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:#e2e8f0;padding:5px 8px;font-size:0.72rem;outline:none}.filter-input:focus{border-color:var(--accent)}select.filter-input option{background:#1f2937}
-.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tab{padding:10px 14px;cursor:pointer;font-size:0.75rem;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}.tab:hover:not(.active){color:#e2e8f0}
-.tab-content{display:none;padding:12px 16px}.tab-content.active{display:block}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
-.kpi{background:var(--bg2);border-radius:8px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.blue::before{background:var(--accent2)}.kpi.yellow::before{background:var(--yellow)}
-.kpi-label{font-size:0.65rem;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}.kpi-value{font-size:1.4rem;font-weight:700;color:#f1f5f9}.kpi-sub{font-size:0.65rem;color:#6b7280;margin-top:2px}
-.alert-section{margin-bottom:16px}.alert-title{font-size:0.8rem;font-weight:700;margin-bottom:8px}.alert-list{display:flex;flex-direction:column;gap:6px}
-.alert-item{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}.alert-item.danger{border-left:3px solid var(--red)}.alert-item.warning{border-left:3px solid var(--yellow)}
-.alert-badge{padding:2px 8px;border-radius:12px;font-size:0.65rem;font-weight:700;white-space:nowrap}.badge-red{background:rgba(239,68,68,.15);color:var(--red)}.badge-yellow{background:rgba(234,179,8,.15);color:var(--yellow)}.badge-green{background:rgba(34,197,94,.15);color:var(--green)}.badge-blue{background:rgba(59,130,246,.15);color:var(--accent2)}
-.alert-text{font-size:0.78rem;color:#e2e8f0;flex:1;min-width:0}.alert-sub{font-size:0.68rem;color:#6b7280;margin-top:2px}
-.hot-lead{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer}.hot-lead.fire{border-left:3px solid var(--red)}.hot-lead.warm{border-left:3px solid var(--yellow)}.hot-lead.interest{border-left:3px solid var(--accent2)}
-.hot-lead-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.hot-lead-name{font-weight:600;font-size:0.82rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hot-score{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap}.score-fire{background:rgba(239,68,68,.2);color:var(--red)}.score-warm{background:rgba(234,179,8,.2);color:var(--yellow)}.score-interest{background:rgba(59,130,246,.2);color:var(--accent2)}
-.hot-lead-msg{font-size:0.72rem;color:#94a3b8;margin-top:4px;overflow:hidden;text-overflow:ellipsis}.hot-lead-meta{font-size:0.65rem;color:#6b7280;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
-.conv-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){.conv-layout{grid-template-columns:1fr}}
-.conv-list{display:flex;flex-direction:column;gap:5px;max-height:500px;overflow-y:auto}
-.conv-item{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer;transition:all .2s}.conv-item:hover,.conv-item.selected{background:var(--bg3);border-color:var(--accent)}.conv-item.pending{border-left:3px solid var(--red)}
-.conv-name{font-weight:600;font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.conv-preview{font-size:0.7rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.conv-meta{font-size:0.63rem;color:#6b7280;margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.msg-panel{background:var(--bg2);border-radius:8px;border:1px solid var(--border);display:flex;flex-direction:column;max-height:500px}
-.msg-header{padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.8rem}.msg-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
-.msg{max-width:80%;padding:7px 10px;border-radius:10px;font-size:0.75rem;line-height:1.4;word-break:break-word}.msg-from-lead{align-self:flex-start;background:#1e3a5f;border-radius:10px 10px 10px 2px}.msg-from-bot{align-self:flex-end;background:#1a3a1a;border-radius:10px 10px 2px 10px}.msg-from-attendant{align-self:flex-end;background:#3a1a5f;border-radius:10px 10px 2px 10px}
-.msg-sender{font-size:0.6rem;font-weight:700;margin-bottom:3px;opacity:.8}.msg-sender-lead{color:#60a5fa}.msg-sender-bot{color:#4ade80}.msg-sender-attendant{color:#c084fc}
-.msg-time{font-size:0.6rem;color:#6b7280;margin-top:3px;text-align:right}.msg-audio{font-style:italic;color:#94a3b8}
-.msg-transcription{background:rgba(255,255,255,.05);border-radius:4px;padding:4px 6px;margin-top:4px;font-size:0.68rem;color:#cbd5e1}.msg-transcription-label{font-size:0.58rem;color:#6b7280;margin-bottom:2px}
-.vendor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
-.vendor-card{background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border)}.vendor-rank{font-size:1.2rem;font-weight:700;color:var(--accent);margin-bottom:6px}.vendor-name{font-size:0.9rem;font-weight:700;color:#f1f5f9;margin-bottom:2px}
-.vendor-stats{margin-top:8px;display:flex;flex-direction:column;gap:4px}.vendor-stat{display:flex;justify-content:space-between;font-size:0.72rem}.vendor-stat-label{color:#6b7280}.vendor-stat-value{font-weight:600;color:#e2e8f0}
-.progress-bar{background:#1f2937;border-radius:4px;height:4px;margin-top:6px;overflow:hidden}.progress-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s}
-.funnel-grid{display:flex;flex-direction:column;gap:5px}.funnel-stage{background:var(--bg2);border-radius:8px;padding:10px 14px;border:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.funnel-name{flex:1;font-size:0.8rem;font-weight:600;color:#e2e8f0}.funnel-bar-wrap{flex:2;min-width:80px}.funnel-bar{height:8px;border-radius:4px;background:var(--accent);transition:width .5s}.funnel-count{font-size:0.85rem;font-weight:700;color:#f1f5f9;min-width:35px;text-align:right}
-.chart-wrap{background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);margin-bottom:12px}.chart-title{font-size:0.8rem;font-weight:700;color:#94a3b8;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}.chart-canvas-wrap{position:relative;height:180px}
-.table-wrap{background:var(--bg2);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;overflow-x:auto}.table-wrap table{width:100%;border-collapse:collapse;min-width:400px}
-.table-wrap th{background:#1f2937;padding:8px 10px;font-size:0.68rem;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;white-space:nowrap}.table-wrap td{padding:8px 10px;font-size:0.75rem;border-top:1px solid var(--border);white-space:nowrap}.table-wrap tr:hover td{background:rgba(255,255,255,.03)}
-.empty{text-align:center;padding:30px;color:#6b7280;font-size:0.8rem}.loading{display:flex;align-items:center;justify-content:center;padding:20px;gap:8px;color:#6b7280;font-size:0.8rem}
-.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+:root{
+  --bg0:#080b12;--bg1:#0d1117;--bg2:#161b22;--bg3:#1c2130;--bg4:#21262d;
+  --border:#30363d;--text1:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --accent:#f97316;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--purple:#a855f7;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg0);color:var(--text1);font-size:14px;display:flex;flex-direction:column}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000}
+.hdr-title{font-size:15px;font-weight:700;color:var(--text1)}
+.hdr-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.live-text{font-size:11px;color:var(--text2)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.btn-refresh{background:var(--bg4);border:1px solid var(--border);color:var(--text1);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-refresh:hover{background:var(--accent);border-color:var(--accent);color:#000}
+.btn-refresh:disabled{opacity:.5;cursor:not-allowed}
+/* ALERT CARDS */
+.alert-cards{display:flex;gap:12px;padding:16px 20px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.alert-card{flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.alert-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.alert-card.red-card::before{background:var(--red)}
+.alert-card.yellow-card::before{background:var(--yellow)}
+.alert-card.blue-card::before{background:var(--blue)}
+.alert-card.active,.alert-card:hover{border-color:var(--border);background:var(--bg3);transform:translateY(-1px)}
+.alert-card.red-card.active,.alert-card.red-card:hover{border-color:var(--red)}
+.alert-card.yellow-card.active,.alert-card.yellow-card:hover{border-color:var(--yellow)}
+.alert-card.blue-card.active,.alert-card.blue-card:hover{border-color:var(--blue)}
+.ac-number{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.red-card .ac-number{color:var(--red)}
+.yellow-card .ac-number{color:var(--yellow)}
+.blue-card .ac-number{color:var(--blue)}
+.ac-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+/* TABS */
+.tabs-bar{display:flex;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:10px 18px;font-size:12px;font-weight:600;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:'Inter',sans-serif;background:none;border-top:none;border-left:none;border-right:none}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text1)}
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.tab-pane{display:none;flex:1;overflow-y:auto;padding:20px}
+.tab-pane.active{display:block}
+/* SECTION HEADERS */
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:700;color:var(--text1);text-transform:uppercase;letter-spacing:.5px}
+.section-badge{background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:2px 9px;font-size:11px;color:var(--text2);font-weight:600}
+/* LEAD CARDS */
+.lead-section{margin-bottom:24px}
+.lead-section-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.priority-badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700}
+.badge-red-bg{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.badge-yellow-bg{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+.badge-blue-bg{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.badge-green-bg{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.badge-purple-bg{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.lead-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.lead-card:hover{background:var(--bg3);border-color:var(--border)}
+.lead-card.lc-red{border-left-color:var(--red)}
+.lead-card.lc-yellow{border-left-color:var(--yellow)}
+.lead-card.lc-blue{border-left-color:var(--blue)}
+.lead-card.lc-purple{border-left-color:var(--purple)}
+.lc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.lc-name{font-weight:600;font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-time{font-size:11px;color:var(--text3);white-space:nowrap}
+.lc-msg{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:5px}
+.lc-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.lc-vendor{font-size:11px;color:var(--text2);font-weight:500}
+.lc-kw{font-size:11px;color:var(--accent);font-weight:600}
+/* VENDORS */
+.vendor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.vendor-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s}
+.vendor-card:hover{border-color:var(--text3);background:var(--bg3)}
+.vc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.vc-name{font-size:15px;font-weight:700}
+.vc-rank{font-size:20px}
+.vc-stats{display:flex;flex-direction:column;gap:8px}
+.vc-stat{display:flex;justify-content:space-between;align-items:center}
+.vc-stat-label{font-size:11px;color:var(--text2)}
+.vc-stat-val{font-size:13px;font-weight:700}
+.vc-bar-wrap{background:var(--bg4);border-radius:4px;height:3px;margin-top:8px}
+.vc-bar{height:3px;border-radius:4px;transition:width .6s}
+/* CHAT (WhatsApp style) */
+.conv-layout{display:grid;grid-template-columns:320px 1fr;gap:0;height:100%;max-height:calc(100vh - 160px);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+@media(max-width:700px){.conv-layout{grid-template-columns:1fr;max-height:none}}
+.conv-list-panel{border-right:1px solid var(--border);overflow-y:auto;background:var(--bg1)}
+.conv-list-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.conv-list-search{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:7px 12px;font-size:12px;width:100%;outline:none;font-family:'Inter',sans-serif}
+.conv-list-search:focus{border-color:var(--accent)}
+.conv-filters{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);overflow-x:auto}
+.cf-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;transition:all .15s}
+.cf-btn.active,.cf-btn:hover{background:var(--accent);border-color:var(--accent);color:#000}
+.conv-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.conv-item:hover,.conv-item.selected{background:var(--bg3)}
+.conv-item.pending{border-left-color:var(--red)}
+.ci-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.ci-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.ci-time{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:6px}
+.ci-preview{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.ci-meta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.ci-badge{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600}
+/* CHAT PANEL */
+.chat-panel{display:flex;flex-direction:column;background:var(--bg0)}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.chat-header-name{font-weight:700;font-size:14px}
+.chat-header-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--bg0)}
+.msg-row{display:flex;flex-direction:column;max-width:75%}
+.msg-row.from-lead{align-self:flex-start}
+.msg-row.from-vendor{align-self:flex-end}
+.msg-row.from-bot{align-self:flex-end}
+.msg-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.from-lead .msg-bubble{background:#1c3a5e;border-radius:2px 12px 12px 12px}
+.from-vendor .msg-bubble{background:#2d1b5e;border-radius:12px 2px 12px 12px}
+.from-bot .msg-bubble{background:#1a3a1a;border-radius:12px 2px 12px 12px}
+.msg-sender-name{font-size:10px;font-weight:700;margin-bottom:3px;padding:0 2px}
+.from-lead .msg-sender-name{color:#60a5fa}
+.from-vendor .msg-sender-name{color:#c084fc}
+.from-bot .msg-sender-name{color:#4ade80}
+.msg-time-row{font-size:10px;color:var(--text3);margin-top:3px;padding:0 2px;text-align:right}
+.from-lead .msg-time-row{text-align:left}
+.msg-audio-label{font-style:italic;color:var(--text2);font-size:12px}
+.msg-transcription{background:rgba(255,255,255,.06);border-radius:6px;padding:6px 8px;margin-top:6px;font-size:11px;color:var(--text2)}
+.msg-transcription-lbl{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600}
+/* EMPTY / LOADING */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:10px}
+.empty-text{font-size:13px}
+.loading-state{display:flex;align-items:center;justify-content:center;gap:8px;padding:30px;color:var(--text2);font-size:13px}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.vendor-grid{grid-template-columns:1fr 1fr}.tab{padding:8px 10px;font-size:0.7rem}.filters-bar{padding:8px 12px}.tab-content{padding:10px 12px}}
-@media(max-width:400px){.vendor-grid{grid-template-columns:1fr}}
-.count-badge{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1px 8px;font-size:0.65rem;color:#94a3b8}
+/* ALERT LIST */
+.alert-list-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;border-left:3px solid transparent;transition:all .15s}
+.alert-list-item.ali-red{border-left-color:var(--red)}
+.alert-list-item.ali-yellow{border-left-color:var(--yellow)}
+.alert-list-item.ali-blue{border-left-color:var(--blue)}
+.ali-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
+.ali-name{font-weight:600;font-size:13px}
+.ali-badge{flex-shrink:0}
+.ali-sub{font-size:12px;color:var(--text2)}
+/* RESPONSIVE */
+@media(max-width:600px){
+  .alert-cards{gap:8px;padding:12px 14px}
+  .alert-card{min-width:130px;padding:12px}
+  .ac-number{font-size:24px}
+  .tab-pane{padding:14px}
+  .vendor-grid{grid-template-columns:1fr 1fr}
+  .conv-layout{max-height:none}
+  .tabs-bar .tab-btn{padding:8px 12px;font-size:11px}
+  .hdr{padding:10px 14px}
+}
+@media(max-width:400px){
+  .vendor-grid{grid-template-columns:1fr}
+}
+.no-select{user-select:none}
 </style>
 </head>
 <body>
-<div class="header"><div><h1>Dashboard LN Marketing</h1><div class="sub">Datacrazy CRM - Tempo Real</div></div><div class="header-right"><div style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:#6b7280"><div class="status-dot" id="statusDot"></div><span id="lastUpdate">--</span></div><button class="btn btn-primary" id="btnReload" onclick="loadAll()">Atualizar</button></div></div>
-<div class="filters-bar"><div class="filter-group"><span class="filter-label">De:</span><input type="date" class="filter-input" id="filterFrom" onchange="applyFilters()"></div><div class="filter-group"><span class="filter-label">Ate:</span><input type="date" class="filter-input" id="filterTo" onchange="applyFilters()"></div><div class="filter-group"><span class="filter-label">Periodo:</span><select class="filter-input" id="filterPeriod" onchange="setPeriod(this.value)"><option value="">Personalizado</option><option value="today">Hoje</option><option value="yesterday">Ontem</option><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="60">60 dias</option><option value="90">90 dias</option><option value="all">Todo historico</option></select></div><div class="filter-group"><span class="filter-label">Vendedor:</span><select class="filter-input" id="filterVendor" onchange="applyFilters()"><option value="">Todos</option><option value="Alysson">Alysson</option><option value="Luan">Luan</option><option value="Jeremias">Jeremias</option><option value="Michele">Michele</option></select></div><button class="btn btn-primary" style="font-size:0.7rem;padding:5px 10px" onclick="clearFilters()">Limpar</button></div>
-<div class="tabs"><div class="tab active" onclick="showTab('alertas')">Alertas</div><div class="tab" onclick="showTab('hot')">Leads Quentes</div><div class="tab" onclick="showTab('vendedores')">Vendedores</div><div class="tab" onclick="showTab('funil')">Funil</div><div class="tab" onclick="showTab('conversas')">Conversas</div><div class="tab" onclick="showTab('crm')">CRM</div></div>
-<div id="tab-alertas" class="tab-content active"><div id="alertasContent"><div class="loading"><div class="spinner"></div>Carregando...</div></div></div>
-<div id="tab-hot" class="tab-content"><div class="kpi-grid" id="hotKpis"></div><div style="margin-bottom:12px"><div style="font-size:0.85rem;font-weight:700;color:#94a3b8;margin-bottom:8px">Prontos p/ Fechar <span class="count-badge" id="hotFireCount">0</span></div><div id="hotFireList"><div class="empty">Carregando...</div></div></div><div style="margin-bottom:12px"><div style="font-size:0.85rem;font-weight:700;color:#94a3b8;margin-bottom:8px">Muito Interessados <span class="count-badge" id="hotWarmCount">0</span></div><div id="hotWarmList"><div class="empty">Carregando...</div></div></div><div style="margin-bottom:12px"><div style="font-size:0.85rem;font-weight:700;color:#94a3b8;margin-bottom:8px">Interesse Detectado <span class="count-badge" id="hotInterestCount">0</span></div><div id="hotInterestList"><div class="empty">Carregando...</div></div></div></div>
-<div id="tab-vendedores" class="tab-content"><div class="vendor-grid" id="vendedoresGrid"></div><div class="chart-wrap"><div class="chart-title">Negocios por Vendedor</div><div class="chart-canvas-wrap"><canvas id="chartVendors"></canvas></div></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Vendedor</th><th>Negocios</th><th>Conversas</th><th>Pendentes</th><th>Sem Negocio</th></tr></thead><tbody id="vendedoresTableBody"></tbody></table></div></div>
-<div id="tab-funil" class="tab-content"><div class="kpi-grid" id="funilKpis"></div><div class="funnel-grid" id="funilList"></div></div>
-<div id="tab-conversas" class="tab-content"><div class="kpi-grid" id="convKpis"></div><div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="filter-label">Status:</span><select class="filter-input" id="filterConvStatus" onchange="renderConversas()"><option value="">Todos</option><option value="waiting">Aguardando</option><option value="opened">Aberta</option><option value="unstarted">Nao iniciada</option><option value="automation">Automacao</option></select><span class="filter-label">Buscar:</span><input type="text" class="filter-input" id="filterConvSearch" placeholder="Nome ou telefone..." oninput="renderConversas()" style="width:160px"><label style="font-size:0.72rem;color:#94a3b8;display:flex;align-items:center;gap:4px"><input type="checkbox" id="filterConvPending" onchange="renderConversas()"> So pendentes</label></div><div class="conv-layout"><div><div id="convList" class="conv-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div></div><div class="msg-panel"><div class="msg-header" id="msgPanelHeader">Selecione uma conversa</div><div class="msg-list" id="msgList"><div class="empty">Clique em uma conversa</div></div></div></div></div>
-<div id="tab-crm" class="tab-content"><div class="kpi-grid" id="crmKpis"></div><div class="chart-wrap"><div class="chart-title">Negocios por Dia</div><div class="chart-canvas-wrap"><canvas id="chartDays"></canvas></div></div><div class="table-wrap"><table><thead><tr><th>Lead</th><th>Telefone</th><th>Vendedor</th><th>Etapa</th><th>Tag</th><th>Data</th></tr></thead><tbody id="crmLeadsBody"></tbody></table></div></div>
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">LN</div>
+    <div>
+      <div class="hdr-title">Dashboard LN Marketing</div>
+      <div class="hdr-sub">Datacrazy CRM &bull; Tempo Real &bull; Ultimas 24h</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-dot" id="liveDot"></div>
+    <span class="live-text" id="lastUpdate">--:--</span>
+    <button class="btn-refresh" id="btnRefresh" onclick="loadAll()">Atualizar</button>
+  </div>
+</div>
+
+<!-- ALERT CARDS -->
+<div class="alert-cards">
+  <div class="alert-card red-card" id="card-semvendedor" onclick="filterByAlert('semvendedor')">
+    <div class="ac-number" id="cnt-semvendedor">-</div>
+    <div class="ac-label">Conversas Sem Vendedor</div>
+  </div>
+  <div class="alert-card yellow-card" id="card-semnegocio" onclick="filterByAlert('semnegocio')">
+    <div class="ac-number" id="cnt-semnegocio">-</div>
+    <div class="ac-label">Leads Sem Negocio no CRM</div>
+  </div>
+  <div class="alert-card blue-card" id="card-pendente" onclick="filterByAlert('pendente')">
+    <div class="ac-number" id="cnt-pendente">-</div>
+    <div class="ac-label">Clientes Pendentes</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('alertas',this)">Alertas</button>
+  <button class="tab-btn" onclick="showTab('hotleads',this)">Leads Quentes</button>
+  <button class="tab-btn" onclick="showTab('vendedores',this)">Vendedores</button>
+  <button class="tab-btn" onclick="showTab('conversas',this)">Conversas</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+<!-- TAB: ALERTAS -->
+<div id="pane-alertas" class="tab-pane active">
+  <div id="alertas-content"><div class="loading-state"><div class="spinner"></div>Carregando dados...</div></div>
+</div>
+
+<!-- TAB: HOT LEADS -->
+<div id="pane-hotleads" class="tab-pane">
+  <div class="lead-section">
+    <div class="lead-section-title">
+      <span>&#128680; ALERTA DE FECHAMENTO</span>
+      <span class="priority-badge badge-red-bg" id="cnt-fechamento">0</span>
+    </div>
+    <div id="list-fechamento"><div class="loading-state"><div class="spinner"></div>Carregando...</div></div>
+  </div>
+  <div class="lead-section">
+    <div class="lead-section-title">
+      <span>&#9889; INTENCAO DE COMPRA GENUINA</span>
+      <span class="priority-badge badge-yellow-bg" id="cnt-intencao">0</span>
+    </div>
+    <div id="list-intencao"><div class="loading-state"><div class="spinner"></div>Carregando...</div></div>
+  </div>
+</div>
+
+<!-- TAB: VENDEDORES -->
+<div id="pane-vendedores" class="tab-pane">
+  <div class="vendor-grid" id="vendorGrid"></div>
+</div>
+
+<!-- TAB: CONVERSAS -->
+<div id="pane-conversas" class="tab-pane" style="padding:0;height:calc(100vh - 160px)">
+  <div class="conv-layout" style="height:100%">
+    <div class="conv-list-panel">
+      <div class="conv-list-header">
+        <input type="text" class="conv-list-search" id="convSearch" placeholder="Buscar lead ou telefone..." oninput="renderConvList()">
+      </div>
+      <div class="conv-filters">
+        <button class="cf-btn active" data-filter="all" onclick="setConvFilter('all',this)">Todos</button>
+        <button class="cf-btn" data-filter="pending" onclick="setConvFilter('pending',this)">Pendentes</button>
+        <button class="cf-btn" data-filter="waiting" onclick="setConvFilter('waiting',this)">Aguardando</button>
+        <button class="cf-btn" data-filter="novendor" onclick="setConvFilter('novendor',this)">Sem Vendedor</button>
+      </div>
+      <div id="convList"></div>
+    </div>
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-header" id="chatHeader">
+        <div class="chat-header-name">Selecione uma conversa</div>
+        <div class="chat-header-sub">Clique em um lead para ver o chat</div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Selecione uma conversa</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
 <script>
-const TOKEN='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';const CRM='https://crm.g1.datacrazy.io/api/crm';const MSG='https://messaging.g1.datacrazy.io/api/messaging';const H={'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'};const VENDORS=['Alysson','Luan','Jeremias','Michele'];const VENDOR_COLORS={'Alysson':'#f97316','Luan':'#3b82f6','Jeremias':'#22c55e','Michele':'#a855f7'};const MSG_PADRAO=['ol\u00E1 doutor, quero saber mais','ola doutor, quero saber mais'];const HOT_FIRE=['quanto custa','vou pagar','como pago','boleto','pix','cart\u00E3o','parcela','quero pedir','quero comprar','quanto \u00E9','me manda o link','link de pagamento','vou fechar','fechei','t\u00F4 dentro','to dentro','pode mandar','manda o pix','chave pix','pagar agora','valor','como fa\u00E7o pra pagar','quero o plano','aceito'];const HOT_WARM=['interessado','tenho interesse','sim doutor','t\u00F4 sim','to sim','isso sim','acontece comigo','\u00E9 exatamente','isso mesmo','quanto tempo','funciona mesmo','realmente funciona','tem garantia','resultado','como funciona','me conta mais','pode me falar mais','me explica','preciso disso','me ajuda'];const HOT_INTEREST=['hm','talvez','poss\u00EDvel','posso pensar','vou ver','me manda','entendi','ok doutor','certo','entendo','to aqui','t\u00F4 aqui'];const SKIP_BOT=['ol\u00E1, meu amigo','seja bem-vindo','consult\u00F3rio zencaps','dr. roberto','dr roberto','vitalidade masculina','condi\u00E7\u00E3o especial','garantia total','frete gr\u00E1tis'];let allBusinesses=[],allConversations=[],filteredBusinesses=[],filteredConversations=[];let chartVendors=null,chartDays=null,filterFrom=null,filterTo=null,filterVendor='',activeTab='alertas';
-function getVendorKey(name){if(!name)return "";const n=name.toLowerCase().trim();return ["Alysson","Luan","Jeremias","Michele"].find(v=>n.includes(v.toLowerCase()))||"";}function setPeriod(val){const today=new Date(),fmt=d=>d.toISOString().split('T')[0];if(val==='today'){document.getElementById('filterFrom').value=fmt(today);document.getElementById('filterTo').value=fmt(today);}else if(val==='yesterday'){const y=new Date(today);y.setDate(y.getDate()-1);document.getElementById('filterFrom').value=fmt(y);document.getElementById('filterTo').value=fmt(y);}else if(val==='all'){document.getElementById('filterFrom').value='';document.getElementById('filterTo').value='';}else if(val){const d=new Date(today);d.setDate(d.getDate()-parseInt(val));document.getElementById('filterFrom').value=fmt(d);document.getElementById('filterTo').value=fmt(today);}applyFilters();}function applyFilters(){filterFrom=document.getElementById('filterFrom').value?new Date(document.getElementById('filterFrom').value+'T00:00:00'):null;filterTo=document.getElementById('filterTo').value?new Date(document.getElementById('filterTo').value+'T23:59:59'):null;filterVendor=document.getElementById('filterVendor').value;filteredBusinesses=allBusinesses.filter(b=>{const d=new Date(b.createdAt||b.updatedAt||'');if(filterFrom&&d<filterFrom)return false;if(filterTo&&d>filterTo)return false;if(filterVendor){const vk=getVendorKey(b.attendant&&b.attendant.name);if(vk!==filterVendor)return false;}return true;});filteredConversations=allConversations.filter(c=>{const d=new Date(c.updatedAt||c.createdAt||'');if(filterFrom&&d<filterFrom)return false;if(filterTo&&d>filterTo)return false;if(filterVendor){const att=(c.attendants||[]).map(a=>a.name||'').join(' ');if(!att.toLowerCase().includes(filterVendor.toLowerCase()))return false;}return true;});renderAll();}function clearFilters(){document.getElementById('filterFrom').value='';document.getElementById('filterTo').value='';document.getElementById('filterPeriod').value='30';document.getElementById('filterVendor').value='';setPeriod('30');}async function apiFetch(url){const r=await fetch(url,{headers:H});if(!r.ok)throw new Error(r.status);return r.json();}async function fetchAllBiz(){let all=[],skip=0,total=Infinity;while(all.length<total){const url=CRM+'/businesses?order[createdAt]=desc&take=100&skip='+skip;const d=await apiFetch(url);const items=d.businesses||d.data||[];if(d.total!==undefined)total=d.total;if(!items.length)break;all=all.concat(items);skip+=100;if(items.length<100)break;}return all;}async function fetchAllConvs(){let all=[],skip=0;while(true){const url=MSG+'/conversations?take=100&skip='+skip+'&order[updatedAt]=desc';const d=await apiFetch(url);const items=d.data||d.conversations||[];if(!items.length)break;all=all.concat(items);if(all.length>=(d.total||999))break;skip+=100;if(items.length<100)break;}return all;}async function loadAll(){const btn=document.getElementById('btnReload');btn.disabled=true;btn.textContent='Carregando...';document.getElementById('statusDot').style.background='#eab308';try{const[bizRaw,convsRaw]=await Promise.all([fetchAllBiz(),fetchAllConvs()]);allBusinesses=bizRaw;allConversations=convsRaw;applyFilters();document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('pt-BR');document.getElementById('statusDot').style.background='#22c55e';}catch(e){console.error(e);document.getElementById('statusDot').style.background='#ef4444';}btn.disabled=false;btn.textContent='Atualizar';}function renderAll(){renderAlertas();renderVendedores();renderFunil();renderConversas();renderCRM();}function showTab(name){activeTab=name;document.querySelectorAll('.tab').forEach((t,i)=>{const tabs=['alertas','hot','vendedores','funil','conversas','crm'];t.classList.toggle('active',tabs[i]===name);});document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');if(name==='hot'&&filteredConversations.length)renderHotLeads();}function timeAgo(d){const diff=(Date.now()-new Date(d).getTime())/1000;if(diff<60)return Math.round(diff)+'s';if(diff<3600)return Math.round(diff/60)+'min';if(diff<86400)return Math.round(diff/3600)+'h';return Math.round(diff/86400)+'d';}function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}function kpiCard(label,val,sub,cls){return '<div class="kpi '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+val+'</div>'+(sub?'<div class="kpi-sub">'+sub+'</div>':'')+'</div>';}
-function renderAlertas(){const semVendedor=filteredConversations.filter(c=>!(c.attendants&&c.attendants.length));const semNegocio=filteredConversations.filter(c=>{const atts=(c.attendants||[]).map(a=>a.name||'');return atts.some(n=>VENDORS.some(v=>n.toLowerCase().includes(v.toLowerCase())))&&!c.businessId;});const pendentes=filteredConversations.filter(c=>c.isPending);const apresentacao=filteredBusinesses.filter(b=>{const s=((b.stage&&(b.stage.name||b.stage.externalId||''))||'');return s.toLowerCase().includes('apresenta');});const semAtribuir=filteredBusinesses.filter(b=>!b.attendant);let html='<div class="kpi-grid" style="margin-bottom:14px">';html+=kpiCard('SEM VENDEDOR',semVendedor.length,'','red');html+=kpiCard('SEM NEGOCIO',semNegocio.length,'','yellow');html+=kpiCard('PENDENTES',pendentes.length,'cliente esperando','red');html+=kpiCard('APRESENTACAO',apresentacao.length,'precisam de acao','yellow');html+=kpiCard('NEGOCIO SEM DONO',semAtribuir.length,'','red');html+='</div>';if(semVendedor.length){html+='<div class="alert-section"><div class="alert-title" style="color:var(--red)">Conversas SEM vendedor ('+semVendedor.length+')</div><div class="alert-list">';semVendedor.slice(0,20).forEach(c=>{const name=(c.contact&&c.contact.name)||c.id||'?';const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';const st=(c.statuses&&c.statuses[0])||'?';html+='<div class="alert-item danger"><div class="alert-text"><b>'+escH(name)+'</b> '+escH(phone)+'<div class="alert-sub">Status: '+st+' - '+timeAgo(c.updatedAt||c.createdAt)+'</div></div><span class="alert-badge badge-red">Sem vendedor</span></div>';});html+='</div></div>';}if(pendentes.length){html+='<div class="alert-section"><div class="alert-title" style="color:var(--red)">Clientes aguardando ('+pendentes.length+')</div><div class="alert-list">';pendentes.slice(0,20).forEach(c=>{const name=(c.contact&&c.contact.name)||'?';const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Ninguem';const msg=(c.lastMessage&&c.lastMessage.body)||'';html+='<div class="alert-item danger"><div class="alert-text"><b>'+escH(name)+'</b> '+escH(phone)+'<div class="alert-sub">Vendedor: '+escH(att)+' - '+timeAgo(c.updatedAt)+'</div>'+(msg?'<div class="alert-sub" style="color:#94a3b8">'+escH(msg.substring(0,80))+'</div>':'')+'</div><span class="alert-badge badge-red">Pendente</span></div>';});html+='</div></div>';}if(semNegocio.length){html+='<div class="alert-section"><div class="alert-title" style="color:var(--yellow)">Conversas sem negocio ('+semNegocio.length+')</div><div class="alert-list">';semNegocio.slice(0,20).forEach(c=>{const name=(c.contact&&c.contact.name)||'?';const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'?';html+='<div class="alert-item warning"><div class="alert-text"><b>'+escH(name)+'</b><div class="alert-sub">Vendedor: '+escH(att)+' - '+timeAgo(c.updatedAt||c.createdAt)+'</div></div><span class="alert-badge badge-yellow">Sem negocio</span></div>';});html+='</div></div>';}if(apresentacao.length){html+='<div class="alert-section"><div class="alert-title" style="color:var(--yellow)">Negocios em APRESENTACAO ('+apresentacao.length+')</div><div class="alert-list">';apresentacao.slice(0,20).forEach(b=>{const name=(b.lead&&b.lead.name)||b.name||'?';const att=(b.attendant&&b.attendant.name)||'Ninguem';const tags=(b.tags||[]).map(t=>t.name||'').join(', ')||'Sem tag';html+='<div class="alert-item warning"><div class="alert-text"><b>'+escH(name)+'</b><div class="alert-sub">Vendedor: '+escH(att)+' - Tags: '+escH(tags)+' - '+timeAgo(b.updatedAt||b.createdAt)+'</div></div><span class="alert-badge badge-yellow">Apresentacao</span></div>';});html+='</div></div>';}if(!semVendedor.length&&!pendentes.length&&!semNegocio.length&&!apresentacao.length)html+='<div class="empty">Nenhum alerta no periodo</div>';document.getElementById('alertasContent').innerHTML=html;}
-function isBot(text){const t=text.toLowerCase();return SKIP_BOT.some(k=>t.includes(k));}function isMsgPadrao(text){const t=text.toLowerCase().trim();return MSG_PADRAO.some(k=>t.includes(k));}function scoreMsg(text){const t=text.toLowerCase();if(isMsgPadrao(t)||isBot(text))return 0;if(HOT_FIRE.some(k=>t.includes(k)))return 3;if(HOT_WARM.some(k=>t.includes(k)))return 2;if(HOT_INTEREST.some(k=>t.includes(k)))return 1;return 0;}async function loadHotLeads(){const phoneStageMap={};allBusinesses.forEach(b=>{const ph=(b.lead&&b.lead.phone)||"";const sn=((b.stage&&b.stage.name)||"").toUpperCase();if(ph)phoneStageMap[ph]=sn;});const convs=filteredConversations.filter(c=>{const phone=(c.contact&&c.contact.contactId)||"";if(phone&&phoneStageMap[phone]==="AGENDADO")return false;const atts=(c.attendants||[]).map(a=>a.name||"");return atts.some(n=>VENDORS.some(v=>n.toLowerCase().includes(v.toLowerCase())))||!(c.statuses||[]).includes("automation");});const results=[];const batches=[];for(let i=0;i<convs.length;i+=10)batches.push(convs.slice(i,i+10));for(const batch of batches){await Promise.all(batch.map(async c=>{try{const d=await apiFetch(MSG+"/conversations/"+c.id+"/messages?take=50&order[createdAt]=desc");const msgs=d.messages||[];let maxScore=0,bestMsg="",kw="";for(const m of msgs){if(!m.received)continue;let txt=m.body||"";if(m.interpretedContent&&!m.interpretedContentPending)txt=m.interpretedContent;if(!txt||isMsgPadrao(txt)||isBot(txt))continue;const s=scoreMsg(txt);if(s>maxScore){maxScore=s;bestMsg=txt.substring(0,120);const tt=txt.toLowerCase();kw=[...HOT_FIRE,...HOT_WARM,...HOT_INTEREST].find(k=>tt.includes(k))||"";}}if(maxScore>0){const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||"Sem vendedor";results.push({conv:c,score:maxScore,msg:bestMsg,kw,att});}}catch(e){}}))}results.sort((a,b)=>b.score-a.score||(new Date(b.conv.updatedAt)-new Date(a.conv.updatedAt)));return results;}function hotItem(r){const name=(r.conv.contact&&r.conv.contact.name)||r.conv.id||"?";const phone=(r.conv.contact&&(r.conv.contact.phone||r.conv.contact.phoneNumber))||"";const id=r.conv.id;let cls,label;if(r.score>=3){cls="fire";label="PRONTO P/ FECHAR";}else if(r.score>=2){cls="warm";label="MUITO INTERESSADO";}else{cls="interest";label="INTERESSE";}let h="<div class=\"hot-lead "+cls+"\" data-id=\""+id+"\" onclick=\"openConvById(this.dataset.id)\">";h+="<div class=\"hot-lead-header\"><div class=\"hot-lead-name\">"+escH(name)+"</div><span class=\"hot-score score-"+cls+"\">"+label+"</span></div>";h+="<div class=\"hot-lead-msg\">"+escH((r.msg||"").substring(0,100))+"</div>";h+="<div class=\"hot-lead-meta\"><span>"+escH(r.att)+"</span>"+(phone?"<span>"+escH(phone)+"</span>":"")+(r.kw?"<span style=\"color:var(--accent)\">"+escH(r.kw)+"</span>":"")+"<span>"+timeAgo(r.conv.updatedAt||r.conv.createdAt)+"</span></div></div>";return h;}async function renderHotLeads(){["hotFireList","hotWarmList","hotInterestList"].forEach(id=>{document.getElementById(id).innerHTML="<div class=\"loading\"><div class=\"spinner\"></div>Analisando...</div>";});const results=await loadHotLeads();const fire=results.filter(r=>r.score>=3),warm=results.filter(r=>r.score===2),interest=results.filter(r=>r.score===1);document.getElementById("hotFireCount").textContent=fire.length;document.getElementById("hotWarmCount").textContent=warm.length;document.getElementById("hotInterestCount").textContent=interest.length;document.getElementById("hotKpis").innerHTML=kpiCard("Prontos p/ Fechar",fire.length,"","red")+kpiCard("Muito Interessados",warm.length,"","yellow")+kpiCard("Com Interesse",interest.length,"","blue")+kpiCard("Total",filteredConversations.length,"conversas","");const empty="<div class=\"empty\">Nenhum no periodo</div>";document.getElementById("hotFireList").innerHTML=fire.length?fire.map(hotItem).join(""):empty;document.getElementById("hotWarmList").innerHTML=warm.length?warm.map(hotItem).join(""):empty;document.getElementById("hotInterestList").innerHTML=interest.length?interest.map(hotItem).join(""):empty;}
-function renderVendedores(){const stats={};VENDORS.forEach(v=>{stats[v]={name:v,businesses:0,conversations:0,pending:0,noBusinessConvs:0};});filteredBusinesses.forEach(b=>{const v=getVendorKey(b.attendant&&b.attendant.name);if(v&&stats[v])stats[v].businesses++;});filteredConversations.forEach(c=>{(c.attendants||[]).forEach(a=>{const v=getVendorKey(a.name);if(v&&stats[v]){stats[v].conversations++;if(c.isPending)stats[v].pending++;if(!c.businessId)stats[v].noBusinessConvs++;}});});const sorted=VENDORS.map(v=>stats[v]).sort((a,b)=>b.businesses-a.businesses);const maxBiz=Math.max(...sorted.map(s=>s.businesses))||1;const medals=["1","2","3","4"];document.getElementById("vendedoresGrid").innerHTML=sorted.map((s,i)=>{const color=VENDOR_COLORS[s.name]||"#666";const pct=(s.businesses/maxBiz*100).toFixed(0);return "<div class=\"vendor-card\" style=\"border-top:3px solid "+color+"\"><div class=\"vendor-rank\">"+medals[i]+"</div><div class=\"vendor-name\">"+escH(s.name)+"</div><div class=\"progress-bar\"><div class=\"progress-fill\" style=\"width:"+pct+"%;background:"+color+"\"></div></div><div class=\"vendor-stats\"><div class=\"vendor-stat\"><span class=\"vendor-stat-label\">Negocios</span><span class=\"vendor-stat-value\">"+s.businesses+"</span></div><div class=\"vendor-stat\"><span class=\"vendor-stat-label\">Conversas</span><span class=\"vendor-stat-value\">"+s.conversations+"</span></div><div class=\"vendor-stat\"><span class=\"vendor-stat-label\">Pendentes</span><span class=\"vendor-stat-value\" style=\"color:var(--red)\">"+s.pending+"</span></div><div class=\"vendor-stat\"><span class=\"vendor-stat-label\">Sem negocio</span><span class=\"vendor-stat-value\" style=\"color:var(--yellow)\">"+s.noBusinessConvs+"</span></div></div></div>";}).join("");document.getElementById("vendedoresTableBody").innerHTML=sorted.map((s,i)=>"<tr><td>"+medals[i]+"</td><td style=\"color:"+(VENDOR_COLORS[s.name]||"#94a3b8")+"\"><b>"+escH(s.name)+"</b></td><td>"+s.businesses+"</td><td>"+s.conversations+"</td><td style=\"color:var(--red)\">"+s.pending+"</td><td style=\"color:var(--yellow)\">"+s.noBusinessConvs+"</td></tr>").join("");if(chartVendors)chartVendors.destroy();const ctx=document.getElementById("chartVendors").getContext("2d");chartVendors=new Chart(ctx,{type:"bar",data:{labels:sorted.map(s=>s.name),datasets:[{label:"Negocios",data:sorted.map(s=>s.businesses),backgroundColor:sorted.map(s=>VENDOR_COLORS[s.name]||"#666"),borderRadius:6},{label:"Conversas",data:sorted.map(s=>s.conversations),backgroundColor:sorted.map(s=>(VENDOR_COLORS[s.name]||"#666")+"55"),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}},scales:{x:{ticks:{color:"#6b7280",font:{size:11}},grid:{color:"#1f2937"}},y:{ticks:{color:"#6b7280",font:{size:11}},grid:{color:"#1f2937"}}}}});}function renderFunil(){const stageMap={};filteredBusinesses.forEach(b=>{const s=(b.stage&&(b.stage.name||b.stage.externalId||"Sem etapa"))||"Sem etapa";stageMap[s]=(stageMap[s]||0)+1;});const ORDER=["APRESENTACAO","SONDAGEM","GERACAO DE VALOR","NEGOCIACAO","FECHAMENTO","AGENDADO","FOLLOW-UP","LEAD PRA O FUTURO","BASE ANTIGA","DESQUALIFICADO"];const sorted=Object.entries(stageMap).sort((a,b)=>{const ia=ORDER.indexOf(a[0].toUpperCase()),ib=ORDER.indexOf(b[0].toUpperCase());if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return -1;if(ib>=0)return 1;return b[1]-a[1];});const max=Math.max(...sorted.map(s=>s[1]))||1;const total=filteredBusinesses.length,ganhos=filteredBusinesses.filter(b=>b.isWon).length,perdidos=filteredBusinesses.filter(b=>b.isLost).length;document.getElementById("funilKpis").innerHTML=kpiCard("Total",total,"negocios","blue")+kpiCard("Ganhos",ganhos,"","green")+kpiCard("Perdidos",perdidos,"","red")+kpiCard("Em Aberto",total-ganhos-perdidos,"","");const stageColors={"APRESENTACAO":"#3b82f6","SONDAGEM":"#8b5cf6","GERACAO DE VALOR":"#06b6d4","NEGOCIACAO":"#f59e0b","FECHAMENTO":"#22c55e","AGENDADO":"#10b981","FOLLOW-UP":"#f97316","LEAD PRA O FUTURO":"#84cc16","BASE ANTIGA":"#6b7280","DESQUALIFICADO":"#ef4444"};document.getElementById("funilList").innerHTML=sorted.map(function(entry){const name=entry[0],count=entry[1];const pct=(count/max*100).toFixed(0);const color=stageColors[name.toUpperCase()]||"#f97316";return "<div class=\"funnel-stage\"><div class=\"funnel-name\">"+escH(name)+"</div><div class=\"funnel-bar-wrap\"><div class=\"funnel-bar\" style=\"width:"+pct+"%;background:"+color+"\"></div></div><div class=\"funnel-count\">"+count+"</div></div>";}).join("");}
-function renderConversas(){const statusF=document.getElementById("filterConvStatus").value;const search=(document.getElementById("filterConvSearch").value||"").toLowerCase();const onlyPend=document.getElementById("filterConvPending").checked;let convs=filteredConversations.filter(c=>{if(onlyPend&&!c.isPending)return false;if(statusF&&!(c.statuses||[]).includes(statusF))return false;if(search){const n=((c.contact&&c.contact.name)||"").toLowerCase();const p=((c.contact&&(c.contact.phone||c.contact.phoneNumber))||"").toLowerCase();if(!n.includes(search)&&!p.includes(search))return false;}return true;});const total=filteredConversations.length,waiting=filteredConversations.filter(c=>(c.statuses||[]).includes("waiting")).length,opened=filteredConversations.filter(c=>(c.statuses||[]).includes("opened")).length,automation=filteredConversations.filter(c=>(c.statuses||[]).includes("automation")).length,pending=filteredConversations.filter(c=>c.isPending).length;document.getElementById("convKpis").innerHTML=kpiCard("Total",total,"","blue")+kpiCard("Abertas",opened,"","green")+kpiCard("Aguardando",waiting,"","red")+kpiCard("Automacao",automation,"","yellow")+kpiCard("Pendentes",pending,"","red");const stBadge={"waiting":"badge-red","opened":"badge-green","unstarted":"badge-blue","automation":"badge-yellow"};document.getElementById("convList").innerHTML=convs.length?convs.slice(0,100).map(c=>{const name=(c.contact&&c.contact.name)||c.id||"?";const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||"";const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||"Sem vendedor";const st=(c.statuses&&c.statuses[0])||"?";const msg=(c.lastMessage&&c.lastMessage.body)||"";const badge=stBadge[st]||"badge-blue";const id=c.id;return "<div class=\"conv-item"+(c.isPending?" pending":"")+"\" data-id=\""+id+"\" onclick=\"openConvEl(this)\"><div class=\"conv-name\">"+escH(name)+(c.isPending?" <span style=\"color:var(--red);font-size:.65rem\">PENDENTE</span>":"")+"</div><div class=\"conv-preview\">"+escH(msg.substring(0,60))+"</div><div class=\"conv-meta\"><span class=\"alert-badge "+badge+"\">"+st+"</span><span>"+escH(att)+"</span><span>"+timeAgo(c.updatedAt||c.createdAt)+"</span>"+(phone?"<span>"+escH(phone)+"</span>":"")+"</div></div>";}).join(""):"<div class=\"empty\">Nenhuma conversa</div>";}function openConvEl(el){document.querySelectorAll(".conv-item").forEach(e=>e.classList.remove("selected"));el.classList.add("selected");const id=el.getAttribute("data-id");loadMessages(id);}function openConvById(id){showTab("conversas");setTimeout(function(){const el=document.querySelector('[data-id="'+id+'"]');if(el){el.classList.add("selected");}loadMessages(id);},300);}async function loadMessages(convId){const conv=allConversations.find(c=>c.id===convId);const name=conv&&conv.contact&&conv.contact.name?conv.contact.name:convId;const att=conv&&conv.attendants&&conv.attendants[0]?conv.attendants[0].name:"";document.getElementById("msgPanelHeader").textContent=name+(att?" - "+att:"");document.getElementById("msgList").innerHTML="<div class=\"loading\"><div class=\"spinner\"></div>Carregando...</div>";try{let allMsgs=[],skip=0;while(true){const d=await apiFetch(MSG+"/conversations/"+convId+"/messages?take=50&skip="+skip+"&order[createdAt]=asc");const msgs=d.messages||[];if(!msgs.length)break;allMsgs=allMsgs.concat(msgs);if(msgs.length<50)break;skip+=50;}const attNames=conv&&conv.attendants?conv.attendants.map(a=>a.name||""):[];if(!allMsgs.length){document.getElementById("msgList").innerHTML="<div class=\"empty\">Sem mensagens</div>";return;}document.getElementById("msgList").innerHTML=allMsgs.filter(m=>(m.body&&m.body.trim().length>0)||(m.interpretedContent&&!m.interpretedContentPending)||(m.attachments&&m.attachments.length>0)).map(m=>{const isReceived=m.received===true;const msgAttName=(m.attendant&&m.attendant.name)||"";const isVendorMsg=!isReceived&&!!msgAttName;let cls,sCls,sLabel;if(isReceived){cls="msg-from-lead";sCls="msg-sender-lead";sLabel=(conv&&conv.contact&&conv.contact.name)||"Lead";}else if(isVendorMsg){cls="msg-from-attendant";sCls="msg-sender-attendant";sLabel=msgAttName;}else{cls="msg-from-bot";sCls="msg-sender-bot";sLabel="Bot/Automacao";}const body=m.body||"";const hasT=m.interpretedContent&&!m.interpretedContentPending;const isAudio=m.type==="audio"||(m.mimeType&&m.mimeType.includes("audio"));const isImg=m.type==="image"||(m.mimeType&&m.mimeType.includes("image"));const isVid=m.type==="video"||(m.mimeType&&m.mimeType.includes("video"));let content="";if(isAudio){content="<div class=\"msg-audio\">Audio</div>";if(hasT)content+="<div class=\"msg-transcription\"><div class=\"msg-transcription-label\">Transcricao:</div>"+escH(m.interpretedContent)+"</div>";else if(m.interpretedContentPending)content+="<div class=\"msg-transcription\" style=\"color:#6b7280\">Transcrevendo...</div>";}else if(isImg)content="<div class=\"msg-audio\">Imagem</div>";else if(isVid)content="<div class=\"msg-audio\">Video</div>";else content=escH(body);const t=m.createdAt?new Date(m.createdAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"}):"";return "<div class=\"msg "+cls+"\"><div class=\"msg-sender "+sCls+"\">"+escH(sLabel)+"</div>"+content+"<div class=\"msg-time\">"+t+"</div></div>";}).join("");const ml=document.getElementById("msgList");ml.scrollTop=ml.scrollHeight;}catch(e){document.getElementById("msgList").innerHTML="<div class=\"empty\">Erro ao carregar</div>";}}
-function renderCRM(){const total=filteredBusinesses.length,ganhos=filteredBusinesses.filter(b=>b.isWon).length,perdidos=filteredBusinesses.filter(b=>b.isLost).length;document.getElementById("crmKpis").innerHTML=kpiCard("Negocios",total,"no periodo","blue")+kpiCard("Ganhos",ganhos,"vendas","green")+kpiCard("Perdidos",perdidos,"","red")+kpiCard("Em Aberto",total-ganhos-perdidos,"","");const byDay={};filteredBusinesses.forEach(b=>{const d=new Date(b.createdAt||b.updatedAt||"");const k=d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});byDay[k]=(byDay[k]||0)+1;});const days=Object.keys(byDay).slice(-30);if(chartDays)chartDays.destroy();const ctx=document.getElementById("chartDays").getContext("2d");chartDays=new Chart(ctx,{type:"bar",data:{labels:days,datasets:[{label:"Negocios",data:days.map(d=>byDay[d]),backgroundColor:"#f97316",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#6b7280",font:{size:10},maxRotation:45},grid:{color:"#1f2937"}},y:{ticks:{color:"#6b7280",font:{size:10}},grid:{color:"#1f2937"}}}}});document.getElementById("crmLeadsBody").innerHTML=filteredBusinesses.slice(0,50).map(b=>{const name=(b.lead&&b.lead.name)||b.name||"-";const phone=(b.lead&&(b.lead.phone||b.lead.phoneNumber))||"-";const att=(b.attendant&&b.attendant.name)||"-";const attKey=getVendorKey(att);const stage=(b.stage&&(b.stage.name||b.stage.externalId))||"-";const tags=(b.tags||[]).map(t=>t.name||"").join(", ")||"-";const d=b.createdAt?new Date(b.createdAt).toLocaleDateString("pt-BR"):"-";return "<tr><td>"+escH(name)+"</td><td style=\"color:#6b7280\">"+escH(phone)+"</td><td style=\"color:"+(VENDOR_COLORS[attKey]||"#94a3b8")+"\">"+escH(att)+"</td><td>"+escH(stage)+"</td><td style=\"font-size:.68rem;color:#f97316\">"+escH(tags)+"</td><td>"+d+"</td></tr>";}).join("");}window.addEventListener("load",function(){setPeriod("30");loadAll();setInterval(loadAll,300000);});
+const TOKEN='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
+const CRM='https://crm.g1.datacrazy.io/api/crm';
+const MSG='https://messaging.g1.datacrazy.io/api/messaging';
+const H={'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'};
+const VENDORS=['Jeremias','Alysson','Luan','Michele'];
+const VENDOR_COLORS={'Jeremias':'#22c55e','Alysson':'#f97316','Luan':'#3b82f6','Michele':'#a855f7'};
+const VENDOR_RANKS=['Jeremias','Alysson','Luan','Michele'];
+
+// 24h boundary
+const get24hAgo=()=>new Date(Date.now()-24*60*60*1000);
+
+// Purchase intent keywords (exact match)
+const PURCHASE_KEYWORDS=['pix','cartao','boleto','link','desconto','comprar','valor','preco','quanto e','fechar','manda o link'];
+const MSG_PADRAO=['ola doutor, quero saber mais','olá doutor, quero saber mais','ola, quero saber mais'];
+const BOT_SKIP=['dr. roberto','dr roberto','seja bem-vindo','consultorios','vitalidade','condicao especial','garantia total','frete gratis','zencaps'];
+
+let allConvs=[], allBiz=[], convFilter='all', activeAlertFilter=null;
+
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function timeAgo(d){const s=(Date.now()-new Date(d))/1000;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
+function is24h(d){return new Date(d)>=get24hAgo();}
+function getVendorKey(name){if(!name)return '';const n=name.toLowerCase();return VENDORS.find(v=>n.includes(v.toLowerCase()))||'';}
+function isBot(text){const t=(text||'').toLowerCase();return BOT_SKIP.some(k=>t.includes(k));}
+function isMsgPadrao(text){const t=(text||'').toLowerCase().trim();return MSG_PADRAO.some(k=>t.includes(k));}
+
+async function apiFetch(url){
+  const r=await fetch(url,{headers:H});
+  if(!r.ok)throw new Error(r.status);
+  return r.json();
+}
+
+async function fetchConvs(){
+  let all=[],skip=0;
+  const cutoff=get24hAgo();
+  while(true){
+    const d=await apiFetch(MSG+'/conversations?take=100&skip='+skip+'&order[updatedAt]=desc');
+    const items=d.data||d.conversations||[];
+    if(!items.length)break;
+    // filter to 24h
+    const fresh=items.filter(c=>new Date(c.updatedAt||c.createdAt)>=cutoff);
+    all=all.concat(fresh);
+    // if the last item is older than 24h, stop
+    const last=items[items.length-1];
+    if(!last||new Date(last.updatedAt||last.createdAt)<cutoff)break;
+    if(all.length>=(d.total||9999))break;
+    skip+=100;
+    if(items.length<100)break;
+  }
+  return all;
+}
+
+async function fetchBiz(){
+  let all=[],skip=0;
+  const cutoff=get24hAgo();
+  while(true){
+    const d=await apiFetch(CRM+'/businesses?order[updatedAt]=desc&take=100&skip='+skip);
+    const items=d.businesses||d.data||[];
+    if(!items.length)break;
+    const fresh=items.filter(b=>new Date(b.updatedAt||b.createdAt)>=cutoff);
+    all=all.concat(fresh);
+    const last=items[items.length-1];
+    if(!last||new Date(last.updatedAt||last.createdAt)<cutoff)break;
+    if(all.length>=(d.total||9999))break;
+    skip+=100;
+    if(items.length<100)break;
+  }
+  return all;
+}
+
+async function loadAll(){
+  const btn=document.getElementById('btnRefresh');
+  btn.disabled=true;btn.textContent='Carregando...';
+  document.getElementById('liveDot').style.background='#f59e0b';
+  try{
+    const [convs,biz]=await Promise.all([fetchConvs(),fetchBiz()]);
+    allConvs=convs;allBiz=biz;
+    updateAlertCards();
+    renderCurrentTab();
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('liveDot').style.background='#22c55e';
+  }catch(e){
+    console.error(e);
+    document.getElementById('liveDot').style.background='#ef4444';
+  }
+  btn.disabled=false;btn.textContent='Atualizar';
+}
+
+function updateAlertCards(){
+  const semVendedor=allConvs.filter(c=>!(c.attendants&&c.attendants.length));
+  const semNegocio=allConvs.filter(c=>{
+    const att=(c.attendants||[]).some(a=>getVendorKey(a.name));
+    return att&&!c.businessId;
+  });
+  const pendentes=allConvs.filter(c=>c.isPending);
+  document.getElementById('cnt-semvendedor').textContent=semVendedor.length;
+  document.getElementById('cnt-semnegocio').textContent=semNegocio.length;
+  document.getElementById('cnt-pendente').textContent=pendentes.length;
+}
+
+function filterByAlert(type){
+  document.querySelectorAll('.alert-card').forEach(c=>{c.classList.remove('active')});
+  const card=document.getElementById('card-'+type);
+  if(activeAlertFilter===type){activeAlertFilter=null;}
+  else{activeAlertFilter=type;if(card)card.classList.add('active');}
+  renderAlertas();
+}
+
+function showTab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='hotleads')renderHotLeads();
+  if(name==='vendedores')renderVendedores();
+  if(name==='conversas')renderConvList();
+  if(name==='alertas')renderAlertas();
+}
+
+function renderCurrentTab(){
+  const active=document.querySelector('.tab-pane.active');
+  if(!active)return;
+  const id=active.id.replace('pane-','');
+  if(id==='alertas')renderAlertas();
+  else if(id==='hotleads')renderHotLeads();
+  else if(id==='vendedores')renderVendedores();
+  else if(id==='conversas')renderConvList();
+}
+function renderAlertas(){
+  const semVendedor=allConvs.filter(c=>!(c.attendants&&c.attendants.length));
+  const semNegocio=allConvs.filter(c=>{
+    const att=(c.attendants||[]).some(a=>getVendorKey(a.name));
+    return att&&!c.businessId;
+  });
+  const pendentes=allConvs.filter(c=>c.isPending);
+
+  let filtered;
+  if(activeAlertFilter==='semvendedor')filtered={type:'semvendedor',list:semVendedor,label:'Conversas Sem Vendedor',cls:'ali-red'};
+  else if(activeAlertFilter==='semnegocio')filtered={type:'semnegocio',list:semNegocio,label:'Leads Sem Negocio no CRM',cls:'ali-yellow'};
+  else if(activeAlertFilter==='pendente')filtered={type:'pendente',list:pendentes,label:'Clientes Pendentes (Aguardando Resposta)',cls:'ali-blue'};
+  else filtered=null;
+
+  let html='';
+  if(filtered){
+    html+='<div class="section-hdr"><div class="section-title">'+escH(filtered.label)+'</div><span class="section-badge">'+filtered.list.length+'</span></div>';
+    if(!filtered.list.length){html+='<div class="empty-state"><div class="empty-icon">&#10003;</div><div class="empty-text">Nenhum nas ultimas 24h</div></div>';}
+    else{filtered.list.forEach(c=>{
+      const name=(c.contact&&c.contact.name)||'Lead';
+      const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+      const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+      const msg=(c.lastMessage&&c.lastMessage.body)||'';
+      html+='<div class="alert-list-item '+filtered.cls+'">';
+      html+='<div class="ali-top"><div class="ali-name">'+escH(name)+(phone?' <span style="color:var(--text3);font-size:11px">'+escH(phone)+'</span>':'')+'</div>';
+      html+='<span style="font-size:11px;color:var(--text3)">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+      html+='<div class="ali-sub">Vendedor: '+escH(att);
+      if(msg)html+=' &bull; '+escH(msg.substring(0,70));
+      html+='</div></div>';
+    });}
+  } else {
+    // Show all 3 sections
+    const sections=[
+      {list:semVendedor,label:'Conversas Sem Vendedor',cls:'ali-red',emoji:'&#128308;'},
+      {list:semNegocio,label:'Leads Sem Negocio no CRM',cls:'ali-yellow',emoji:'&#128993;'},
+      {list:pendentes,label:'Clientes Pendentes (Aguardando Resposta)',cls:'ali-blue',emoji:'&#128309;'}
+    ];
+    if(!allConvs.length){
+      html='<div class="loading-state"><div class="spinner"></div>Carregando dados das ultimas 24h...</div>';
+    } else {
+      sections.forEach(s=>{
+        html+='<div style="margin-bottom:20px"><div class="section-hdr"><div class="section-title">'+s.emoji+' '+escH(s.label)+'</div><span class="section-badge">'+s.list.length+'</span></div>';
+        if(!s.list.length){html+='<div class="empty-state"><div class="empty-icon">&#10003;</div><div class="empty-text">Nenhum nas ultimas 24h</div></div>';}
+        else{
+          s.list.slice(0,15).forEach(c=>{
+            const name=(c.contact&&c.contact.name)||'Lead';
+            const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+            const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+            const msg=(c.lastMessage&&c.lastMessage.body)||'';
+            html+='<div class="alert-list-item '+s.cls+'">';
+            html+='<div class="ali-top"><div class="ali-name">'+escH(name)+(phone?' <span style="color:var(--text3);font-size:11px">'+escH(phone)+'</span>':'')+'</div>';
+            html+='<span style="font-size:11px;color:var(--text3)">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+            html+='<div class="ali-sub">Vendedor: '+escH(att);
+            if(msg)html+=' &bull; '+escH(msg.substring(0,60));
+            html+='</div></div>';
+          });
+          if(s.list.length>15)html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--text2)">+' +(s.list.length-15)+' mais...</div>';
+        }
+        html+='</div>';
+      });
+    }
+  }
+  document.getElementById('alertas-content').innerHTML=html;
+    }
+async function renderHotLeads(){
+  document.getElementById('list-fechamento').innerHTML='<div class="loading-state"><div class="spinner"></div>Buscando leads em Fechamento...</div>';
+  document.getElementById('list-intencao').innerHTML='<div class="loading-state"><div class="spinner"></div>Analisando mensagens...</div>';
+
+  // Section 1: Fechamento stage from CRM
+  const fechamentoBiz=allBiz.filter(b=>{
+    const sn=((b.stage&&(b.stage.name||b.stage.externalId||''))||'').toUpperCase();
+    return sn.includes('FECHAMENTO');
+  });
+  document.getElementById('cnt-fechamento').textContent=fechamentoBiz.length;
+  if(!fechamentoBiz.length){
+    document.getElementById('list-fechamento').innerHTML='<div class="empty-state"><div class="empty-icon">&#8987;</div><div class="empty-text">Nenhum lead em fechamento nas ultimas 24h</div></div>';
+  } else {
+    let html='';
+    fechamentoBiz.forEach(b=>{
+      const name=(b.lead&&b.lead.name)||b.name||'Lead';
+      const att=(b.attendant&&b.attendant.name)||'Sem vendedor';
+      const since=b.stageUpdatedAt||b.updatedAt||b.createdAt;
+      html+='<div class="lead-card lc-red">';
+      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
+      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
+      html+='</div>';
+    });
+    document.getElementById('list-fechamento').innerHTML=html;
+  }
+
+  // Section 2: Purchase intent from messages
+  const results=[];
+  const batches=[];
+  for(let i=0;i<allConvs.length;i+=8)batches.push(allConvs.slice(i,i+8));
+  for(const batch of batches){
+    await Promise.all(batch.map(async c=>{
+      try{
+        const d=await apiFetch(MSG+'/conversations/'+c.id+'/messages?take=30&order[createdAt]=desc');
+        const msgs=d.messages||[];
+        let bestKw='',bestMsg='';
+        for(const m of msgs){
+          if(!m.received)continue;
+          let txt=m.body||'';
+          if(m.interpretedContent&&!m.interpretedContentPending)txt=m.interpretedContent;
+          if(!txt||!txt.trim())continue;
+          if(isMsgPadrao(txt)||isBot(txt))continue;
+          const t=txt.toLowerCase();
+          const kw=PURCHASE_KEYWORDS.find(k=>t.includes(k));
+          if(kw){bestKw=kw;bestMsg=txt.substring(0,100);break;}
+        }
+        if(bestKw){
+          const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+          results.push({c,att,kw:bestKw,msg:bestMsg,ts:c.updatedAt||c.createdAt});
+        }
+      }catch(e){}
+    }));
+  }
+  results.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  document.getElementById('cnt-intencao').textContent=results.length;
+  if(!results.length){
+    document.getElementById('list-intencao').innerHTML='<div class="empty-state"><div class="empty-icon">&#128270;</div><div class="empty-text">Nenhuma intencao de compra detectada nas ultimas 24h</div></div>';
+  } else {
+    let html='';
+    results.forEach(r=>{
+      const name=(r.c.contact&&r.c.contact.name)||'Lead';
+      const phone=(r.c.contact&&(r.c.contact.phone||r.c.contact.phoneNumber))||'';
+      const id=r.c.id;
+      html+='<div class="lead-card lc-yellow" data-id="'+escH(id)+'" onclick="openConvFromHot(this.dataset.id)">';
+      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(r.ts)+'</div></div>';
+      html+='<div class="lc-msg">'+escH(r.msg)+'</div>';
+      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(r.att)+'</span>';
+      if(phone)html+='<span style="font-size:11px;color:var(--text2)">'+escH(phone)+'</span>';
+      html+='<span class="lc-kw">&#128737; '+escH(r.kw)+'</span></div>';
+      html+='</div>';
+    });
+    document.getElementById('list-intencao').innerHTML=html;
+  }
+    }
+function renderVendedores(){
+  const stats={};
+  VENDOR_RANKS.forEach(v=>{stats[v]={name:v,biz:0,convs:0,pending:0,noBiz:0};});
+  allBiz.forEach(b=>{
+    const v=getVendorKey(b.attendant&&b.attendant.name);
+    if(v&&stats[v])stats[v].biz++;
+  });
+  allConvs.forEach(c=>{
+    (c.attendants||[]).forEach(a=>{
+      const v=getVendorKey(a.name);
+      if(v&&stats[v]){
+        stats[v].convs++;
+        if(c.isPending)stats[v].pending++;
+        if(!c.businessId)stats[v].noBiz++;
+      }
+    });
+  });
+  const sorted=VENDOR_RANKS.map(v=>stats[v]).sort((a,b)=>b.biz-a.biz);
+  const maxBiz=Math.max(...sorted.map(s=>s.biz),1);
+  const medals=['&#129351;','&#129352;','&#129353;','4'];
+  let html='';
+  sorted.forEach((s,i)=>{
+    const color=VENDOR_COLORS[s.name]||'#666';
+    const pct=(s.biz/maxBiz*100).toFixed(0);
+    html+='<div class="vendor-card" style="border-top:3px solid '+color+'">';
+    html+='<div class="vc-top"><div class="vc-name" style="color:'+color+'">'+escH(s.name)+'</div><div class="vc-rank">'+medals[i]+'</div></div>';
+    html+='<div class="vc-bar-wrap"><div class="vc-bar" style="width:'+pct+'%;background:'+color+'"></div></div>';
+    html+='<div class="vc-stats" style="margin-top:12px">';
+    html+='<div class="vc-stat"><span class="vc-stat-label">Negocios ativos (24h)</span><span class="vc-stat-val" style="color:'+color+'">'+s.biz+'</span></div>';
+    html+='<div class="vc-stat"><span class="vc-stat-label">Conversas abertas</span><span class="vc-stat-val">'+s.convs+'</span></div>';
+    html+='<div class="vc-stat"><span class="vc-stat-label">Clientes Largados &#128680;</span><span class="vc-stat-val" style="color:var(--red)">'+s.pending+'</span></div>';
+    html+='</div></div>';
+  });
+  document.getElementById('vendorGrid').innerHTML=html||'<div class="empty-state"><div class="empty-text">Nenhum dado nas ultimas 24h</div></div>';
+}
+
+function setConvFilter(f,btn){
+  convFilter=f;
+  document.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderConvList();
+}
+
+function renderConvList(){
+  const search=(document.getElementById('convSearch').value||'').toLowerCase();
+  let list=allConvs.filter(c=>{
+    if(convFilter==='pending'&&!c.isPending)return false;
+    if(convFilter==='waiting'&&!(c.statuses||[]).includes('waiting'))return false;
+    if(convFilter==='novendor'&&(c.attendants&&c.attendants.length))return false;
+    if(search){
+      const n=((c.contact&&c.contact.name)||'').toLowerCase();
+      const p=((c.contact&&(c.contact.phone||c.contact.phoneNumber))||'').toLowerCase();
+      if(!n.includes(search)&&!p.includes(search))return false;
+    }
+    return true;
+  });
+  const stBadge={'waiting':'badge-red-bg','opened':'badge-green-bg','unstarted':'badge-blue-bg','automation':'badge-yellow-bg'};
+  let html='';
+  if(!list.length){html='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Nenhuma conversa</div></div>';}
+  list.slice(0,80).forEach(c=>{
+    const name=(c.contact&&c.contact.name)||c.id||'Lead';
+    const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+    const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+    const st=(c.statuses&&c.statuses[0])||'';
+    const msg=(c.lastMessage&&c.lastMessage.body)||'';
+    const id=c.id;
+    const badge=stBadge[st]||'badge-blue-bg';
+    html+='<div class="conv-item'+(c.isPending?' pending':'')+'" data-id="'+escH(id)+'" onclick="openConv(this)">';
+    html+='<div class="ci-top"><div class="ci-name">'+escH(name)+'</div><span class="ci-time">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+    html+='<div class="ci-preview">'+escH(msg.substring(0,55))+'</div>';
+    html+='<div class="ci-meta"><span class="ci-badge '+badge+'">'+escH(st||'?')+'</span>';
+    html+='<span style="font-size:10px;color:var(--text2)">'+escH(att)+'</span>';
+    if(c.isPending)html+='<span class="ci-badge badge-red-bg">PENDENTE</span>';
+    html+='</div></div>';
+  });
+  document.getElementById('convList').innerHTML=html;
+}
+
+function openConvFromHot(id){
+  showTab('conversas',document.querySelectorAll('.tab-btn')[3]);
+  setTimeout(()=>{
+    const el=document.querySelector('[data-id="'+id+'"]');
+    if(el){el.classList.add('selected');loadMessages(id,el);}
+    else{loadMessages(id,null);}
+  },200);
+}
+
+function openConv(el){
+  document.querySelectorAll('.conv-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  loadMessages(el.dataset.id,el);
+  }
+async function loadMessages(convId,elRef){
+  const conv=allConvs.find(c=>c.id===convId);
+  const name=conv&&conv.contact&&conv.contact.name?conv.contact.name:'Lead';
+  const atts=conv&&conv.attendants?conv.attendants.map(a=>a.name||'').filter(Boolean):[];
+  const attDisplay=atts.length?atts.join(', '):'Sem vendedor';
+  document.getElementById('chatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(attDisplay)+' &bull; '+timeAgo(conv?conv.updatedAt||conv.createdAt:new Date())+'</div>';
+  document.getElementById('chatMessages').innerHTML='<div class="loading-state"><div class="spinner"></div>Carregando mensagens...</div>';
+  try{
+    let allMsgs=[],skip=0;
+    while(true){
+      const d=await apiFetch(MSG+'/conversations/'+convId+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
+      const msgs=d.messages||[];
+      if(!msgs.length)break;
+      allMsgs=allMsgs.concat(msgs);
+      if(msgs.length<50)break;
+      skip+=50;
+      if(allMsgs.length>300)break;
+    }
+    if(!allMsgs.length){document.getElementById('chatMessages').innerHTML='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Sem mensagens</div></div>';return;}
+    const validMsgs=allMsgs.filter(m=>{
+      const hasText=m.body&&m.body.trim().length>0;
+      const hasTranscription=m.interpretedContent&&!m.interpretedContentPending;
+      const isMedia=m.type&&['audio','image','video'].includes(m.type);
+      const isMimeAudio=m.mimeType&&m.mimeType.includes('audio');
+      const isMimeImg=m.mimeType&&m.mimeType.includes('image');
+      return hasText||hasTranscription||isMedia||isMimeAudio||isMimeImg;
+    });
+    let html='';
+    validMsgs.forEach(m=>{
+      const isReceived=m.received===true;
+      const msgAttName=(m.attendant&&m.attendant.name)||'';
+      const isVendor=!isReceived&&!!msgAttName;
+      const isBot2=!isReceived&&!msgAttName;
+      let rowCls,senderName,senderColor;
+      if(isReceived){
+        rowCls='from-lead';
+        senderName=(conv&&conv.contact&&conv.contact.name)||'Lead';
+        senderColor='#60a5fa';
+      } else if(isVendor){
+        rowCls='from-vendor';
+        senderName=msgAttName;
+        senderColor='#c084fc';
+      } else {
+        rowCls='from-bot';
+        senderName='Dr. Roberto (Bot)';
+        senderColor='#4ade80';
+      }
+      const body=m.body||'';
+      const hasT=m.interpretedContent&&!m.interpretedContentPending;
+      const isAudio=m.type==='audio'||(m.mimeType&&m.mimeType.includes('audio'));
+      const isImg=m.type==='image'||(m.mimeType&&m.mimeType.includes('image'));
+      const isVid=m.type==='video'||(m.mimeType&&m.mimeType.includes('video'));
+      let content='';
+      if(isAudio){
+        content='<div class="msg-audio-label">&#127911; Audio</div>';
+        if(hasT)content+='<div class="msg-transcription"><div class="msg-transcription-lbl">TRANSCRICAO</div>'+escH(m.interpretedContent)+'</div>';
+        else if(m.interpretedContentPending)content+='<div class="msg-transcription" style="color:var(--text3)">Transcrevendo...</div>';
+      } else if(isImg){
+        content='<div class="msg-audio-label">&#128247; Imagem</div>';
+      } else if(isVid){
+        content='<div class="msg-audio-label">&#127916; Video</div>';
+      } else {
+        content=escH(body);
+      }
+      const t=m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      html+='<div class="msg-row '+rowCls+'">';
+      html+='<div class="msg-sender-name" style="color:'+senderColor+'">'+escH(senderName)+'</div>';
+      html+='<div class="msg-bubble">'+content+'</div>';
+      html+='<div class="msg-time-row">'+t+'</div>';
+      html+='</div>';
+    });
+    document.getElementById('chatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
+    const panel=document.getElementById('chatMessages');
+    panel.scrollTop=panel.scrollHeight;
+  }catch(e){
+    document.getElementById('chatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
+  }
+}
+
+window.addEventListener('load',function(){
+  loadAll();
+  setInterval(loadAll,180000);
+});
 </script>
 </body>
 </html>
