@@ -123,6 +123,8 @@ function tAgo(s){if(!s)return '–';const d=Date.now()-new Date(s).getTime(),m=M
 function vColor(n){for(const v of VE)if(n&&n.toLowerCase().includes(v.toLowerCase()))return VC[v];return '#7070a0'}
 function vInit(n){if(!n)return '?';const p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function cleanTxt(s){return (s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').trim()}
+function bestClientMsg(msgs){const rev=[...msgs].reverse();const best=rev.find(m=>{const b=cleanTxt(m.content||m.text||m.body||m.interpretedContent||'').toLowerCase();if(!b)return false;if(b.includes('olá doutor, quero saber mais')||b.includes('ola doutor, quero saber mais'))return false;return true});return best||msgs[msgs.length-1]||null}
 async function loadAll(){document.getElementById('upd-time').textContent='Atualizando...';try{await Promise.all([loadDeals(),loadConvs()]);document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR')}catch(e){document.getElementById('upd-time').textContent='Erro: '+e.message}}
 async function loadDeals(){try{const since=s24();const d=await apiFetch(CRM,'/deals',{limit:300,updatedAfter:since});_dl=(d.data||d.deals||d||[]).filter(x=>(x.updatedAt||x.lastActivity||'')>=since);const ids=['jer','aly','lua','mic'];VE.forEach((v,i)=>{const cnt=_dl.filter(x=>(x.assignedTo||x.owner||x.vendorName||'').toLowerCase().includes(v.toLowerCase())).length;const el=document.getElementById('vp-'+ids[i]);if(el)el.textContent=cnt})}catch(e){_dl=[];console.error('loadDeals',e)}}
 async function loadConvs(){
@@ -148,7 +150,7 @@ async function loadConvs(){
         const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});
         const allMsgs=(md.data||md.messages||md||[]).filter(m=>{const b=(m.content||m.text||m.body||m.interpretedContent||'').trim();const t=(m.type||'').toLowerCase();return b&&!['event','system','notification','activity'].includes(t)});
         const clientMsgs=allMsgs.filter(m=>m.received===true||m.direction==='inbound');
-        const lastClientMsg=clientMsgs.length>0?clientMsgs[clientMsgs.length-1]:null;
+        const lastClientMsg=clientMsgs.length>0?bestClientMsg(clientMsgs):null;
         _cm[c.id]={conv:c,allMsgs,clientMsgs,lastClientMsg};
       }catch(e){_cm[c.id]={conv:c,allMsgs:[],clientMsgs:[],lastClientMsg:null}}
     }));
@@ -179,7 +181,7 @@ function renderLeads(){
     const ag=tAgo(d.updatedAt||d.lastActivity||'');
     const cl=vColor(vn);const ini=vInit(nm);
     let pv='Nenhuma mensagem do cliente.';
-    if(ph){const mc=Object.values(_cm).find(cm=>{const cid=cm.conv.contactId||cm.conv.contact?.id||'';const ct=_ct['i'+cid];return ct&&nph(ct.phoneNumber)===ph});if(mc&&mc.lastClientMsg){pv=esc((mc.lastClientMsg.content||mc.lastClientMsg.text||mc.lastClientMsg.body||mc.lastClientMsg.interpretedContent||'').trim().substring(0,100))}}
+    if(ph){const mc=Object.values(_cm).find(cm=>{const cid=cm.conv.contactId||cm.conv.contact?.id||'';const ct=_ct['i'+cid];return ct&&nph(ct.phoneNumber)===ph});if(mc&&mc.lastClientMsg){pv=esc(cleanTxt(mc.lastClientMsg.content||mc.lastClientMsg.text||mc.lastClientMsg.body||mc.lastClientMsg.interpretedContent||'').trim().substring(0,100))}}
     return '<div class="lc fech" data-type="deal" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><span class="lc-badge">Fechamento</span><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<span class="lc-open-btn">Ver conversa →</span></div></div>';
   }).join('');
   document.getElementById('cnt-int').textContent=inten.length;
@@ -191,7 +193,7 @@ function renderLeads(){
     const vn=conv.assignedTo||conv.assignee||'';
     const cl=vColor(vn);const ini=vInit(nm);
     const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
-    const pv=lastClientMsg?esc((lastClientMsg.content||lastClientMsg.text||lastClientMsg.body||lastClientMsg.interpretedContent||'').trim().substring(0,100)):'Nenhuma mensagem do cliente.';
+    const pv=lastClientMsg?esc(cleanTxt(lastClientMsg.content||lastClientMsg.text||lastClientMsg.body||lastClientMsg.interpretedContent||'').trim().substring(0,100)):'Nenhuma mensagem do cliente.';
     return '<div class="lc" data-type="conv" data-cid="'+conv.id+'" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<div style="display:flex;align-items:center;gap:6px"><span class="lc-kw">'+esc(kw)+'</span><span class="lc-open-btn">Ver conversa →</span></div></div></div>';
   }).join('');
 }
@@ -210,7 +212,7 @@ async function openChat(el){
     arr.sort((a,b)=>new Date(a.createdAt||a.timestamp||0)-new Date(b.createdAt||b.timestamp||0));
     if(!arr.length){msgs.innerHTML='<div class="ml">Nenhuma mensagem encontrada.</div>';return}
     let h='';
-    arr.forEach(m=>{const b=esc((m.content||m.text||m.body||m.interpretedContent||'').trim());const rcv=m.received===true||m.direction==='inbound';const ts=m.createdAt||m.timestamp||'';const tm=ts?new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';if(rcv){h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>'}else{const sn=m.senderName||m.agentName||m.userName||m.sender?.name||'';const isBot=!sn||sn.toLowerCase().includes('roberto')||sn.toLowerCase().includes('bot')||sn.toLowerCase().includes('auto')||m.automated===true||m.isBot===true;if(isBot){h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>'}else{h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>'}}});
+    arr.forEach(m=>{const b=esc(cleanTxt(m.content||m.text||m.body||m.interpretedContent||'').trim());const rcv=m.received===true||m.direction==='inbound';const ts=m.createdAt||m.timestamp||'';const tm=ts?new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';if(rcv){h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>'}else{const sn=m.senderName||m.agentName||m.userName||m.sender?.name||'';const isBot=!sn||sn.toLowerCase().includes('roberto')||sn.toLowerCase().includes('bot')||sn.toLowerCase().includes('auto')||m.automated===true||m.isBot===true;if(isBot){h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>'}else{h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>'}}});
     msgs.innerHTML=h;scrollBot();
   }catch(e){msgs.innerHTML='<div class="ml">Erro: '+esc(e.message)+'</div>'}
 }
