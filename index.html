@@ -7,709 +7,895 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#0a0d14;color:#e2e8f0;min-height:100vh}
-.header{background:linear-gradient(135deg,#111827,#1f2937);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937}
-.header h1{font-size:1.3rem;font-weight:700;color:#60a5fa}
-.header .sub{font-size:0.75rem;color:#6b7280;margin-top:3px}
-.header-right{display:flex;align-items:center;gap:12px}
-.last-update{font-size:0.72rem;color:#6b7280}
-.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:0.85rem;font-weight:600;transition:all 0.2s}
-.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
-.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
-.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
-.container{padding:20px 28px}
-.tabs{display:flex;gap:0;border-bottom:1px solid #1f2937;margin-bottom:22px}
-.tab-btn{padding:11px 22px;background:none;border:none;color:#6b7280;cursor:pointer;font-size:0.88rem;border-bottom:2px solid transparent;transition:all 0.2s}
-.tab-btn:hover{color:#e2e8f0}.tab-btn.active{color:#60a5fa;border-bottom-color:#2563eb}
-.tab-content{display:none}.tab-content.active{display:block}
-.sec-title{font-size:1rem;font-weight:600;color:#93c5fd;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
-.sec-title::before{content:'';width:3px;height:18px;background:#2563eb;border-radius:2px;display:inline-block}
+body{font-family:'Segoe UI',sans-serif;background:#0a0d14;color:#e2e8f0;min-height:100vh;font-size:14px}
+:root{--accent:#f97316;--accent2:#3b82f6;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--purple:#a855f7;--bg2:#111827;--bg3:#1f2937;--border:#374151}
+.header{background:linear-gradient(135deg,#111827,#1f2937);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border)}
+.header h1{font-size:1.1rem;font-weight:700;color:#f97316}
+.header .sub{font-size:0.7rem;color:#6b7280}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-size:0.75rem;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#ea6c00}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;color:#94a3b8;border:1px solid var(--border)}
+.btn-outline:hover{background:var(--bg3);color:#e2e8f0}
+.btn-sm{padding:4px 8px;font-size:0.7rem}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* FILTROS */
+.filters-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:0.7rem;color:#6b7280;white-space:nowrap}
+.filter-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:#e2e8f0;padding:5px 8px;font-size:0.72rem;outline:none}
+.filter-input:focus{border-color:var(--accent)}
+select.filter-input option{background:#1f2937}
+.filter-sep{color:#374151;font-size:0.8rem}
+/* TABS */
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 14px;cursor:pointer;font-size:0.75rem;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:#e2e8f0}
+.tab-content{display:none;padding:12px 16px}
+.tab-content.active{display:block}
+/* CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--bg2);border-radius:8px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
+.kpi.green::before{background:var(--green)}
+.kpi.red::before{background:var(--red)}
+.kpi.blue::before{background:var(--accent2)}
+.kpi.yellow::before{background:var(--yellow)}
+.kpi.purple::before{background:var(--purple)}
+.kpi-label{font-size:0.65rem;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-value{font-size:1.4rem;font-weight:700;color:#f1f5f9}
+.kpi-sub{font-size:0.65rem;color:#6b7280;margin-top:2px}
 /* ALERTAS */
-.alert-box{background:#1f2937;border:1px solid #374151;border-radius:12px;padding:0;overflow:hidden;margin-bottom:8px}
-.alert-header{background:#7f1d1d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.alert-header.yellow{background:#78350f}
-.alert-header.blue{background:#1e3a5f}
-.alert-title{font-weight:700;font-size:0.88rem;color:#fff;display:flex;align-items:center;gap:6px}
-.alert-count{background:rgba(255,255,255,0.2);border-radius:20px;padding:2px 10px;font-size:0.8rem;font-weight:700;color:#fff}
-.alert-list{max-height:280px;overflow-y:auto}
-.alert-item{padding:10px 16px;border-bottom:1px solid #374151;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.alert-item:last-child{border-bottom:none}
-.alert-item:hover{background:#111827}
-.alert-name{font-weight:600;font-size:0.85rem;color:#f3f4f6}
-.alert-detail{font-size:0.78rem;color:#9ca3af;margin-top:2px}
-.alert-time{font-size:0.72rem;color:#6b7280;white-space:nowrap}
-.alert-badge{font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap}
-.badge-red{background:#7f1d1d;color:#fca5a5}
-.badge-yellow{background:#78350f;color:#fcd34d}
-.badge-green{background:#14532d;color:#86efac}
-.badge-blue{background:#1e3a5f;color:#93c5fd}
-.badge-purple{background:#4c1d95;color:#c4b5fd}
-.badge-hot{background:#991b1b;color:#fef2f2;border:1px solid #dc2626;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:700}
-/* LEADS QUENTES */
-.hot-grid{display:grid;grid-template-columns:1fr;gap:8px}
-.hot-card{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:12px 16px;border-left:3px solid #dc2626;cursor:pointer;transition:all 0.2s}
-.hot-card:hover{border-color:#ef4444;background:#111827}
-.hot-card.tier1{border-left-color:#dc2626}
-.hot-card.tier2{border-left-color:#f97316}
-.hot-card.tier3{border-left-color:#eab308}
-.hot-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.hot-name{font-weight:700;font-size:0.88rem;color:#f3f4f6}
-.hot-signals{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
-.hot-msg{font-size:0.78rem;color:#9ca3af;line-height:1.4;background:#111827;border-radius:6px;padding:6px 8px;border-left:2px solid #374151;font-style:italic}
-.hot-meta{display:flex;align-items:center;gap:8px;margin-top:6px}
-.hot-att{font-size:0.72rem;color:#60a5fa;background:#1e3a5f;padding:1px 7px;border-radius:8px}
-.hot-stage{font-size:0.72rem;color:#9ca3af}
-.hot-time{font-size:0.72rem;color:#6b7280;margin-left:auto}
-/* RANKING */
-.ranking-table{width:100%;border-collapse:collapse;font-size:0.84rem}
-.ranking-table th{background:#111827;color:#93c5fd;padding:10px 14px;text-align:left;font-weight:600;border-bottom:1px solid #374151}
-.ranking-table td{padding:10px 14px;border-bottom:1px solid #1f2937;color:#d1d5db;vertical-align:middle}
-.ranking-table tr:hover td{background:#111827}
-.rank-pos{font-weight:700;font-size:1rem;color:#60a5fa;width:30px}
-.rank-name{font-weight:600;color:#f3f4f6}
-.rank-bar{height:6px;background:#374151;border-radius:3px;overflow:hidden;min-width:80px}
-.rank-bar-fill{height:100%;border-radius:3px;transition:width 0.6s}
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:6px}
-.kpi-card{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:14px;text-align:center;transition:all 0.2s}
-.kpi-card:hover{border-color:#2563eb;transform:translateY(-1px)}
-.kpi-val{font-size:1.8rem;font-weight:700;color:#60a5fa}
-.kpi-val.red{color:#f87171}.kpi-val.green{color:#4ade80}.kpi-val.yellow{color:#fbbf24}.kpi-val.orange{color:#fb923c}
-.kpi-lbl{font-size:0.72rem;color:#6b7280;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px}
+.alert-section{margin-bottom:16px}
+.alert-title{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.alert-list{display:flex;flex-direction:column;gap:6px}
+.alert-item{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.alert-item.danger{border-left:3px solid var(--red)}
+.alert-item.warning{border-left:3px solid var(--yellow)}
+.alert-item.info{border-left:3px solid var(--accent2)}
+.alert-badge{padding:2px 8px;border-radius:12px;font-size:0.65rem;font-weight:700;white-space:nowrap}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-yellow{background:rgba(234,179,8,.15);color:var(--yellow)}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--accent2)}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--accent)}
+.badge-purple{background:rgba(168,85,247,.15);color:var(--purple)}
+.alert-text{font-size:0.78rem;color:#e2e8f0;flex:1;min-width:0}
+.alert-sub{font-size:0.68rem;color:#6b7280;margin-top:2px}
+.alert-time{font-size:0.65rem;color:#6b7280;white-space:nowrap}
+/* LEAD QUENTE */
+.hot-lead{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer}
+.hot-lead.fire{border-left:3px solid var(--red)}
+.hot-lead.warm{border-left:3px solid var(--yellow)}
+.hot-lead.interest{border-left:3px solid var(--accent2)}
+.hot-lead-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hot-lead-name{font-weight:600;font-size:0.82rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hot-score{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap}
+.score-fire{background:rgba(239,68,68,.2);color:var(--red)}
+.score-warm{background:rgba(234,179,8,.2);color:var(--yellow)}
+.score-interest{background:rgba(59,130,246,.2);color:var(--accent2)}
+.hot-lead-msg{font-size:0.72rem;color:#94a3b8;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hot-lead-meta{font-size:0.65rem;color:#6b7280;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
 /* CONVERSAS */
-.conv-split{display:grid;grid-template-columns:1fr 2fr;gap:16px}
-.conv-list-wrap{background:#1f2937;border:1px solid #374151;border-radius:10px;overflow:hidden}
-.conv-filters{padding:10px 12px;border-bottom:1px solid #374151;display:flex;gap:6px;flex-wrap:wrap}
-.filter-btn{padding:4px 10px;border-radius:6px;border:1px solid #374151;background:none;color:#9ca3af;cursor:pointer;font-size:0.75rem;transition:all 0.15s}
-.filter-btn:hover,.filter-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
-.conv-scroll{max-height:500px;overflow-y:auto}
-.conv-scroll::-webkit-scrollbar{width:3px}
-.conv-scroll::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
-.conv-item{padding:11px 14px;border-bottom:1px solid #1f2937;cursor:pointer;transition:background 0.15s;position:relative}
-.conv-item:hover,.conv-item.active{background:#111827}
-.conv-item.has-hot::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#dc2626}
-.conv-item.has-pending::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#f59e0b}
-.ci-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
-.ci-name{font-weight:600;font-size:0.85rem;color:#f3f4f6}
-.ci-time{font-size:0.7rem;color:#6b7280}
-.ci-preview{font-size:0.78rem;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
-.ci-meta{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
-.ci-att{font-size:0.68rem;color:#60a5fa;background:#1e3a5f;padding:1px 6px;border-radius:6px}
-/* CHAT */
-.chat-wrap{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:18px;display:flex;flex-direction:column}
-.chat-header{margin-bottom:14px}
-.chat-name{font-size:1rem;font-weight:700;color:#f3f4f6}
-.chat-sub{font-size:0.78rem;color:#6b7280;margin-top:2px}
-.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;max-height:420px;padding-right:4px}
-.chat-msgs::-webkit-scrollbar{width:3px}
-.chat-msgs::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
-.msg-bubble{max-width:82%;padding:8px 12px;border-radius:10px;font-size:0.82rem;line-height:1.45}
-.msg-in{background:#374151;color:#e2e8f0;align-self:flex-start;border-bottom-left-radius:3px}
-.msg-out{background:#1d4ed8;color:#dbeafe;align-self:flex-end;border-bottom-right-radius:3px}
-.msg-auto{background:#1a2e1a;color:#86efac;align-self:flex-start;border-bottom-left-radius:3px;border:1px solid #14532d}
-.msg-transcript{font-size:0.72rem;color:#9ca3af;margin-top:3px;font-style:italic;background:#111827;border-radius:4px;padding:3px 6px}
-.msg-time{font-size:0.65rem;color:#6b7280;margin-top:3px}
-.intent-banner{padding:8px 12px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:600}
-.intent-hot{background:#7f1d1d;color:#fca5a5;border:1px solid #dc2626}
-.intent-warm{background:#78350f;color:#fcd34d;border:1px solid #f59e0b}
-.intent-cold{background:#1f2937;color:#6b7280;border:1px solid #374151}
-.no-data{padding:32px;text-align:center;color:#6b7280;font-size:0.85rem}
-.spinner-sm{display:inline-block;width:14px;height:14px;border:2px solid #374151;border-top-color:#60a5fa;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
+.conv-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.conv-layout{grid-template-columns:1fr}}
+.conv-list{display:flex;flex-direction:column;gap:5px;max-height:500px;overflow-y:auto}
+.conv-item{background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.conv-item:hover,.conv-item.selected{background:var(--bg3);border-color:var(--accent)}
+.conv-item.pending{border-left:3px solid var(--red)}
+.conv-name{font-weight:600;font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-preview{font-size:0.7rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.conv-meta{font-size:0.63rem;color:#6b7280;margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* MENSAGENS */
+.msg-panel{background:var(--bg2);border-radius:8px;border:1px solid var(--border);display:flex;flex-direction:column;max-height:500px}
+.msg-header{padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.8rem}
+.msg-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:80%;padding:7px 10px;border-radius:10px;font-size:0.75rem;line-height:1.4;word-break:break-word}
+.msg-from-lead{align-self:flex-start;background:#1e3a5f;border-radius:10px 10px 10px 2px}
+.msg-from-bot{align-self:flex-end;background:#1a3a1a;border-radius:10px 10px 2px 10px}
+.msg-from-attendant{align-self:flex-end;background:#3a1a5f;border-radius:10px 10px 2px 10px}
+.msg-sender{font-size:0.6rem;font-weight:700;margin-bottom:3px;opacity:.8}
+.msg-sender-lead{color:#60a5fa}
+.msg-sender-bot{color:#4ade80}
+.msg-sender-attendant{color:#c084fc}
+.msg-time{font-size:0.6rem;color:#6b7280;margin-top:3px;text-align:right}
+.msg-audio{font-style:italic;color:#94a3b8}
+.msg-transcription{background:rgba(255,255,255,.05);border-radius:4px;padding:4px 6px;margin-top:4px;font-size:0.68rem;color:#cbd5e1}
+.msg-transcription-label{font-size:0.58rem;color:#6b7280;margin-bottom:2px}
+/* VENDEDORES */
+.vendor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.vendor-card{background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border)}
+.vendor-rank{font-size:1.2rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+.vendor-name{font-size:0.9rem;font-weight:700;color:#f1f5f9;margin-bottom:2px}
+.vendor-stats{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.vendor-stat{display:flex;justify-content:space-between;font-size:0.72rem}
+.vendor-stat-label{color:#6b7280}
+.vendor-stat-value{font-weight:600;color:#e2e8f0}
+.progress-bar{background:#1f2937;border-radius:4px;height:4px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s}
+/* FUNIL */
+.funnel-grid{display:flex;flex-direction:column;gap:5px}
+.funnel-stage{background:var(--bg2);border-radius:8px;padding:10px 14px;border:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.funnel-name{flex:1;font-size:0.8rem;font-weight:600;color:#e2e8f0}
+.funnel-bar-wrap{flex:2;min-width:80px}
+.funnel-bar{height:8px;border-radius:4px;background:var(--accent);transition:width .5s}
+.funnel-count{font-size:0.85rem;font-weight:700;color:#f1f5f9;min-width:35px;text-align:right}
+/* CHARTS */
+.chart-wrap{background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border);margin-bottom:12px}
+.chart-title{font-size:0.8rem;font-weight:700;color:#94a3b8;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.chart-canvas-wrap{position:relative;height:180px}
+/* TABELA */
+.table-wrap{background:var(--bg2);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px}
+.table-wrap table{width:100%;border-collapse:collapse}
+.table-wrap th{background:#1f2937;padding:8px 10px;font-size:0.68rem;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;white-space:nowrap}
+.table-wrap td{padding:8px 10px;font-size:0.75rem;border-top:1px solid var(--border);white-space:nowrap}
+.table-wrap tr:hover td{background:rgba(255,255,255,.03)}
+/* EMPTY */
+.empty{text-align:center;padding:30px;color:#6b7280;font-size:0.8rem}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:20px;gap:8px;color:#6b7280;font-size:0.8rem}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-full{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center}
-.loading-full.show{display:flex}
-.spinner-lg{width:44px;height:44px;border:4px solid #374151;border-top-color:#2563eb;border-radius:50%;animation:spin 0.8s linear infinite}
-.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.chart-card{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px}
-.chart-card h3{font-size:0.85rem;color:#93c5fd;margin-bottom:12px}
-.chart-wrap{position:relative;height:220px}
-.empty-state{text-align:center;padding:40px 20px;color:#6b7280}
-.empty-state .icon{font-size:2.5rem;margin-bottom:10px}
-.funnel-wrap{display:flex;flex-direction:column;gap:5px}
-.funnel-item{display:flex;align-items:center;gap:10px}
-.f-label{width:160px;font-size:0.77rem;color:#9ca3af;text-align:right;flex-shrink:0}
-.f-bar-wrap{flex:1;background:#374151;border-radius:3px;height:22px;overflow:hidden}
-.f-bar{height:100%;background:linear-gradient(90deg,#1d4ed8,#60a5fa);border-radius:3px;display:flex;align-items:center;padding-left:7px;transition:width 0.5s}
-.f-bar span{font-size:0.72rem;color:#fff;white-space:nowrap}
+/* RESPONSIVE */
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .vendor-grid{grid-template-columns:1fr 1fr}
+  .tab{padding:8px 10px;font-size:0.7rem}
+  .header h1{font-size:1rem}
+  .filters-bar{padding:8px 12px}
+  .tab-content{padding:10px 12px}
+}
+@media(max-width:400px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .vendor-grid{grid-template-columns:1fr}
+}
+/* SECTION */
+.section{margin-bottom:16px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.section-title{font-size:0.85rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.count-badge{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1px 8px;font-size:0.65rem;color:#94a3b8}
+.reload-info{font-size:0.65rem;color:#6b7280}
 </style>
 </head>
 <body>
-<div class="loading-full" id="loadingFull"><div class="spinner-lg"></div></div>
 <div class="header">
   <div>
-    <h1>🎯 Dashboard LN Marketing</h1>
-    <div class="sub">Luan · Alysson · Jeremias · Michele — atualizado em <span id="lastUpdate">-</span></div>
+    <h1>📊 Dashboard LN Marketing</h1>
+    <div class="sub">Datacrazy CRM • Tempo Real</div>
   </div>
   <div class="header-right">
-    <button class="btn btn-primary" onclick="loadAll()" id="btnRefresh">🔄 Atualizar</button>
+    <div style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:#6b7280">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="lastUpdate">--</span>
+    </div>
+    <button class="btn btn-primary" id="btnReload" onclick="loadAll()">↻ Atualizar</button>
   </div>
 </div>
-<div class="container">
+
+<!-- FILTROS GLOBAIS -->
+<div class="filters-bar">
+  <div class="filter-group">
+    <span class="filter-label">📅 De:</span>
+    <input type="date" class="filter-input" id="filterFrom" onchange="applyFilters()">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Até:</span>
+    <input type="date" class="filter-input" id="filterTo" onchange="applyFilters()">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Período:</span>
+    <select class="filter-input" id="filterPeriod" onchange="setPeriod(this.value)">
+      <option value="">Personalizado</option>
+      <option value="today">Hoje</option>
+      <option value="yesterday">Ontem</option>
+      <option value="7">Últimos 7 dias</option>
+      <option value="30" selected>Últimos 30 dias</option>
+      <option value="60">Últimos 60 dias</option>
+      <option value="90">Últimos 90 dias</option>
+      <option value="all">Todo histórico</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Vendedor:</span>
+    <select class="filter-input" id="filterVendor" onchange="applyFilters()">
+      <option value="">Todos</option>
+      <option value="Alysson">Alysson</option>
+      <option value="Luan">Luan</option>
+      <option value="Jeremias">Jeremias</option>
+      <option value="Michele">Michele</option>
+    </select>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="clearFilters()">✕ Limpar</button>
+</div>
+
+<!-- TABS -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('tab-alertas',this)">🚨 Alertas</button>
-  <button class="tab-btn" onclick="showTab('tab-quentes',this)">🔥 Leads Quentes</button>
-  <button class="tab-btn" onclick="showTab('tab-vendedores',this)">👥 Vendedores</button>
-  <button class="tab-btn" onclick="showTab('tab-conversas',this)">💬 Conversas</button>
-  <button class="tab-btn" onclick="showTab('tab-funil',this)">📊 Funil</button>
+  <div class="tab active" onclick="showTab('alertas')">🚨 Alertas</div>
+  <div class="tab" onclick="showTab('hot')">🔥 Leads Quentes</div>
+  <div class="tab" onclick="showTab('vendedores')">👥 Vendedores</div>
+  <div class="tab" onclick="showTab('funil')">📊 Funil</div>
+  <div class="tab" onclick="showTab('conversas')">💬 Conversas</div>
+  <div class="tab" onclick="showTab('crm')">📈 CRM</div>
 </div>
 
-<!-- TAB ALERTAS -->
-<div class="tab-content active" id="tab-alertas">
-  <div class="sec-title">Problemas que precisam de ação agora</div>
+<!-- ABA ALERTAS -->
+<div id="tab-alertas" class="tab-content active">
+  <div id="alertasContent"><div class="loading"><div class="spinner"></div>Carregando alertas...</div></div>
+</div>
 
-  <div class="alert-box">
-    <div class="alert-header">
-      <div class="alert-title">🔴 Conversas SEM vendedor atribuído</div>
-      <span class="alert-count" id="cntSemAtt">-</span>
+<!-- ABA LEADS QUENTES -->
+<div id="tab-hot" class="tab-content">
+  <div class="kpi-grid" id="hotKpis"></div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">🔥 Prontos pra Fechar <span class="count-badge" id="hotFireCount">0</span></div>
     </div>
-    <div class="alert-list" id="listSemAtt"><div class="no-data">Carregando...</div></div>
+    <div id="hotFireList"><div class="empty">Carregando...</div></div>
   </div>
-
-  <div class="alert-box" style="margin-top:12px">
-    <div class="alert-header">
-      <div class="alert-title">🚫 Conversas SEM negócio criado</div>
-      <span class="alert-count" id="cntSemNeg">-</span>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">⚡ Muito Interessados <span class="count-badge" id="hotWarmCount">0</span></div>
     </div>
-    <div class="alert-list" id="listSemNeg"><div class="no-data">Carregando...</div></div>
+    <div id="hotWarmList"><div class="empty">Carregando...</div></div>
   </div>
-
-  <div class="alert-box" style="margin-top:12px">
-    <div class="alert-header yellow">
-      <div class="alert-title">⏳ Cliente aguardando resposta (isPending)</div>
-      <span class="alert-count" id="cntPending">-</span>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">💡 Interesse Detectado <span class="count-badge" id="hotInterestCount">0</span></div>
     </div>
-    <div class="alert-list" id="listPending"><div class="no-data">Carregando...</div></div>
-  </div>
-
-  <div class="alert-box" style="margin-top:12px">
-    <div class="alert-header blue">
-      <div class="alert-title">📥 Negócios em APRESENTAÇÃO sem ação de vendedor</div>
-      <span class="alert-count" id="cntApres">-</span>
-    </div>
-    <div class="alert-list" id="listApres"><div class="no-data">Carregando...</div></div>
+    <div id="hotInterestList"><div class="empty">Carregando...</div></div>
   </div>
 </div>
 
-<!-- TAB LEADS QUENTES -->
-<div class="tab-content" id="tab-quentes">
-  <div class="sec-title">🔥 Leads com intenção de compra detectada (texto + transcrição de áudio)</div>
-  <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-val red" id="qTier1">-</div><div class="kpi-lbl">🔴 Prontos pra fechar</div></div>
-    <div class="kpi-card"><div class="kpi-val orange" id="qTier2">-</div><div class="kpi-lbl">🟠 Muito interessados</div></div>
-    <div class="kpi-card"><div class="kpi-val yellow" id="qTier3">-</div><div class="kpi-lbl">🟡 Interesse detectado</div></div>
-    <div class="kpi-card"><div class="kpi-val" id="qTotal">-</div><div class="kpi-lbl">Total analisado</div></div>
+<!-- ABA VENDEDORES -->
+<div id="tab-vendedores" class="tab-content">
+  <div class="vendor-grid" id="vendedoresGrid"></div>
+  <div class="chart-wrap">
+    <div class="chart-title">Negócios por Vendedor</div>
+    <div class="chart-canvas-wrap"><canvas id="chartVendors"></canvas></div>
   </div>
-  <div class="hot-grid" id="hotGrid"><div class="no-data">Carregando análise de intenções...</div></div>
-</div>
-
-<!-- TAB VENDEDORES -->
-<div class="tab-content" id="tab-vendedores">
-  <div class="sec-title">Ranking dos Vendedores</div>
-  <div class="kpi-row" id="vendKpis"></div>
-  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;overflow:hidden;margin-top:16px">
-    <table class="ranking-table" id="rankingTable">
-      <thead><tr>
-        <th>#</th><th>Vendedor</th><th>Negócios</th><th>Conversas</th>
-        <th>Pendentes</th><th>Sem resposta</th><th>Tags de ação</th>
-      </tr></thead>
-      <tbody id="rankingBody"></tbody>
+  <div class="table-wrap">
+    <table id="vendedoresTable">
+      <thead><tr><th>#</th><th>Vendedor</th><th>Negócios</th><th>Conversas</th><th>Pendentes</th><th>Sem Negócio</th></tr></thead>
+      <tbody id="vendedoresTableBody"></tbody>
     </table>
   </div>
-  <div class="charts-2" style="margin-top:16px">
-    <div class="chart-card"><h3>Negócios por vendedor</h3><div class="chart-wrap"><canvas id="chartVendNeg"></canvas></div></div>
-    <div class="chart-card"><h3>Conversas por vendedor</h3><div class="chart-wrap"><canvas id="chartVendConv"></canvas></div></div>
-  </div>
 </div>
 
-<!-- TAB CONVERSAS -->
-<div class="tab-content" id="tab-conversas">
-  <div class="sec-title">Conversas Recentes</div>
-  <div class="conv-split">
-    <div class="conv-list-wrap">
-      <div class="conv-filters">
-        <button class="filter-btn active" onclick="filterConv('all',this)">Todas</button>
-        <button class="filter-btn" onclick="filterConv('pending',this)">⏳ Pendentes</button>
-        <button class="filter-btn" onclick="filterConv('hot',this)">🔥 Quentes</button>
-        <button class="filter-btn" onclick="filterConv('sem-att',this)">🚫 Sem vendedor</button>
-      </div>
-      <div class="conv-scroll" id="convListEl"><div class="no-data">Carregando...</div></div>
+<!-- ABA FUNIL -->
+<div id="tab-funil" class="tab-content">
+  <div class="kpi-grid" id="funilKpis"></div>
+  <div class="funnel-grid" id="funilList"></div>
+</div>
+
+<!-- ABA CONVERSAS -->
+<div id="tab-conversas" class="tab-content">
+  <div class="kpi-grid" id="convKpis"></div>
+  <div class="filter-group" style="margin-bottom:10px;gap:8px;flex-wrap:wrap;display:flex;align-items:center">
+    <span class="filter-label">Status:</span>
+    <select class="filter-input" id="filterConvStatus" onchange="renderConversas()">
+      <option value="">Todos</option>
+      <option value="waiting">Aguardando</option>
+      <option value="opened">Aberta</option>
+      <option value="unstarted">Não iniciada</option>
+      <option value="automation">Automação</option>
+    </select>
+    <span class="filter-label">Buscar:</span>
+    <input type="text" class="filter-input" id="filterConvSearch" placeholder="Nome ou telefone..." oninput="renderConversas()" style="width:160px">
+    <label style="font-size:0.72rem;color:#94a3b8;display:flex;align-items:center;gap:4px">
+      <input type="checkbox" id="filterConvPending" onchange="renderConversas()"> Só pendentes
+    </label>
+  </div>
+  <div class="conv-layout">
+    <div>
+      <div id="convList" class="conv-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
     </div>
-    <div class="chat-wrap" id="chatDetail">
-      <div class="empty-state"><div class="icon">💬</div><div>Selecione uma conversa</div></div>
+    <div id="msgPanel" class="msg-panel">
+      <div class="msg-header" id="msgPanelHeader">Selecione uma conversa</div>
+      <div class="msg-list" id="msgList"><div class="empty">Clique em uma conversa para ver as mensagens</div></div>
     </div>
   </div>
 </div>
 
-<!-- TAB FUNIL -->
-<div class="tab-content" id="tab-funil">
-  <div class="sec-title">Pipeline de Negócios</div>
-  <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-val" id="fTotal">-</div><div class="kpi-lbl">Total negócios</div></div>
-    <div class="kpi-card"><div class="kpi-val green" id="fGanhos">-</div><div class="kpi-lbl">Ganhos</div></div>
-    <div class="kpi-card"><div class="kpi-val red" id="fPerdidos">-</div><div class="kpi-lbl">Perdidos</div></div>
-    <div class="kpi-card"><div class="kpi-val yellow" id="fAbertos">-</div><div class="kpi-lbl">Em aberto</div></div>
-    <div class="kpi-card"><div class="kpi-val orange" id="fSemVend">-</div><div class="kpi-lbl">Sem vendedor</div></div>
-    <div class="kpi-card"><div class="kpi-val" id="fSemProd">-</div><div class="kpi-lbl">Sem produto</div></div>
+<!-- ABA CRM -->
+<div id="tab-crm" class="tab-content">
+  <div class="kpi-grid" id="crmKpis"></div>
+  <div class="chart-wrap">
+    <div class="chart-title">Negócios por Dia (últimos 30 dias)</div>
+    <div class="chart-canvas-wrap"><canvas id="chartDays"></canvas></div>
   </div>
-  <div class="sec-title">Etapas do Funil</div>
-  <div class="funnel-wrap" id="funnelWrap"></div>
-  <div class="charts-2" style="margin-top:16px">
-    <div class="chart-card"><h3>Negócios por dia (30 dias)</h3><div class="chart-wrap"><canvas id="chartDias"></canvas></div></div>
-    <div class="chart-card"><h3>Distribuição por etapa</h3><div class="chart-wrap"><canvas id="chartEtapas"></canvas></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Lead</th><th>Telefone</th><th>Vendedor</th><th>Etapa</th><th>Tag</th><th>Data</th></tr></thead>
+      <tbody id="crmLeadsBody"></tbody>
+    </table>
   </div>
 </div>
 
-</div>
 <script>
 const TOKEN = 'dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
 const CRM = 'https://crm.g1.datacrazy.io/api/crm';
 const MSG = 'https://messaging.g1.datacrazy.io/api/messaging';
-const PIPE = '827986b4-56a9-4074-a54e-440b6b7be6a5';
 const H = {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'};
-const VENDEDORES = ['Luan Sampaio','Alysson Oliveira','Jeremias Santos Aragão','Jeremias Santos Aragão ','Michele Langendorf'];
-const VEND_NOMES = ['Luan Sampaio','Alysson Oliveira','Jeremias Santos Aragão','Michele Langendorf'];
+const VENDORS = ['Alysson','Luan','Jeremias','Michele'];
+const VENDOR_COLORS = {'Alysson':'#f97316','Luan':'#3b82f6','Jeremias':'#22c55e','Michele':'#a855f7'};
 
-// Palavras-chave de intenção de compra por tier
-const TIER1 = ['quero comprar','vou comprar','como pago','forma de pagamento','pix','boleto','cartão','quanto custa o frete','posso pagar','o que falta','manda o link','manda a chave','pago agora','fechado','vou pedir','quero pedir','como faço pra comprar','me manda','me passa o','vou fechar','bora fechar','pode mandar'];
-const TIER2 = ['interessado','tenho interesse','quero sim','quero saber mais','me interessa','tô interessado','to interessado','quero','gostei','parece bom','parece ótimo','funciona mesmo','realmente funciona','vou tomar','quero tomar','me convenceu','me ajudou'];
-const TIER3 = ['quanto custa','qual o preço','preço','valor','desconto','promoção','quantos potes','como funciona','resultado','quanto tempo','demoraria','antes e depois','funciona'];
+// Estado global
+let allBusinesses = [];
+let allConversations = [];
+let allLeads = [];
+let filteredBusinesses = [];
+let filteredConversations = [];
+let chartVendors = null;
+let chartDays = null;
+let filterFrom = null;
+let filterTo = null;
+let filterVendor = '';
+let activeTab = 'alertas';
 
-let _allConvs = [];
-let _allBiz = [];
-let _convFilter = 'all';
-let _charts = {};
-let _hotConvs = [];
+// Keywords de intenção (excluindo msg padrão)
+const MSG_PADRAO = ['olá doutor, quero saber mais','ola doutor, quero saber mais','olá doutor quero saber mais','ola doutor quero saber mais'];
+const HOT_FIRE = ['quanto custa','vou pagar','como pago','boleto','pix','cartão','parcela','quero pedir','quero comprar','quanto é','me manda o link','link de pagamento','vou fechar','fechei','tô dentro','to dentro','pode mandar','manda o pix','chave pix','pagar agora','valor','como faço pra pagar','quero o plano','aceito','comprando'];
+const HOT_WARM = ['interessado','tenho interesse','sim doutor','sim médico','tô sim','to sim','isso sim','acontece comigo','é exatamente','isso mesmo','quanto tempo','pra quanto tempo','funciona mesmo','realmente funciona','tem garantia','resultado','como funciona','me conta mais','pode me falar mais','quero saber mais sobre o plano','me explica','preciso disso','me ajuda','pode me ajudar'];
+const HOT_INTEREST = ['hm','talvez','possível','posso pensar','vou ver','deixa eu ver','me manda','me explica','entendi','ok doutor','certo','entendo','to aqui','tô aqui','tô ouvindo','to ouvindo'];
+const SKIP_BOT = ['olá, meu amigo', 'seja bem-vindo', 'consultório zencaps', 'dr. roberto', 'dr roberto', 'vitalidade masculina', 'condição especial', 'garantia total', 'frete grátis', 'potes de cápsulas'];
 
-function api(url){return fetch(url,{headers:H}).then(r=>r.json())}
-
-function showTab(id,btn){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function timeAgo(d){
-  if(!d)return '';
-  const diff=Date.now()-new Date(d).getTime();
-  const m=Math.floor(diff/60000);
-  if(m<1)return 'agora';
-  if(m<60)return m+'min';
-  const h=Math.floor(m/60);
-  if(h<24)return h+'h';
-  return Math.floor(h/24)+'d';
-}
-
-function fmtTime(d){
-  if(!d)return '-';
-  return new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-}
-
-function isVendedor(name){
-  if(!name)return false;
-  return VENDEDORES.some(v=>name.trim().toLowerCase().includes(v.split(' ')[0].toLowerCase()) || v.toLowerCase().includes(name.trim().toLowerCase().split(' ')[0]));
-}
-
-function getVendNome(name){
-  if(!name)return null;
-  for(const v of VEND_NOMES){
-    if(name.toLowerCase().includes(v.split(' ')[0].toLowerCase()))return v;
+function setPeriod(val) {
+  const today = new Date();
+  const fmt = d => d.toISOString().split('T')[0];
+  if(val === 'today') {
+    document.getElementById('filterFrom').value = fmt(today);
+    document.getElementById('filterTo').value = fmt(today);
+  } else if(val === 'yesterday') {
+    const y = new Date(today); y.setDate(y.getDate()-1);
+    document.getElementById('filterFrom').value = fmt(y);
+    document.getElementById('filterTo').value = fmt(y);
+  } else if(val === 'all') {
+    document.getElementById('filterFrom').value = '';
+    document.getElementById('filterTo').value = '';
+  } else if(val) {
+    const d = new Date(today); d.setDate(d.getDate()-parseInt(val));
+    document.getElementById('filterFrom').value = fmt(d);
+    document.getElementById('filterTo').value = fmt(today);
   }
-  return name;
+  applyFilters();
 }
 
-function detectIntent(texts){
-  const combined = texts.join(' ').toLowerCase();
-  for(const kw of TIER1){if(combined.includes(kw))return{tier:1,label:'🔴 Pronto pra fechar',match:kw}}
-  for(const kw of TIER2){if(combined.includes(kw))return{tier:2,label:'🟠 Muito interessado',match:kw}}
-  for(const kw of TIER3){if(combined.includes(kw))return{tier:3,label:'🟡 Interesse detectado',match:kw}}
-  return null;
+function applyFilters() {
+  filterFrom = document.getElementById('filterFrom').value ? new Date(document.getElementById('filterFrom').value+'T00:00:00') : null;
+  filterTo = document.getElementById('filterTo').value ? new Date(document.getElementById('filterTo').value+'T23:59:59') : null;
+  filterVendor = document.getElementById('filterVendor').value;
+
+  filteredBusinesses = allBusinesses.filter(b => {
+    const d = new Date(b.createdAt||b.updatedAt||'');
+    if(filterFrom && d < filterFrom) return false;
+    if(filterTo && d > filterTo) return false;
+    if(filterVendor) {
+      const att = (b.attendants||[]).map(a=>a.name||'').join(' ');
+      if(!att.includes(filterVendor)) return false;
+    }
+    return true;
+  });
+
+  filteredConversations = allConversations.filter(c => {
+    const d = new Date(c.updatedAt||c.createdAt||'');
+    if(filterFrom && d < filterFrom) return false;
+    if(filterTo && d > filterTo) return false;
+    if(filterVendor) {
+      const att = (c.attendants||[]).map(a=>a.name||'').join(' ');
+      if(!att.includes(filterVendor)) return false;
+    }
+    return true;
+  });
+
+  renderAll();
 }
 
-async function getMsgsIntent(convId){
-  try{
-    const r = await api(MSG+'/conversations/'+convId+'/messages?take=40');
-    const msgs = r.messages||[];
-    const texts = msgs
-      .filter(m=>m.received===true)
-      .map(m=>(m.body||'')+(m.interpretedContent?' '+m.interpretedContent:''));
-    const intent = detectIntent(texts);
-    const lastUserMsg = msgs.filter(m=>m.received===true).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt))[0];
-    const preview = lastUserMsg ? (lastUserMsg.interpretedContent||lastUserMsg.body||'[mídia]') : '';
-    return {intent, preview, msgs};
-  }catch(e){return{intent:null,preview:'',msgs:[]}}
+function clearFilters() {
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value = '';
+  document.getElementById('filterPeriod').value = '30';
+  document.getElementById('filterVendor').value = '';
+  setPeriod('30');
 }
-</script>
-<script>
-async function loadAlertas(convs, bizArr){
-  // SEM VENDEDOR
-  const semAtt = convs.filter(c=>!c.attendants||c.attendants.length===0||!isVendedor(c.attendants[0]?.name));
-  document.getElementById('cntSemAtt').textContent = semAtt.length;
-  document.getElementById('listSemAtt').innerHTML = semAtt.length===0
-    ? '<div class="no-data">✅ Todas as conversas têm vendedor!</div>'
-    : semAtt.slice(0,30).map(c=>{
-        const nome=c.name||c.contact?.phoneNumber||'?';
-        const att=c.attendants?.[0]?.name||'Sem atribuição';
-        const t=timeAgo(c.lastMessageDate||c.updatedAt);
-        return `<div class="alert-item">
-          <div><div class="alert-name">${nome}</div><div class="alert-detail">Atendente: ${att}</div></div>
-          <div style="text-align:right"><div class="alert-time">${t}</div><span class="alert-badge badge-red">SEM VENDEDOR</span></div>
-        </div>`;
-      }).join('');
 
-  // SEM NEGÓCIO — conversas que não têm negócio vinculado (baseado no leadId)
-  const convLeadIds = new Set(bizArr.map(b=>b.lead?.id||b.leadId).filter(Boolean));
-  const semNeg = convs.filter(c=>{
-    const contactPhone = c.contact?.phoneNumber||c.contact?.phone||'';
-    // heurística: se nenhum biz tem o mesmo telefone
-    const hasBiz = bizArr.some(b=>{
-      const lp = b.lead?.phone||b.lead?.phoneNumber||'';
-      return lp && contactPhone && (lp.replace(/D/g,'').slice(-8)===contactPhone.replace(/D/g,'').slice(-8));
+async function apiFetch(url) {
+  const r = await fetch(url, {headers: H});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function fetchAll(endpoint, pageSize=100) {
+  let all = [], skip = 0, total = Infinity;
+  while(all.length < total) {
+    const url = endpoint + (endpoint.includes('?') ? '&' : '?') + 'take='+pageSize+'&skip='+skip;
+    const d = await apiFetch(url);
+    const items = d.data || d.businesses || d.leads || d.conversations || d.messages || [];
+    if(d.total !== undefined) total = d.total;
+    if(!items.length) break;
+    all = all.concat(items);
+    skip += pageSize;
+    if(items.length < pageSize) break;
+  }
+  return all;
+}
+
+async function fetchConversationsFull() {
+  let all = [], skip = 0;
+  while(true) {
+    const url = MSG+'/conversations?take=100&skip='+skip+'&order[updatedAt]=desc';
+    const d = await apiFetch(url);
+    const items = d.data || d.conversations || [];
+    if(!items.length) break;
+    all = all.concat(items);
+    if(all.length >= (d.total||999)) break;
+    skip += 100;
+    if(items.length < 100) break;
+  }
+  return all;
+}
+
+async function loadAll() {
+  const btn = document.getElementById('btnReload');
+  btn.disabled = true; btn.textContent = '⏳ Carregando...';
+  document.getElementById('statusDot').style.background = '#eab308';
+  try {
+    const [bizRaw, convsRaw] = await Promise.all([
+      fetchAll(CRM+'/businesses?order[createdAt]=desc', 100),
+      fetchConversationsFull()
+    ]);
+    allBusinesses = bizRaw;
+    allConversations = convsRaw;
+    applyFilters();
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+    document.getElementById('statusDot').style.background = '#22c55e';
+    document.getElementById('statusDot').style.animation = 'pulse 2s infinite';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('statusDot').style.background = '#ef4444';
+  }
+  btn.disabled = false; btn.textContent = '↻ Atualizar';
+}
+
+function renderAll() {
+  renderAlertas();
+  renderHotLeads();
+  renderVendedores();
+  renderFunil();
+  renderConversas();
+  renderCRM();
+}
+
+function showTab(name) {
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const tabs=['alertas','hot','vendedores','funil','conversas','crm'];
+    t.classList.toggle('active', tabs[i]===name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function timeAgo(d) {
+  const diff = (Date.now() - new Date(d).getTime())/1000;
+  if(diff < 60) return Math.round(diff)+'s';
+  if(diff < 3600) return Math.round(diff/60)+'min';
+  if(diff < 86400) return Math.round(diff/3600)+'h';
+  return Math.round(diff/86400)+'d';
+}
+
+function fmt(d) {
+  return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+// ===== ALERTAS =====
+function renderAlertas() {
+  const semVendedor = filteredConversations.filter(c=>!(c.attendants&&c.attendants.length));
+  const semNegocio = filteredConversations.filter(c=>{
+    const atts = (c.attendants||[]).map(a=>a.name||'');
+    return atts.some(n=>VENDORS.includes(n)) && !c.businessId;
+  });
+  const pendentes = filteredConversations.filter(c=>c.isPending);
+  const apresentacao = filteredBusinesses.filter(b=>{
+    const s = (b.stage&&(b.stage.name||b.stage.externalId||''))||'';
+    return s.toLowerCase().includes('apresenta');
+  });
+  const semAtribuir = filteredBusinesses.filter(b=>!(b.attendants&&b.attendants.length));
+  
+  let html = '';
+  html += '<div class="kpi-grid" style="margin-bottom:14px">';
+  html += kpiCard('🚨 Sem Vendedor', semVendedor.length, '', 'red');
+  html += kpiCard('📋 Sem Negócio', semNegocio.length, '', 'yellow');
+  html += kpiCard('⏳ Pendentes', pendentes.length, 'cliente esperando', 'red');
+  html += kpiCard('📌 Em Apresentação', apresentacao.length, 'precisam de ação', 'yellow');
+  html += kpiCard('👤 Negócio sem Dono', semAtribuir.length, '', 'red');
+  html += '</div>';
+
+  if(semVendedor.length) {
+    html += '<div class="alert-section"><div class="alert-title" style="color:var(--red)">🚨 Conversas SEM vendedor atribuído ('+semVendedor.length+')</div><div class="alert-list">';
+    semVendedor.slice(0,20).forEach(c=>{
+      const name = (c.contact&&c.contact.name)||c.id||'?';
+      const phone = (c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+      const st = (c.statuses&&c.statuses[0])||'?';
+      html += '<div class="alert-item danger"><div class="alert-text"><b>'+escH(name)+'</b> '+escH(phone)+'<div class="alert-sub">Status: '+st+' • '+timeAgo(c.updatedAt||c.createdAt)+'</div></div>';
+      html += '<span class="alert-badge badge-red">Sem vendedor</span></div>';
     });
-    return !hasBiz;
-  });
-  const semNegVend = semNeg.filter(c=>c.attendants?.some(a=>isVendedor(a.name)));
-  document.getElementById('cntSemNeg').textContent = semNegVend.length;
-  document.getElementById('listSemNeg').innerHTML = semNegVend.length===0
-    ? '<div class="no-data">✅ Sem alertas de negócio!</div>'
-    : semNegVend.slice(0,20).map(c=>{
-        const nome=c.name||c.contact?.phoneNumber||'?';
-        const att=c.attendants?.[0]?.name||'-';
-        const t=timeAgo(c.lastMessageDate||c.updatedAt);
-        return `<div class="alert-item">
-          <div><div class="alert-name">${nome}</div><div class="alert-detail">Vendedor: ${att}</div></div>
-          <div style="text-align:right"><div class="alert-time">${t}</div><span class="alert-badge badge-red">SEM NEGÓCIO</span></div>
-        </div>`;
-      }).join('');
+    html += '</div></div>';
+  }
 
-  // PENDENTES
-  const pending = convs.filter(c=>c.isPending===true);
-  document.getElementById('cntPending').textContent = pending.length;
-  document.getElementById('listPending').innerHTML = pending.length===0
-    ? '<div class="no-data">✅ Nenhum cliente aguardando!</div>'
-    : pending.slice(0,30).map(c=>{
-        const nome=c.name||c.contact?.phoneNumber||'?';
-        const att=c.attendants?.[0]?.name||'Sem vendedor';
-        const t=timeAgo(c.lastReceivedMessageDate||c.lastMessageDate||c.updatedAt);
-        return `<div class="alert-item">
-          <div><div class="alert-name">${nome}</div><div class="alert-detail">Vendedor: ${att} — cliente esperando resposta</div></div>
-          <div style="text-align:right"><div class="alert-time">${t}</div><span class="alert-badge badge-yellow">AGUARDANDO</span></div>
-        </div>`;
-      }).join('');
+  if(pendentes.length) {
+    html += '<div class="alert-section"><div class="alert-title" style="color:var(--red)">⏳ Clientes aguardando resposta ('+pendentes.length+')</div><div class="alert-list">';
+    pendentes.slice(0,20).forEach(c=>{
+      const name = (c.contact&&c.contact.name)||'?';
+      const phone = (c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+      const att = (c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Ninguém';
+      const msg = (c.lastMessage&&c.lastMessage.body)||'';
+      html += '<div class="alert-item danger"><div class="alert-text"><b>'+escH(name)+'</b> '+escH(phone)+'<div class="alert-sub">Vendedor: '+escH(att)+' • '+timeAgo(c.updatedAt)+'</div>';
+      if(msg) html += '<div class="alert-sub" style="color:#94a3b8">↩ '+escH(msg.substring(0,80))+'</div>';
+      html += '</div><span class="alert-badge badge-red">Pendente</span></div>';
+    });
+    html += '</div></div>';
+  }
 
-  // APRESENTAÇÃO sem ação
-  const apres = bizArr.filter(b=>{
-    const stage = b.stage?.name||b.stageName||'';
-    const tags = b.tags||[];
-    const hasAction = tags.some(t=>['TENTEI LIGAR','FOI PRA LIGAÇÃO','INTERESSADO','LEAD QUENTE','MSG MANUAL ENVIADA'].some(k=>t.name?.toUpperCase().includes(k)));
-    return stage.toUpperCase().includes('APRESENTAÇÃO') && !hasAction;
-  });
-  document.getElementById('cntApres').textContent = apres.length;
-  document.getElementById('listApres').innerHTML = apres.length===0
-    ? '<div class="no-data">✅ Todos com ação registrada!</div>'
-    : apres.slice(0,30).map(b=>{
-        const nome=b.lead?.name||b.name||'?';
-        const att=b.attendant?.name||b.attendants?.[0]?.name||'Sem vendedor';
-        const t=fmtTime(b.createdAt);
-        return `<div class="alert-item">
-          <div><div class="alert-name">${nome}</div><div class="alert-detail">Vendedor: ${att} — nenhuma tag de ação</div></div>
-          <div style="text-align:right"><div class="alert-time">${t}</div><span class="alert-badge badge-blue">SEM AÇÃO</span></div>
-        </div>`;
-      }).join('');
+  if(semNegocio.length) {
+    html += '<div class="alert-section"><div class="alert-title" style="color:var(--yellow)">📋 Conversas sem negócio criado ('+semNegocio.length+')</div><div class="alert-list">';
+    semNegocio.slice(0,20).forEach(c=>{
+      const name = (c.contact&&c.contact.name)||'?';
+      const att = (c.attendants&&c.attendants[0]&&c.attendants[0].name)||'?';
+      html += '<div class="alert-item warning"><div class="alert-text"><b>'+escH(name)+'</b><div class="alert-sub">Vendedor: '+escH(att)+' • '+timeAgo(c.updatedAt||c.createdAt)+'</div></div>';
+      html += '<span class="alert-badge badge-yellow">Sem negócio</span></div>';
+    });
+    html += '</div></div>';
+  }
+
+  if(apresentacao.length) {
+    html += '<div class="alert-section"><div class="alert-title" style="color:var(--yellow)">📌 Negócios em APRESENTAÇÃO sem ação ('+apresentacao.length+')</div><div class="alert-list">';
+    apresentacao.slice(0,20).forEach(b=>{
+      const name = (b.lead&&b.lead.name)||b.name||'?';
+      const att = (b.attendants&&b.attendants[0]&&b.attendants[0].name)||'Ninguém';
+      const tags = (b.tags||[]).map(t=>t.name||'').join(', ')||'Sem tag';
+      html += '<div class="alert-item warning"><div class="alert-text"><b>'+escH(name)+'</b><div class="alert-sub">Vendedor: '+escH(att)+' • Tags: '+escH(tags)+' • '+timeAgo(b.updatedAt||b.createdAt)+'</div></div>';
+      html += '<span class="alert-badge badge-yellow">Apresentação</span></div>';
+    });
+    html += '</div></div>';
+  }
+
+  if(!semVendedor.length && !pendentes.length && !semNegocio.length && !apresentacao.length) {
+    html += '<div class="empty">✅ Nenhum alerta crítico no período</div>';
+  }
+
+  document.getElementById('alertasContent').innerHTML = html;
 }
 
-async function loadQuentes(convs){
-  const sample = convs.slice(0,60);
-  let tier1=[],tier2=[],tier3=[];
-  
-  const results = await Promise.all(sample.map(async c=>{
-    const r = await getMsgsIntent(c.id);
-    return {conv:c, ...r};
-  }));
-  
-  results.forEach(r=>{
-    if(!r.intent)return;
-    const obj = {conv:r.conv, intent:r.intent, preview:r.preview, msgs:r.msgs};
-    if(r.intent.tier===1)tier1.push(obj);
-    else if(r.intent.tier===2)tier2.push(obj);
-    else tier3.push(obj);
+function kpiCard(label, val, sub, cls) {
+  return '<div class="kpi '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+val+'</div>'+(sub?'<div class="kpi-sub">'+sub+'</div>':'')+'</div>';
+}
+
+function escH(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ===== LEADS QUENTES =====
+function isBot(text) {
+  const t = text.toLowerCase();
+  return SKIP_BOT.some(k=>t.includes(k));
+}
+function isMsgPadrao(text) {
+  const t = text.toLowerCase().trim();
+  return MSG_PADRAO.some(k=>t.includes(k));
+}
+function scoreMessage(text) {
+  const t = text.toLowerCase();
+  if(isMsgPadrao(t)) return 0;
+  if(isBot(text)) return 0;
+  if(HOT_FIRE.some(k=>t.includes(k))) return 3;
+  if(HOT_WARM.some(k=>t.includes(k))) return 2;
+  if(HOT_INTEREST.some(k=>t.includes(k))) return 1;
+  return 0;
+}
+
+async function loadHotLeads() {
+  const convs = filteredConversations.filter(c=>{
+    const atts = (c.attendants||[]).map(a=>a.name||'');
+    return atts.some(n=>VENDORS.includes(n)) || !(c.statuses||[]).includes('automation');
   });
   
-  _hotConvs = [...tier1,...tier2,...tier3];
-  document.getElementById('qTier1').textContent = tier1.length;
-  document.getElementById('qTier2').textContent = tier2.length;
-  document.getElementById('qTier3').textContent = tier3.length;
-  document.getElementById('qTotal').textContent = sample.length;
+  const results = [];
+  const batches = [];
+  for(let i=0;i<convs.length;i+=10) batches.push(convs.slice(i,i+10));
   
-  const all = [...tier1,...tier2,...tier3];
-  if(all.length===0){
-    document.getElementById('hotGrid').innerHTML='<div class="no-data">Nenhum lead quente detectado nas últimas conversas</div>';
-    return;
+  for(const batch of batches) {
+    await Promise.all(batch.map(async c => {
+      try {
+        const d = await apiFetch(MSG+'/conversations/'+c.id+'/messages?take=50&order[createdAt]=desc');
+        const msgs = d.messages||[];
+        let maxScore = 0, bestMsg = '', keywordFound = '';
+        for(const m of msgs) {
+          let txt = m.body||'';
+          if(m.interpretedContent&&!m.interpretedContentPending) txt = m.interpretedContent;
+          if(!txt||isMsgPadrao(txt)||isBot(txt)) continue;
+          if(m.fromMe) continue; // pula mensagens do bot/vendedor
+          const s = scoreMessage(txt);
+          if(s > maxScore) {
+            maxScore = s;
+            bestMsg = txt.substring(0,120);
+            const t = txt.toLowerCase();
+            keywordFound = [...HOT_FIRE,...HOT_WARM,...HOT_INTEREST].find(k=>t.includes(k))||'';
+          }
+        }
+        if(maxScore > 0) {
+          const att = (c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+          results.push({conv:c, score:maxScore, msg:bestMsg, keyword:keywordFound, att});
+        }
+      } catch(e){}
+    }));
   }
   
-  document.getElementById('hotGrid').innerHTML = all.map(item=>{
-    const c = item.conv;
-    const nome = c.name||c.contact?.phoneNumber||'?';
-    const att = c.attendants?.[0]?.name||'Sem vendedor';
-    const tier = item.intent.tier;
-    const cls = tier===1?'tier1':tier===2?'tier2':'tier3';
-    const preview = item.preview.substring(0,180);
-    const t = timeAgo(c.lastMessageDate||c.updatedAt);
-    const stage = c.businessStage||'';
-    return `<div class="hot-card ${cls}" onclick="openConvChat('${c.id}','tab-conversas')">
-      <div class="hot-top">
-        <span class="hot-name">${nome}</span>
-        <span class="badge-hot">${item.intent.label}</span>
-      </div>
-      <div class="hot-signals">
-        <span class="alert-badge badge-${tier===1?'red':tier===2?'yellow':'blue'}">${item.intent.match}</span>
-      </div>
-      <div class="hot-msg">"${preview}"</div>
-      <div class="hot-meta">
-        <span class="hot-att">${att}</span>
-        ${stage?'<span class="hot-stage">'+stage+'</span>':''}
-        <span class="hot-time">${t}</span>
-      </div>
-    </div>`;
-  }).join('');
+  results.sort((a,b)=>b.score-a.score||(new Date(b.conv.updatedAt)-new Date(a.conv.updatedAt)));
+  return results;
 }
-</script>
-<script>
-async function loadVendedores(convs, bizArr){
+
+function renderHotLeadItem(r) {
+  const name = (r.conv.contact&&r.conv.contact.name)||r.conv.id||'?';
+  const phone = (r.conv.contact&&(r.conv.contact.phone||r.conv.contact.phoneNumber))||'';
+  let cls, scoreLabel;
+  if(r.score>=3){cls='fire';scoreLabel='🔥 Pronto p/ Fechar';}
+  else if(r.score>=2){cls='warm';scoreLabel='⚡ Muito Interessado';}
+  else{cls='interest';scoreLabel='💡 Interesse';}
+  return '<div class="hot-lead '+cls+'" onclick="openConvById(''+r.conv.id+'')">'+
+    '<div class="hot-lead-header">'+
+    '<div class="hot-lead-name">'+escH(name)+'</div>'+
+    '<span class="hot-score score-'+cls+'">'+scoreLabel+'</span>'+
+    '</div>'+
+    '<div class="hot-lead-msg">"'+escH(r.msg||'')+'"</div>'+
+    '<div class="hot-lead-meta">'+
+    '<span>👤 '+escH(r.att)+'</span>'+
+    (phone?'<span>📱 '+escH(phone)+'</span>':'')+
+    (r.keyword?'<span style="color:var(--accent)">🎯 "'+escH(r.keyword)+'"</span>':'')+
+    '<span>'+timeAgo(r.conv.updatedAt||r.conv.createdAt)+'</span>'+
+    '</div></div>';
+}
+
+async function renderHotLeads() {
+  ['hotFireList','hotWarmList','hotInterestList'].forEach(id=>{
+    document.getElementById(id).innerHTML='<div class="loading"><div class="spinner"></div>Analisando conversas...</div>';
+  });
+  
+  const results = await loadHotLeads();
+  const fire = results.filter(r=>r.score>=3);
+  const warm = results.filter(r=>r.score===2);
+  const interest = results.filter(r=>r.score===1);
+  
+  document.getElementById('hotFireCount').textContent = fire.length;
+  document.getElementById('hotWarmCount').textContent = warm.length;
+  document.getElementById('hotInterestCount').textContent = interest.length;
+  
+  document.getElementById('hotKpis').innerHTML =
+    kpiCard('🔥 Prontos p/ Fechar', fire.length, 'clique pra ver', 'red') +
+    kpiCard('⚡ Muito Interessados', warm.length, '', 'yellow') +
+    kpiCard('💡 Com Interesse', interest.length, '', 'blue') +
+    kpiCard('📊 Analisadas', results.length + filteredConversations.length - results.length, 'conversas totais', '');
+  
+  document.getElementById('hotFireList').innerHTML = fire.length ? fire.map(renderHotLeadItem).join('') : '<div class="empty">Nenhum no período</div>';
+  document.getElementById('hotWarmList').innerHTML = warm.length ? warm.map(renderHotLeadItem).join('') : '<div class="empty">Nenhum no período</div>';
+  document.getElementById('hotInterestList').innerHTML = interest.length ? interest.map(renderHotLeadItem).join('') : '<div class="empty">Nenhum no período</div>';
+}
+// ===== VENDEDORES =====
+function renderVendedores() {
   const stats = {};
-  VEND_NOMES.forEach(v=>{ stats[v]={neg:0,conv:0,pending:0,semResp:0,tags:{}}; });
-
-  // Negócios por vendedor
-  bizArr.forEach(b=>{
-    const att = b.attendant?.name||b.attendants?.[0]?.name||'';
-    const vn = getVendNome(att);
-    if(vn && stats[vn]) {
-      stats[vn].neg++;
-      (b.tags||[]).forEach(t=>{
-        const tn=t.name||'';
-        stats[vn].tags[tn]=(stats[vn].tags[tn]||0)+1;
-      });
-    }
+  VENDORS.forEach(v=>{ stats[v]={name:v,businesses:0,conversations:0,pending:0,noBusinessConvs:0,stages:{}}; });
+  filteredBusinesses.forEach(b=>{
+    (b.attendants||[]).forEach(a=>{
+      const v=a.name||"";
+      if(stats[v]){ stats[v].businesses++; const s=(b.stage&&(b.stage.name||""))||""; stats[v].stages[s]=(stats[v].stages[s]||0)+1; }
+    });
   });
-
-  // Conversas por vendedor
-  convs.forEach(c=>{
-    const att = c.attendants?.[0]?.name||'';
-    const vn = getVendNome(att);
-    if(vn && stats[vn]){
-      stats[vn].conv++;
-      if(c.isPending)stats[vn].pending++;
-    }
+  filteredConversations.forEach(c=>{
+    (c.attendants||[]).forEach(a=>{
+      const v=a.name||"";
+      if(stats[v]){ stats[v].conversations++; if(c.isPending) stats[v].pending++; if(!c.businessId) stats[v].noBusinessConvs++; }
+    });
   });
-
-  // KPIs top
-  const totalNeg = Object.values(stats).reduce((s,v)=>s+v.neg,0);
-  const totalConv = Object.values(stats).reduce((s,v)=>s+v.conv,0);
-  const totalPend = Object.values(stats).reduce((s,v)=>s+v.pending,0);
-  document.getElementById('vendKpis').innerHTML = `
-    <div class="kpi-card"><div class="kpi-val">${totalNeg}</div><div class="kpi-lbl">Total negócios</div></div>
-    <div class="kpi-card"><div class="kpi-val">${totalConv}</div><div class="kpi-lbl">Total conversas</div></div>
-    <div class="kpi-card"><div class="kpi-val yellow">${totalPend}</div><div class="kpi-lbl">Clientes esperando</div></div>
-  `;
-
-  // Ranking
-  const sorted = VEND_NOMES.map(v=>({name:v,...stats[v]})).sort((a,b)=>b.neg-a.neg);
-  const maxNeg = sorted[0]?.neg||1;
-  const colors = ['#fbbf24','#94a3b8','#b45309','#60a5fa'];
-
-  document.getElementById('rankingBody').innerHTML = sorted.map((v,i)=>{
-    const topTags = Object.entries(v.tags).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>`<span class="alert-badge badge-blue" style="font-size:0.65rem">${e[0]} (${e[1]})</span>`).join(' ');
-    const pct = maxNeg>0?Math.round((v.neg/maxNeg)*100):0;
-    return `<tr>
-      <td class="rank-pos">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'4º'}</td>
-      <td><div class="rank-name">${v.name.split(' ')[0]}</div><div style="font-size:0.7rem;color:#6b7280">${v.name}</div></td>
-      <td><div style="display:flex;align-items:center;gap:8px"><strong style="color:#f3f4f6">${v.neg}</strong><div class="rank-bar" style="flex:1"><div class="rank-bar-fill" style="width:${pct}%;background:${colors[i]}"></div></div></div></td>
-      <td><strong style="color:#f3f4f6">${v.conv}</strong></td>
-      <td><strong style="color:${v.pending>0?'#fbbf24':'#4ade80'}">${v.pending}</strong></td>
-      <td>-</td>
-      <td>${topTags||'<span style="color:#6b7280;font-size:0.75rem">sem tags</span>'}</td>
-    </tr>`;
-  }).join('');
-
-  // Charts
-  const labels = sorted.map(v=>v.name.split(' ')[0]);
-  const negData = sorted.map(v=>v.neg);
-  const convData = sorted.map(v=>v.conv);
-  const barColors = ['#2563eb','#16a34a','#d97706','#9333ea'];
-
-  if(_charts.vendNeg)_charts.vendNeg.destroy();
-  _charts.vendNeg = new Chart(document.getElementById('chartVendNeg'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'Negócios',data:negData,backgroundColor:barColors,borderRadius:6,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9ca3af'},grid:{color:'#1f2937'}},y:{ticks:{color:'#9ca3af'},grid:{color:'#374151'}}}}
-  });
-  if(_charts.vendConv)_charts.vendConv.destroy();
-  _charts.vendConv = new Chart(document.getElementById('chartVendConv'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'Conversas',data:convData,backgroundColor:barColors,borderRadius:6,borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9ca3af'},grid:{color:'#1f2937'}},y:{ticks:{color:'#9ca3af'},grid:{color:'#374151'}}}}
-  });
+  const sorted = VENDORS.map(v=>stats[v]).sort((a,b)=>b.businesses-a.businesses);
+  const maxBiz = Math.max(...sorted.map(s=>s.businesses))||1;
+  const medals = ["\u{1F947}","\u{1F948}","\u{1F949}","4"];
+  document.getElementById("vendedoresGrid").innerHTML = sorted.map((s,i)=>'<div class="vendor-card" style="border-top:3px solid '+( VENDOR_COLORS[s.name]||"#666")+'"><div class="vendor-rank">'+medals[i]+'</div><div class="vendor-name">'+escH(s.name)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+(s.businesses/maxBiz*100).toFixed(0)+'%;background:'+(VENDOR_COLORS[s.name]||"var(--accent)")+'"></div></div><div class="vendor-stats"><div class="vendor-stat"><span class="vendor-stat-label">Neg&oacute;cios</span><span class="vendor-stat-value">'+s.businesses+'</span></div><div class="vendor-stat"><span class="vendor-stat-label">Conversas</span><span class="vendor-stat-value">'+s.conversations+'</span></div><div class="vendor-stat"><span class="vendor-stat-label">Pendentes</span><span class="vendor-stat-value" style="color:var(--red)">'+s.pending+'</span></div><div class="vendor-stat"><span class="vendor-stat-label">Sem neg&oacute;cio</span><span class="vendor-stat-value" style="color:var(--yellow)">'+s.noBusinessConvs+'</span></div></div></div>').join("");
+  document.getElementById("vendedoresTableBody").innerHTML = sorted.map((s,i)=>"<tr><td>"+medals[i]+"</td><td style=\"color:"+VENDOR_COLORS[s.name]+"\"<b>"+escH(s.name)+"</b></td><td>"+s.businesses+"</td><td>"+s.conversations+"</td><td style=\"color:var(--red)\">"+s.pending+"</td><td style=\"color:var(--yellow)\">"+s.noBusinessConvs+"</td></tr>").join("");
+  if(chartVendors) chartVendors.destroy();
+  const ctx = document.getElementById("chartVendors").getContext("2d");
+  chartVendors = new Chart(ctx,{type:"bar",data:{labels:sorted.map(s=>s.name),datasets:[{label:"Neg\u00F3cios",data:sorted.map(s=>s.businesses),backgroundColor:sorted.map(s=>VENDOR_COLORS[s.name]||"#666"),borderRadius:6},{label:"Conversas",data:sorted.map(s=>s.conversations),backgroundColor:sorted.map(s=>(VENDOR_COLORS[s.name]||"#666")+"55"),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}},scales:{x:{ticks:{color:"#6b7280",font:{size:11}},grid:{color:"#1f2937"}},y:{ticks:{color:"#6b7280",font:{size:11}},grid:{color:"#1f2937"}}}}});
+}
+// ===== FUNIL =====
+function renderFunil() {
+  const stageMap = {};
+  filteredBusinesses.forEach(b=>{ const s=(b.stage&&(b.stage.name||b.stage.externalId||"Sem etapa"))||"Sem etapa"; stageMap[s]=(stageMap[s]||0)+1; });
+  const ORDER = ["APRESENTA\u00C7\u00C3O","SONDAGEM","GERA\u00C7\u00C3O DE VALOR","NEGOCIA\u00C7\u00C3O","FECHAMENTO","AGENDADO","FOLLOW-UP","LEAD PRA O FUTURO","BASE ANTIGA","DESQUALIFICADO"];
+  const sorted = Object.entries(stageMap).sort((a,b)=>{ const ia=ORDER.indexOf(a[0].toUpperCase()), ib=ORDER.indexOf(b[0].toUpperCase()); if(ia>=0&&ib>=0) return ia-ib; if(ia>=0) return -1; if(ib>=0) return 1; return b[1]-a[1]; });
+  const max=Math.max(...sorted.map(s=>s[1]))||1;
+  const total=filteredBusinesses.length;
+  const ganhos=filteredBusinesses.filter(b=>b.isWon).length;
+  const perdidos=filteredBusinesses.filter(b=>b.isLost).length;
+  document.getElementById("funilKpis").innerHTML=kpiCard("Total",total,"neg\u00F3cios","blue")+kpiCard("\u2705 Ganhos",ganhos,"","green")+kpiCard("\u274C Perdidos",perdidos,"","red")+kpiCard("\u2699\uFE0F Em Aberto",total-ganhos-perdidos,"","");
+  const stageColors={"APRESENTA\u00C7\u00C3O":"#3b82f6","SONDAGEM":"#8b5cf6","GERA\u00C7\u00C3O DE VALOR":"#06b6d4","NEGOCIA\u00C7\u00C3O":"#f59e0b","FECHAMENTO":"#22c55e","AGENDADO":"#10b981","FOLLOW-UP":"#f97316","LEAD PRA O FUTURO":"#84cc16","BASE ANTIGA":"#6b7280","DESQUALIFICADO":"#ef4444"};
+  document.getElementById("funilList").innerHTML = sorted.map(function(entry){ const name=entry[0],count=entry[1]; const pct=(count/max*100).toFixed(0); const color=stageColors[name.toUpperCase()]||"#f97316"; return "<div class=\"funnel-stage\"><div class=\"funnel-name\">"+escH(name)+"</div><div class=\"funnel-bar-wrap\"><div class=\"funnel-bar\" style=\"width:"+pct+"%;background:"+color+"\"></div></div><div class=\"funnel-count\">"+count+"</div></div>"; }).join("");
 }
 
-function renderConvList(convs, filter){
-  _convFilter = filter;
-  let list = convs;
-  if(filter==='pending') list = convs.filter(c=>c.isPending);
-  else if(filter==='hot') list = convs.filter(c=>_hotConvs.some(h=>h.conv.id===c.id));
-  else if(filter==='sem-att') list = convs.filter(c=>!c.attendants||c.attendants.length===0||!isVendedor(c.attendants[0]?.name));
+// ===== CONVERSAS =====
+function renderConversas() {
+  const statusFilter = document.getElementById('filterConvStatus').value;
+  const search = (document.getElementById('filterConvSearch').value||'').toLowerCase();
+  const onlyPending = document.getElementById('filterConvPending').checked;
+  
+  let convs = filteredConversations.filter(c=>{
+    if(onlyPending && !c.isPending) return false;
+    if(statusFilter && !(c.statuses||[]).includes(statusFilter)) return false;
+    if(search) {
+      const name = ((c.contact&&c.contact.name)||'').toLowerCase();
+      const phone = ((c.contact&&(c.contact.phone||c.contact.phoneNumber))||'').toLowerCase();
+      if(!name.includes(search)&&!phone.includes(search)) return false;
+    }
+    return true;
+  });
+  
+  const total = filteredConversations.length;
+  const waiting = filteredConversations.filter(c=>(c.statuses||[]).includes('waiting')).length;
+  const opened = filteredConversations.filter(c=>(c.statuses||[]).includes('opened')).length;
+  const automation = filteredConversations.filter(c=>(c.statuses||[]).includes('automation')).length;
+  const pending = filteredConversations.filter(c=>c.isPending).length;
+  
+  document.getElementById('convKpis').innerHTML =
+    kpiCard('Total',total,'conversas','blue')+
+    kpiCard('Abertas',opened,'','green')+
+    kpiCard('Aguardando',waiting,'','red')+
+    kpiCard('Automacao',automation,'','yellow')+
+    kpiCard('Pendentes',pending,'sem resposta','red');
+  
+  document.getElementById('convList').innerHTML = convs.length
+    ? convs.slice(0,100).map(c=>{
+        const name=(c.contact&&c.contact.name)||c.id||'?';
+        const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+        const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+        const st=(c.statuses&&c.statuses[0])||'?';
+        const msg=(c.lastMessage&&c.lastMessage.body)||'';
+        const stColor={'waiting':'badge-red','opened':'badge-green','unstarted':'badge-blue','automation':'badge-yellow'}[st]||'badge-blue';
+        return '<div class="conv-item'+(c.isPending?' pending':'')+'" onclick="openConv(this,''+c.id+'')">'
+          +'<div class="conv-name">'+escH(name)+(c.isPending?' <span style="color:var(--red);font-size:.65rem">● PENDENTE</span>':'')+'</div>'
+          +'<div class="conv-preview">'+escH((msg||'').substring(0,60))+'</div>'
+          +'<div class="conv-meta"><span class="alert-badge '+stColor+'">'+st+'</span><span>'+escH(att)+'</span><span>'+timeAgo(c.updatedAt||c.createdAt)+'</span>'
+          +(phone?'<span>'+escH(phone)+'</span>':'')+'</div></div>';
+      }).join('')
+    : '<div class="empty">Nenhuma conversa encontrada</div>';
+}
 
-  if(list.length===0){
-    document.getElementById('convListEl').innerHTML='<div class="no-data">Nenhuma conversa neste filtro</div>';
-    return;
+function openConv(el, id) {
+  document.querySelectorAll('.conv-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  loadMessages(id);
+}
+
+function openConvById(id) {
+  showTab('conversas');
+  setTimeout(()=>{ const el=document.querySelector('[onclick*="'+id+'"]'); if(el){el.classList.add('selected');} loadMessages(id); },200);
+}
+
+async function loadMessages(convId) {
+  const conv = allConversations.find(c=>c.id===convId);
+  const name = conv&&conv.contact&&conv.contact.name ? conv.contact.name : convId;
+  const att = conv&&conv.attendants&&conv.attendants[0] ? conv.attendants[0].name : '';
+  document.getElementById('msgPanelHeader').textContent = name + (att?' — '+att:'');
+  document.getElementById('msgList').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando mensagens...</div>';
+  try {
+    let allMsgs = [];
+    let skip = 0;
+    while(true) {
+      const d = await apiFetch(MSG+'/conversations/'+convId+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
+      const msgs = d.messages||[];
+      if(!msgs.length) break;
+      allMsgs = allMsgs.concat(msgs);
+      if(msgs.length < 50) break;
+      skip += 50;
+    }
+    
+    // Detectar nomes de participantes
+    const attendantNames = conv&&conv.attendants ? conv.attendants.map(a=>a.name||'') : [];
+    
+    if(!allMsgs.length) { document.getElementById('msgList').innerHTML='<div class="empty">Sem mensagens</div>'; return; }
+    
+    document.getElementById('msgList').innerHTML = allMsgs.map(m=>{
+      const isFromMe = m.fromMe === true;
+      // Tentar identificar se é bot/automação ou vendedor humano
+      const senderName = m.senderName || m.sender || '';
+      const isAttendant = isFromMe && attendantNames.some(n=>senderName.includes(n));
+      const isBot2 = isFromMe && !isAttendant;
+      
+      let msgClass, senderClass, senderLabel;
+      if(!isFromMe) {
+        msgClass = 'msg-from-lead'; senderClass = 'msg-sender-lead';
+        senderLabel = (conv&&conv.contact&&conv.contact.name)||'Lead';
+      } else if(isAttendant) {
+        msgClass = 'msg-from-attendant'; senderClass = 'msg-sender-attendant';
+        senderLabel = senderName || (attendantNames[0]||'Vendedor');
+      } else {
+        msgClass = 'msg-from-bot'; senderClass = 'msg-sender-bot';
+        senderLabel = 'Bot/Automação';
+      }
+      
+      const body = m.body||'';
+      const hasTranscript = m.interpretedContent && !m.interpretedContentPending;
+      const isAudio = m.type==='audio' || (m.mimeType&&m.mimeType.includes('audio'));
+      const isMedia = m.type==='image'||m.type==='video'||(m.mimeType&&(m.mimeType.includes('image')||m.mimeType.includes('video')));
+      
+      let content = '';
+      if(isAudio) {
+        content = '<div class="msg-audio">🎵 Áudio</div>';
+        if(hasTranscript) content += '<div class="msg-transcription"><div class="msg-transcription-label">📝 Transcrição:</div>'+escH(m.interpretedContent)+'</div>';
+        else if(m.interpretedContentPending) content += '<div class="msg-transcription" style="color:#6b7280">⏳ Transcrevendo...</div>';
+      } else if(isMedia) {
+        content = '<div class="msg-audio">'+(m.type==='image'?'🖼️ Imagem':'🎬 Vídeo')+'</div>';
+      } else if(body) {
+        content = escH(body);
+      }
+      
+      const t = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}) : '';
+      return '<div class="msg '+msgClass+'"><div class="msg-sender '+senderClass+'">'+escH(senderLabel)+'</div>'+content+'<div class="msg-time">'+t+'</div></div>';
+    }).join('');
+    
+    // Scroll para o fim
+    const ml = document.getElementById('msgList');
+    ml.scrollTop = ml.scrollHeight;
+  } catch(e) {
+    document.getElementById('msgList').innerHTML='<div class="empty">Erro ao carregar mensagens</div>';
   }
-
-  document.getElementById('convListEl').innerHTML = list.slice(0,60).map(c=>{
-    const id=c.id;
-    const nome=c.name||c.contact?.phoneNumber||'?';
-    const att=c.attendants?.[0]?.name||'';
-    const attVend=isVendedor(att);
-    const preview=c.lastMessage?.body||c.lastMessage?.interpretedContent||'...';
-    const t=timeAgo(c.lastMessageDate||c.updatedAt);
-    const isHot=_hotConvs.some(h=>h.conv.id===id);
-    const isPend=c.isPending;
-    const extraCls=isHot?'has-hot':isPend?'has-pending':'';
-    return `<div class="conv-item ${extraCls}" id="ci-${id}" onclick="openConvChat('${id}','')">
-      <div class="ci-top"><span class="ci-name">${nome}</span><span class="ci-time">${t}</span></div>
-      <div class="ci-preview">${preview.substring(0,80)}</div>
-      <div class="ci-meta">
-        ${isHot?'<span class="badge-hot">🔥 QUENTE</span>':''}
-        ${isPend?'<span class="alert-badge badge-yellow">⏳ aguardando</span>':''}
-        ${att?'<span class="ci-att">'+att.split(' ')[0]+'</span>':'<span class="alert-badge badge-red">SEM VENDEDOR</span>'}
-      </div>
-    </div>`;
-  }).join('');
 }
 
-function filterConv(f, btn){
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderConvList(_allConvs, f);
-}
-
-async function openConvChat(id, goTab){
-  if(goTab){
-    const btn = document.querySelector('[onclick*="'+goTab+'"]');
-    if(btn) showTab(goTab, btn);
-  }
-  document.querySelectorAll('.conv-item').forEach(e=>e.classList.remove('active'));
-  const el=document.getElementById('ci-'+id);
-  if(el){el.classList.add('active');el.scrollIntoView({block:'nearest'});}
-
-  const conv = _allConvs.find(c=>c.id===id);
-  const nome = conv?.name||conv?.contact?.phoneNumber||'?';
-  const att = conv?.attendants?.[0]?.name||'Sem vendedor';
-
-  document.getElementById('chatDetail').innerHTML=`
-    <div class="chat-header"><div class="chat-name">${nome}</div><div class="chat-sub">Vendedor: ${att}</div></div>
-    <div class="intent-banner intent-cold"><span class="spinner-sm"></span> Analisando intenção...</div>
-    <div class="chat-msgs" id="chatMsgsEl"><div class="no-data">Carregando...</div></div>
-  `;
-
-  const {intent, msgs} = await getMsgsIntent(id);
-
-  // Intent banner
-  const bannerCls = intent?.tier===1?'intent-hot':intent?.tier===2?'intent-warm':'intent-cold';
-  const bannerTxt = intent?intent.label+' — palavra-chave: "'+intent.match+'"':'Sem intenção detectada';
-  document.getElementById('chatDetail').querySelector('.intent-banner').className='intent-banner '+bannerCls;
-  document.getElementById('chatDetail').querySelector('.intent-banner').innerHTML=bannerTxt;
-
-  const msgsHtml = msgs.slice().reverse().map(m=>{
-    const body=m.body||'';
-    const transcript=m.interpretedContent||'';
-    const isOut=m.fromMe===true||m.received===false;
-    const isAuto=!m.received&&!m.attendant;
-    const cls=isAuto?'msg-auto':isOut?'msg-out':'msg-in';
-    const t=fmtTime(m.createdAt);
-    return `<div class="msg-bubble ${cls}">
-      ${body||'[mídia]'}
-      ${transcript&&!body?'<div class="msg-transcript">🎙️ '+transcript+'</div>':''}
-      ${transcript&&body?'<div class="msg-transcript">🎙️ '+transcript+'</div>':''}
-      <div class="msg-time">${t}</div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('chatMsgsEl').innerHTML=msgsHtml||'<div class="no-data">Sem mensagens</div>';
-  const ma=document.getElementById('chatMsgsEl');
-  if(ma)ma.scrollTop=ma.scrollHeight;
-}
-
-async function loadFunil(bizArr){
-  const ganhos=bizArr.filter(b=>b.won).length;
-  const perdidos=bizArr.filter(b=>b.lost).length;
-  const abertos=bizArr.length-ganhos-perdidos;
-  const semVend=bizArr.filter(b=>!b.attendant&&(!b.attendants||b.attendants.length===0)).length;
-  const semProd=bizArr.filter(b=>!b.product&&(!b.products||b.products.length===0)).length;
-
-  document.getElementById('fTotal').textContent=bizArr.length.toLocaleString('pt-BR');
-  document.getElementById('fGanhos').textContent=ganhos;
-  document.getElementById('fPerdidos').textContent=perdidos;
-  document.getElementById('fAbertos').textContent=abertos.toLocaleString('pt-BR');
-  document.getElementById('fSemVend').textContent=semVend;
-  document.getElementById('fSemProd').textContent=semProd;
-
-  // Funil por etapa
-  const stageOrder=['APRESENTAÇÃO','SONDAGEM','GERAÇÃO DE VALOR','NEGOCIAÇÃO','FECHAMENTO','FOLLOW-UP','AGENDADO','LEAD PRA O FUTURO','BASE ANTIGA','DESQUALIFICADO'];
-  const porStage={};
-  bizArr.forEach(b=>{const s=b.stage?.name||b.stageName||'Sem etapa';porStage[s]=(porStage[s]||0)+1;});
-  const stages=stageOrder.filter(s=>porStage[s]).concat(Object.keys(porStage).filter(s=>!stageOrder.includes(s)));
-  const maxV=Math.max(...stages.map(s=>porStage[s]||0));
-  document.getElementById('funnelWrap').innerHTML=stages.map(s=>{
-    const v=porStage[s]||0;
-    const pct=maxV>0?Math.round((v/maxV)*100):0;
-    return `<div class="funnel-item"><div class="f-label">${s}</div><div class="f-bar-wrap"><div class="f-bar" style="width:${pct}%"><span>${v}</span></div></div></div>`;
-  }).join('');
-
-  // Chart dias
-  const hoje=new Date();
-  const porDia={};
-  bizArr.forEach(b=>{
-    if(b.createdAt){
-      const d=new Date(b.createdAt);
-      const diff=Math.floor((hoje-d)/86400000);
-      if(diff<=30){const k=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});porDia[k]=(porDia[k]||0)+1;}
-    }
+// ===== CRM =====
+function renderCRM() {
+  const total = filteredBusinesses.length;
+  const ganhos = filteredBusinesses.filter(b=>b.isWon).length;
+  const perdidos = filteredBusinesses.filter(b=>b.isLost).length;
+  const leads5k = allLeads.length||'–';
+  
+  document.getElementById('crmKpis').innerHTML =
+    kpiCard('Negócios',total,'no período','blue')+
+    kpiCard('Ganhos',ganhos,'vendas',  'green')+
+    kpiCard('Perdidos',perdidos,'','red')+
+    kpiCard('Em Aberto',total-ganhos-perdidos,'','');
+  
+  // Gráfico por dia
+  const byDay = {};
+  filteredBusinesses.forEach(b=>{
+    const d = new Date(b.createdAt||b.updatedAt||'');
+    const key = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    byDay[key]=(byDay[key]||0)+1;
   });
-  const dk=Object.keys(porDia).sort((a,b)=>{const [da,ma]=a.split('/');const [db,mb]=b.split('/');return new Date(2024,parseInt(ma)-1,parseInt(da))-new Date(2024,parseInt(mb)-1,parseInt(db));}).slice(-20);
-
-  if(_charts.dias)_charts.dias.destroy();
-  _charts.dias=new Chart(document.getElementById('chartDias'),{type:'bar',data:{labels:dk,datasets:[{label:'Negócios',data:dk.map(k=>porDia[k]),backgroundColor:'rgba(96,165,250,0.7)',borderColor:'#60a5fa',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9ca3af',font:{size:9}},grid:{color:'#1f2937'}},y:{ticks:{color:'#9ca3af'},grid:{color:'#374151'}}}}});
-
-  if(_charts.etapas)_charts.etapas.destroy();
-  const topStages=stages.slice(0,8);
-  _charts.etapas=new Chart(document.getElementById('chartEtapas'),{type:'doughnut',data:{labels:topStages,datasets:[{data:topStages.map(s=>porStage[s]||0),backgroundColor:['#2563eb','#16a34a','#d97706','#9333ea','#0891b2','#be123c','#065f46','#1e40af'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#9ca3af',font:{size:10},padding:8}}}}});
+  const days = Object.keys(byDay).slice(-30);
+  if(chartDays) chartDays.destroy();
+  const ctx = document.getElementById('chartDays').getContext('2d');
+  chartDays = new Chart(ctx,{type:'bar',data:{labels:days,datasets:[{label:'Negócios',data:days.map(d=>byDay[d]),backgroundColor:'#f97316',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b7280',font:{size:10},maxRotation:45},grid:{color:'#1f2937'}},y:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#1f2937'}}}}});
+  
+  // Tabela de leads recentes
+  document.getElementById('crmLeadsBody').innerHTML = filteredBusinesses.slice(0,50).map(b=>{
+    const name=(b.lead&&b.lead.name)||b.name||'–';
+    const phone=(b.lead&&(b.lead.phone||b.lead.phoneNumber))||'–';
+    const att=(b.attendants&&b.attendants[0]&&b.attendants[0].name)||'–';
+    const stage=(b.stage&&(b.stage.name||b.stage.externalId))||'–';
+    const tags=(b.tags||[]).map(t=>t.name||'').join(', ')||'–';
+    const d=b.createdAt?new Date(b.createdAt).toLocaleDateString('pt-BR'):'–';
+    return '<tr><td>'+escH(name)+'</td><td style="color:#6b7280">'+escH(phone)+'</td><td style="color:'+(VENDOR_COLORS[att]||'#94a3b8')+'">'+escH(att)+'</td><td>'+escH(stage)+'</td><td style="font-size:.68rem;color:#f97316">'+escH(tags)+'</td><td>'+d+'</td></tr>';
+  }).join('');
 }
 
-async function loadAll(){
-  const btn=document.getElementById('btnRefresh');
-  btn.disabled=true;btn.textContent='⏳ Carregando...';
-  document.getElementById('loadingFull').classList.add('show');
-  try{
-    const [convR, bizR] = await Promise.all([
-      api(MSG+'/conversations?take=100&order[updatedAt]=desc'),
-      api(CRM+'/businesses?take=1000&pipelineId='+PIPE)
-    ]);
-    _allConvs = convR.data||convR.conversations||[];
-    _allBiz = bizR.businesses||bizR.data||[];
-
-    await Promise.all([
-      loadAlertas(_allConvs, _allBiz),
-      loadVendedores(_allConvs, _allBiz),
-      loadFunil(_allBiz)
-    ]);
-    renderConvList(_allConvs, _convFilter);
-    await loadQuentes(_allConvs);
-
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('pt-BR');
-  }catch(e){console.error(e);}
-  document.getElementById('loadingFull').classList.remove('show');
-  btn.disabled=false;btn.textContent='🔄 Atualizar';
-}
-
-loadAll();
+// ===== INIT =====
+window.addEventListener('load', function() {
+  // Setar período padrão 30 dias
+  setPeriod('30');
+  loadAll();
+  // Auto-refresh a cada 5 minutos
+  setInterval(loadAll, 300000);
+});
 </script>
 </body>
 </html>
