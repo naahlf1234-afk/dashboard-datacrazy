@@ -100,7 +100,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg0);color:var(--text1);fon
 .conv-list-search{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:7px 12px;font-size:12px;width:100%;outline:none;font-family:'Inter',sans-serif}
 .conv-list-search:focus{border-color:var(--accent)}
 .conv-filters{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);overflow-x:auto}
-.cf-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;transition:all .15s}
+.cf-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer
+;border:1px solid var(--border);background:none;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;transition:all .15s}
 .cf-btn.active,.cf-btn:hover{background:var(--accent);border-color:var(--accent);color:#000}
 .conv-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
 .conv-item:hover,.conv-item.selected{background:var(--bg3)}
@@ -165,6 +166,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg0);color:var(--text1);fon
   .vendor-grid{grid-template-columns:1fr}
 }
 .no-select{user-select:none}
+/* HOT LEADS INLINE CHAT */
+.hot-layout{display:grid;grid-template-columns:1fr 380px;gap:0;height:calc(100vh - 220px);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+@media(max-width:800px){.hot-layout{grid-template-columns:1fr;height:auto}}
+.hot-list-panel{overflow-y:auto;background:var(--bg1);border-right:1px solid var(--border)}
+.hot-chat-panel{display:flex;flex-direction:column;background:var(--bg0)}
+.hot-chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:10px}
+.hot-chat-empty-icon{font-size:36px}
+.hot-chat-empty-text{font-size:13px}
+.hot-lead-card{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.hot-lead-card:hover,.hot-lead-card.selected{background:var(--bg3)}
+.hot-lead-card.hlc-red{border-left-color:var(--red)}
+.hot-lead-card.hlc-yellow{border-left-color:var(--yellow)}
+.hot-section-header{padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:1}
+
 </style>
 </head>
 <body>
@@ -217,24 +232,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg0);color:var(--text1);fon
 </div>
 
 <!-- TAB: HOT LEADS -->
-<div id="pane-hotleads" class="tab-pane">
-  <div class="lead-section">
-    <div class="lead-section-title">
-      <span>&#128680; ALERTA DE FECHAMENTO</span>
-      <span class="priority-badge badge-red-bg" id="cnt-fechamento">0</span>
+<div id="pane-hotleads" class="tab-pane" style="padding:0;height:calc(100vh - 220px)">
+  <div class="hot-layout">
+    <div class="hot-list-panel" id="hotListPanel">
+      <div class="loading-state"><div class="spinner"></div>Carregando leads quentes...</div>
     </div>
-    <div id="list-fechamento"><div class="loading-state"><div class="spinner"></div>Carregando...</div></div>
-  </div>
-  <div class="lead-section">
-    <div class="lead-section-title">
-      <span>&#9889; INTENCAO DE COMPRA GENUINA</span>
-      <span class="priority-badge badge-yellow-bg" id="cnt-intencao">0</span>
+    <div class="hot-chat-panel" id="hotChatPanel">
+      <div class="chat-header" id="hotChatHeader">
+        <div class="chat-header-name">Selecione um lead</div>
+        <div class="chat-header-sub">Clique em um lead quente para ver o chat</div>
+      </div>
+      <div class="chat-messages" id="hotChatMessages">
+        <div class="hot-chat-empty">
+          <div class="hot-chat-empty-icon">&#128172;</div>
+          <div class="hot-chat-empty-text">Clique em um lead para abrir o chat</div>
+        </div>
+      </div>
     </div>
-    <div id="list-intencao"><div class="loading-state"><div class="spinner"></div>Carregando...</div></div>
   </div>
 </div>
-
-<!-- TAB: VENDEDORES -->
 <div id="pane-vendedores" class="tab-pane">
   <div class="vendor-grid" id="vendorGrid"></div>
 </div>
@@ -460,30 +476,14 @@ function renderAlertas(){
   document.getElementById('alertas-content').innerHTML=html;
     }
 async function renderHotLeads(){
-  document.getElementById('list-fechamento').innerHTML='<div class="loading-state"><div class="spinner"></div>Buscando leads em Fechamento...</div>';
-  document.getElementById('list-intencao').innerHTML='<div class="loading-state"><div class="spinner"></div>Analisando mensagens...</div>';
+  const panel = document.getElementById('hotListPanel');
+  if(panel) panel.innerHTML='<div class="loading-state"><div class="spinner"></div>Buscando leads quentes...</div>';
 
-  // Section 1: Fechamento stage from CRM
+  // Section 1: Fechamento from CRM
   const fechamentoBiz=allBiz.filter(b=>{
     const sn=((b.stage&&(b.stage.name||b.stage.externalId||''))||'').toUpperCase();
     return sn.includes('FECHAMENTO');
   });
-  document.getElementById('cnt-fechamento').textContent=fechamentoBiz.length;
-  if(!fechamentoBiz.length){
-    document.getElementById('list-fechamento').innerHTML='<div class="empty-state"><div class="empty-icon">&#8987;</div><div class="empty-text">Nenhum lead em fechamento nas ultimas 24h</div></div>';
-  } else {
-    let html='';
-    fechamentoBiz.forEach(b=>{
-      const name=(b.lead&&b.lead.name)||b.name||'Lead';
-      const att=(b.attendant&&b.attendant.name)||'Sem vendedor';
-      const since=b.stageUpdatedAt||b.updatedAt||b.createdAt;
-      html+='<div class="lead-card lc-red">';
-      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
-      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
-      html+='</div>';
-    });
-    document.getElementById('list-fechamento').innerHTML=html;
-  }
 
   // Section 2: Purchase intent from messages
   const results=[];
@@ -513,16 +513,41 @@ async function renderHotLeads(){
     }));
   }
   results.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
-  document.getElementById('cnt-intencao').textContent=results.length;
-  if(!results.length){
-    document.getElementById('list-intencao').innerHTML='<div class="empty-state"><div class="empty-icon">&#128270;</div><div class="empty-text">Nenhuma intencao de compra detectada nas ultimas 24h</div></div>';
+
+  // Update counters
+  const cntF=document.getElementById('cnt-fechamento');if(cntF)cntF.textContent=fechamentoBiz.length;
+  const cntI=document.getElementById('cnt-intencao');if(cntI)cntI.textContent=results.length;
+
+  // Build the list panel HTML
+  let html='';
+
+  // Section 1
+  html+='<div class="hot-section-header" style="color:var(--red)">&#128680; ALERTA DE FECHAMENTO <span class="section-badge">'+fechamentoBiz.length+'</span></div>';
+  if(!fechamentoBiz.length){
+    html+='<div class="empty-state"><div class="empty-icon">&#8987;</div><div class="empty-text">Nenhum lead em fechamento nas ultimas 24h</div></div>';
   } else {
-    let html='';
+    fechamentoBiz.forEach(b=>{
+      const name=(b.lead&&b.lead.name)||b.name||'Lead';
+      const att=(b.attendant&&b.attendant.name)||'Sem vendedor';
+      const since=b.stageUpdatedAt||b.updatedAt||b.createdAt;
+      const convId=b.conversationId||b.lead&&b.lead.conversationId||'';
+      html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" onclick="openHotChat(this)">';
+      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
+      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
+      html+='</div>';
+    });
+  }
+
+  // Section 2
+  html+='<div class="hot-section-header" style="color:var(--yellow);margin-top:0">&#9889; INTENCAO DE COMPRA <span class="section-badge">'+results.length+'</span></div>';
+  if(!results.length){
+    html+='<div class="empty-state"><div class="empty-icon">&#128270;</div><div class="empty-text">Nenhuma intencao de compra nas ultimas 24h</div></div>';
+  } else {
     results.forEach(r=>{
       const name=(r.c.contact&&r.c.contact.name)||'Lead';
       const phone=(r.c.contact&&(r.c.contact.phone||r.c.contact.phoneNumber))||'';
       const id=r.c.id;
-      html+='<div class="lead-card lc-yellow" data-id="'+escH(id)+'" onclick="openConvFromHot(this.dataset.id)">';
+      html+='<div class="hot-lead-card hlc-yellow" data-convid="'+escH(id)+'" data-name="'+escH(name)+'" data-att="'+escH(r.att)+'" data-ts="'+escH(r.ts)+'" onclick="openHotChat(this)">';
       html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(r.ts)+'</div></div>';
       html+='<div class="lc-msg">'+escH(r.msg)+'</div>';
       html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(r.att)+'</span>';
@@ -530,9 +555,80 @@ async function renderHotLeads(){
       html+='<span class="lc-kw">&#128737; '+escH(r.kw)+'</span></div>';
       html+='</div>';
     });
-    document.getElementById('list-intencao').innerHTML=html;
   }
+
+  if(panel) panel.innerHTML=html;
+}
+
+function openHotChat(el){
+  // Highlight selected
+  document.querySelectorAll('.hot-lead-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  const convId=el.dataset.convid;
+  const name=el.dataset.name||'Lead';
+  const att=el.dataset.att||'';
+  const ts=el.dataset.ts||'';
+  // Update header
+  document.getElementById('hotChatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(att)+(ts?' &bull; '+timeAgo(ts):'')+'</div>';
+  // Load messages into hotChatMessages
+  if(!convId){
+    document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Conversa nao encontrada</div></div>';
+    return;
+  }
+  loadHotMessages(convId);
+}
+
+async function loadHotMessages(convId){
+  const conv=allConvs.find(c=>c.id===convId);
+  document.getElementById('hotChatMessages').innerHTML='<div class="loading-state"><div class="spinner"></div>Carregando mensagens...</div>';
+  try{
+    let allMsgs=[],skip=0;
+    while(true){
+      const d=await apiFetch(MSG+'/conversations/'+convId+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
+      const msgs=d.messages||[];
+      if(!msgs.length)break;
+      allMsgs=allMsgs.concat(msgs);
+      if(msgs.length<50)break;
+      skip+=50;
+      if(allMsgs.length>300)break;
     }
+    if(!allMsgs.length){document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Sem mensagens</div></div>';return;}
+    const validMsgs=allMsgs.filter(m=>{
+      const hasText=m.body&&m.body.trim().length>0;
+      const hasT=m.interpretedContent&&!m.interpretedContentPending;
+      const isMedia=m.type&&['audio','image','video'].includes(m.type);
+      const isMimeAudio=m.mimeType&&m.mimeType.includes('audio');
+      return hasText||hasT||isMedia||isMimeAudio;
+    });
+    let html='';
+    validMsgs.forEach(m=>{
+      const isReceived=m.received===true;
+      const msgAttName=(m.attendant&&m.attendant.name)||'';
+      const isVendor=!isReceived&&!!msgAttName;
+      let rowCls,senderName,senderColor;
+      if(isReceived){rowCls='from-lead';senderName=(conv&&conv.contact&&conv.contact.name)||'Lead';senderColor='#60a5fa';}
+      else if(isVendor){rowCls='from-vendor';senderName=msgAttName;senderColor='#c084fc';}
+      else{rowCls='from-bot';senderName='Dr. Roberto (Bot)';senderColor='#4ade80';}
+      const body=m.body||'';
+      const hasT=m.interpretedContent&&!m.interpretedContentPending;
+      const isAudio=m.type==='audio'||(m.mimeType&&m.mimeType.includes('audio'));
+      const isImg=m.type==='image'||(m.mimeType&&m.mimeType.includes('image'));
+      const isVid=m.type==='video'||(m.mimeType&&m.mimeType.includes('video'));
+      let content='';
+      if(isAudio){content='<div class="msg-audio-label">&#127911; Audio</div>';if(hasT)content+='<div class="msg-transcription"><div class="msg-transcription-lbl">TRANSCRICAO</div>'+escH(m.interpretedContent)+'</div>';else if(m.interpretedContentPending)content+='<div class="msg-transcription" style="color:var(--text3)">Transcrevendo...</div>';}
+      else if(isImg){content='<div class="msg-audio-label">&#128247; Imagem</div>';}
+      else if(isVid){content='<div class="msg-audio-label">&#127916; Video</div>';}
+      else{content=escH(body);}
+      const t=m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      html+='<div class="msg-row '+rowCls+'"><div class="msg-sender-name" style="color:'+senderColor+'">'+escH(senderName)+'</div><div class="msg-bubble">'+content+'</div><div class="msg-time-row">'+t+'</div></div>';
+    });
+    document.getElementById('hotChatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
+    const panel=document.getElementById('hotChatMessages');
+    panel.scrollTop=panel.scrollHeight;
+  }catch(e){
+    document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
+  }
+}
 function renderVendedores(){
   const stats={};
   VENDOR_RANKS.forEach(v=>{stats[v]={name:v,biz:0,convs:0,pending:0,noBiz:0};});
@@ -609,15 +705,6 @@ function renderConvList(){
     html+='</div></div>';
   });
   document.getElementById('convList').innerHTML=html;
-}
-
-function openConvFromHot(id){
-  showTab('conversas',document.querySelectorAll('.tab-btn')[3]);
-  setTimeout(()=>{
-    const el=document.querySelector('[data-id="'+id+'"]');
-    if(el){el.classList.add('selected');loadMessages(id,el);}
-    else{loadMessages(id,null);}
-  },200);
 }
 
 function openConv(el){
