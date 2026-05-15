@@ -537,6 +537,13 @@ async function renderHotLeads(){
       const convId=matchedConv?matchedConv.id:'';
       html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" data-phone="'+escH(phone)+'" onclick="openHotChat(this)">';
       html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
+      const lastMsg=(matchedConv&&matchedConv.lastMessage&&matchedConv.lastMessage.body)||'';
+      if(lastMsg)html+='<div class="lc-msg">'+escH(lastMsg.substring(0,90))+'</div>';
+      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span>';
+      const ph2=(matchedConv&&matchedConv.contact&&(matchedConv.contact.phoneNumber||matchedConv.contact.phone))||phone;
+      if(ph2)html+='<span style="font-size:11px;color:var(--text2)">'+escH(ph2)+'</span>';
+      html+='<span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
+      html+='</div>';
       html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
       html+='</div>';
     });
@@ -629,7 +636,7 @@ async function loadHotMessages(convId){
     });
     document.getElementById('hotChatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
     const panel=document.getElementById('hotChatMessages');
-    panel.scrollTop=panel.scrollHeight;
+    requestAnimationFrame(()=>{requestAnimationFrame(()=>{panel.scrollTop=panel.scrollHeight;});});
   }catch(e){
     document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
   }
@@ -790,7 +797,7 @@ async function loadMessages(convId,elRef){
     });
     document.getElementById('chatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
     const panel=document.getElementById('chatMessages');
-    panel.scrollTop=panel.scrollHeight;
+    requestAnimationFrame(()=>{requestAnimationFrame(()=>{panel.scrollTop=panel.scrollHeight;});});
   }catch(e){
     document.getElementById('chatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
   }
