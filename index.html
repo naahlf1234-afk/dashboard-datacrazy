@@ -163,6 +163,7 @@ async function openChat(el){
   const ms=document.getElementById('chat-msgs');ms.innerHTML='<div class="ml">Carregando conversa...</div>';
   try{
     if(!cid&&ph){const mc=_cv.find(c=>nph(c.contact?.phoneNumber||c.contact?.contactId||'')===ph);if(mc)cid=mc.id}
+    if(!cid&&ph){try{const fd=await apiFetch(MSG,'/conversations',{limit:1000});const fall=fd.data||fd.conversations||fd||[];const fm=fall.find(c=>nph(c.contact?.phoneNumber||c.contact?.contactId||'')===ph);if(fm)cid=fm.id}catch(e){}}
     if(!cid){ms.innerHTML='<div class="ml">Conversa não encontrada.</div>';return}
     const md=await apiFetch(MSG,'/conversations/'+cid+'/messages',{limit:100});
     const arr=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal&&cleanTxt(getMsgText(m)));
