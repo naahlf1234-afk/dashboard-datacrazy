@@ -530,7 +530,11 @@ async function renderHotLeads(){
       const name=(b.lead&&b.lead.name)||b.name||'Lead';
       const att=(b.attendant&&b.attendant.name)||'Sem vendedor';
       const since=b.stageUpdatedAt||b.updatedAt||b.createdAt;
-      const convId=b.conversationId||b.lead&&b.lead.conversationId||'';
+      // Resolve convId by phone match against allConvs
+      const phone=(b.lead&&b.lead.phone)||'';
+      const normPhone=phone.replace(/\D/g,'');
+      const matchedConv=normPhone?allConvs.find(c=>{const cp=((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'').replace(/\D/g,'');return cp===normPhone||cp.endsWith(normPhone)||normPhone.endsWith(cp);}):null;
+      const convId=matchedConv?matchedConv.id:'';
       html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" onclick="openHotChat(this)">';
       html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
       html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
