@@ -4,180 +4,429 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Datacrazy</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root { --bg: #0f1117; --card: #1a1d27; --border: #2a2d3e; --accent: #6366f1; --text: #e2e8f0; --muted: #8892a4; --white: #fff; }
-body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; }
-.topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.badge { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-.btn { background: #20243a; border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-.btn:hover { border-color: var(--accent); color: var(--accent); }
-.container { max-width: 1400px; margin: 0 auto; padding: 24px 28px; }
-.sec { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
-.kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; transition: .2s; }
-.kpi:hover { transform: translateY(-2px); border-color: var(--accent); }
-.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-.kpi.blue::before { background: linear-gradient(90deg,#3b82f6,#6366f1); }
-.kpi.green::before { background: linear-gradient(90deg,#22c55e,#10b981); }
-.kpi.red::before { background: linear-gradient(90deg,#ef4444,#f97316); }
-.kpi.yellow::before { background: linear-gradient(90deg,#f59e0b,#eab308); }
-.kpi-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-.kpi-value { font-size: 28px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
-.kpi-sub { font-size: 12px; color: var(--muted); }
-.kpi-icon { position: absolute; right: 18px; top: 18px; font-size: 24px; opacity: .15; }
-.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
-.chart-card.full { grid-column: 1/-1; }
-.chart-title { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
-.chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-canvas { max-height: 260px; }
-.funnel { display: flex; flex-direction: column; gap: 8px; }
-.fi { display: flex; align-items: center; gap: 12px; }
-.fl { font-size: 12px; color: var(--muted); width: 150px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fw { flex: 1; background: var(--bg); border-radius: 6px; overflow: hidden; height: 36px; }
-.fb { height: 100%; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; font-weight: 600; color: #fff; min-width: 40px; }
-.fc { font-size: 13px; font-weight: 700; color: var(--white); width: 50px; }
-.tbl { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 28px; overflow: hidden; }
-.th { padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-.th h3 { font-size: 15px; font-weight: 600; }
-.search { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 13px; width: 220px; outline: none; }
-.search:focus { border-color: var(--accent); }
-table { width: 100%; border-collapse: collapse; }
-th { padding: 12px 22px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; background: var(--bg); }
-td { padding: 14px 22px; font-size: 13px; border-top: 1px solid var(--border); }
-tr:hover td { background: rgba(99,102,241,.05); }
-.lname { font-weight: 600; color: var(--white); }
-.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
-.av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.att-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap: 12px; }
-.att { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; transition: .2s; }
-.att:hover { border-color: var(--accent); transform: translateY(-2px); }
-.att-av { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #fff; margin: 0 auto 10px; }
-.att-name { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
-.att-count { font-size: 22px; font-weight: 700; color: var(--accent); }
-.att-lbl { font-size: 11px; color: var(--muted); }
-.sbar { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; margin-bottom: 28px; }
-.si { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-.sd { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.st { font-size: 11px; color: var(--muted); }
-.sn { font-size: 15px; font-weight: 700; color: var(--white); }
-.footer { text-align: center; padding: 20px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
-.spin { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width:900px) { .kpi-grid,.charts { grid-template-columns: 1fr 1fr; } .chart-card.full { grid-column: 1; } .sbar { grid-template-columns: repeat(3,1fr); } }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#0f1117; color:#e2e8f0; min-height:100vh; }
+  .header { background:linear-gradient(135deg,#1a1f2e,#252b3b); padding:20px 30px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2d3748; }
+  .header h1 { font-size:1.5rem; font-weight:700; color:#63b3ed; }
+  .header .subtitle { font-size:0.8rem; color:#718096; margin-top:4px; }
+  .btn-refresh { background:#3182ce; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:all 0.2s; }
+  .btn-refresh:hover { background:#2b6cb0; }
+  .btn-refresh:disabled { opacity:0.5; cursor:not-allowed; }
+  .container { padding:24px 30px; }
+  .section-title { font-size:1.1rem; font-weight:600; color:#90cdf4; margin:24px 0 14px; display:flex; align-items:center; gap:8px; }
+  .section-title::before { content:''; width:4px; height:20px; background:#3182ce; border-radius:2px; display:inline-block; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
+  .kpi-card { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; padding:18px; text-align:center; transition:transform 0.2s; }
+  .kpi-card:hover { transform:translateY(-2px); border-color:#3182ce; }
+  .kpi-value { font-size:2rem; font-weight:700; color:#63b3ed; }
+  .kpi-label { font-size:0.75rem; color:#718096; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .charts-grid { display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-top:10px; }
+  .chart-card { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; padding:20px; }
+  .chart-card h3 { font-size:0.9rem; color:#90cdf4; margin-bottom:16px; }
+  .chart-wrapper { position:relative; height:240px; }
+  .attendants-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-top:10px; }
+  .att-card { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; padding:16px; }
+  .att-name { font-weight:600; color:#e2e8f0; margin-bottom:10px; }
+  .att-stat { display:flex; justify-content:space-between; font-size:0.82rem; color:#718096; margin-top:4px; }
+  .att-stat span:last-child { color:#63b3ed; font-weight:600; }
+  .funnel { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+  .funnel-item { display:flex; align-items:center; gap:10px; }
+  .funnel-label { width:180px; font-size:0.8rem; color:#a0aec0; text-align:right; }
+  .funnel-bar-wrap { flex:1; background:#2d3748; border-radius:4px; height:24px; overflow:hidden; }
+  .funnel-bar { height:100%; background:linear-gradient(90deg,#3182ce,#63b3ed); border-radius:4px; transition:width 0.6s; display:flex; align-items:center; padding-left:8px; }
+  .funnel-bar span { font-size:0.75rem; color:#fff; white-space:nowrap; }
+  .leads-table-wrap { overflow-x:auto; margin-top:10px; }
+  table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+  th { background:#252b3b; color:#90cdf4; padding:10px 14px; text-align:left; font-weight:600; }
+  td { padding:9px 14px; border-bottom:1px solid #2d3748; color:#cbd5e0; }
+  tr:hover td { background:#1e2435; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:600; }
+  .badge-opened { background:#2a4365; color:#63b3ed; }
+  .badge-waiting { background:#744210; color:#f6ad55; }
+  .badge-automation { background:#276749; color:#68d391; }
+  .badge-unstarted { background:#44337a; color:#b794f4; }
+  .badge-won { background:#1c4532; color:#68d391; }
+  .badge-lost { background:#742a2a; color:#fc8181; }
+  .badge-open { background:#1a365d; color:#90cdf4; }
+  .conv-grid { display:grid; grid-template-columns:1fr 2fr; gap:20px; margin-top:10px; }
+  .conv-list { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; overflow:hidden; max-height:480px; overflow-y:auto; }
+  .conv-list::-webkit-scrollbar { width:4px; }
+  .conv-list::-webkit-scrollbar-thumb { background:#3182ce; border-radius:2px; }
+  .conv-item { padding:14px 16px; border-bottom:1px solid #2d3748; cursor:pointer; transition:background 0.15s; }
+  .conv-item:hover, .conv-item.active { background:#252b3b; }
+  .conv-item-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
+  .conv-name { font-weight:600; color:#e2e8f0; font-size:0.88rem; }
+  .conv-time { font-size:0.72rem; color:#718096; }
+  .conv-preview { font-size:0.8rem; color:#718096; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+  .conv-meta { display:flex; align-items:center; gap:6px; margin-top:6px; }
+  .conv-att { font-size:0.72rem; color:#90cdf4; background:#1a365d; padding:1px 6px; border-radius:8px; }
+  .conv-detail { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; padding:20px; display:flex; flex-direction:column; }
+  .conv-detail h3 { font-size:1rem; color:#e2e8f0; margin-bottom:4px; }
+  .conv-detail .att-info { font-size:0.82rem; color:#718096; margin-bottom:16px; }
+  .messages-area { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; max-height:360px; padding-right:4px; }
+  .messages-area::-webkit-scrollbar { width:4px; }
+  .messages-area::-webkit-scrollbar-thumb { background:#3182ce; border-radius:2px; }
+  .msg-bubble { max-width:80%; padding:10px 14px; border-radius:12px; font-size:0.84rem; line-height:1.4; }
+  .msg-in { background:#252b3b; color:#e2e8f0; align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-out { background:#2a4365; color:#bee3f8; align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-time { font-size:0.68rem; color:#718096; margin-top:4px; }
+  .msg-loading { color:#718096; font-size:0.85rem; text-align:center; padding:20px; }
+  .conv-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:10px; }
+  .status-tag { display:inline-flex; align-items:center; gap:4px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot-opened { background:#63b3ed; }
+  .dot-waiting { background:#f6ad55; }
+  .dot-automation { background:#68d391; }
+  .dot-unstarted { background:#b794f4; }
+  .loading-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center; }
+  .loading-overlay.show { display:flex; }
+  .spinner { width:48px; height:48px; border:4px solid #2d3748; border-top-color:#3182ce; border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .conv-att-chart { background:#1a1f2e; border:1px solid #2d3748; border-radius:12px; padding:20px; }
+  .conv-att-chart h3 { font-size:0.9rem; color:#90cdf4; margin-bottom:16px; }
+  .tabs { display:flex; gap:0; border-bottom:1px solid #2d3748; margin-bottom:24px; }
+  .tab-btn { padding:12px 24px; background:none; border:none; color:#718096; cursor:pointer; font-size:0.9rem; border-bottom:2px solid transparent; transition:all 0.2s; }
+  .tab-btn:hover { color:#e2e8f0; }
+  .tab-btn.active { color:#63b3ed; border-bottom-color:#3182ce; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="logo">⚡ Datacrazy Dashboard</div>
-  <div style="font-size:13px;color:var(--muted)" id="info">LN Marketing de Vendas Ltda</div>
-  <div style="display:flex;gap:12px;align-items:center"><span class="badge">Essential</span><button class="btn" onclick="load()">↻ Atualizar</button></div>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+<div class="header">
+  <div>
+    <h1>📊 Dashboard Datacrazy</h1>
+    <div class="subtitle">LN Marketing de Vendas Ltda — Plano Essential</div>
+  </div>
+  <button class="btn-refresh" onclick="loadAll()" id="btnRefresh">🔄 Atualizar</button>
 </div>
 <div class="container">
-<div class="sbar">
-  <div class="si"><div class="sd" style="background:#6366f1"></div><div><div class="sn" id="s1">–</div><div class="st">Total Leads</div></div></div>
-  <div class="si"><div class="sd" style="background:#3b82f6"></div><div><div class="sn" id="s2">–</div><div class="st">Total Negócios</div></div></div>
-  <div class="si"><div class="sd" style="background:#f59e0b"></div><div><div class="sn" id="s3">–</div><div class="st">Em Aberto</div></div></div>
-  <div class="si"><div class="sd" style="background:#22c55e"></div><div><div class="sn" id="s4">–</div><div class="st">Ganhos</div></div></div>
-  <div class="si"><div class="sd" style="background:#ef4444"></div><div><div class="sn" id="s5">–</div><div class="st">Perdidos</div></div></div>
-  <div class="si"><div class="sd" style="background:#10b981"></div><div><div class="sn" id="s6">–</div><div class="st">Atendentes</div></div></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('tab-crm')">📈 CRM & Negócios</button>
+    <button class="tab-btn" onclick="showTab('tab-conv')">💬 Conversas</button>
+  </div>
+
+  <!-- TAB CRM -->
+  <div class="tab-content active" id="tab-crm">
+    <div class="section-title">Visão Geral</div>
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card"><div class="kpi-value" id="kLeads">-</div><div class="kpi-label">Total Leads</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kNeg">-</div><div class="kpi-label">Negócios</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kGanhos">-</div><div class="kpi-label">Ganhos</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kPerdidos">-</div><div class="kpi-label">Perdidos</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="kAbertos">-</div><div class="kpi-label">Em Aberto</div></div>
+    </div>
+
+    <div class="section-title">Gráficos</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>📅 Negócios por Dia (últimos 30 dias)</h3>
+        <div class="chart-wrapper"><canvas id="chartDias"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>👤 Negócios por Atendente</h3>
+        <div class="chart-wrapper"><canvas id="chartAtt"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Funil de Etapas</div>
+    <div class="funnel" id="funnelWrap"></div>
+
+    <div class="section-title">Atendentes</div>
+    <div class="attendants-grid" id="attGrid"></div>
+
+    <div class="section-title">Leads Recentes</div>
+    <div class="leads-table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Atendente</th><th>Origem</th><th>Criado em</th></tr></thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB CONVERSAS -->
+  <div class="tab-content" id="tab-conv">
+    <div class="section-title">Status das Conversas</div>
+    <div class="conv-kpi-grid" id="convKpi">
+      <div class="kpi-card"><div class="kpi-value" id="cTotal">-</div><div class="kpi-label">Total</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cOpened" style="color:#63b3ed">-</div><div class="kpi-label"><span class="status-dot dot-opened"></span> Abertas</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cWaiting" style="color:#f6ad55">-</div><div class="kpi-label"><span class="status-dot dot-waiting"></span> Aguardando</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cAuto" style="color:#68d391">-</div><div class="kpi-label"><span class="status-dot dot-automation"></span> Automação</div></div>
+    </div>
+
+    <div class="section-title">Conversas por Atendente</div>
+    <div class="conv-att-chart">
+      <h3>📊 Distribuição por Atendente</h3>
+      <div class="chart-wrapper"><canvas id="chartConvAtt"></canvas></div>
+    </div>
+
+    <div class="section-title">Conversas Recentes</div>
+    <div class="conv-grid">
+      <div class="conv-list" id="convList">
+        <div style="padding:20px;color:#718096;text-align:center;">Carregando conversas...</div>
+      </div>
+      <div class="conv-detail" id="convDetail">
+        <div style="color:#718096;text-align:center;padding:40px 20px;">
+          <div style="font-size:2rem;margin-bottom:12px;">💬</div>
+          <div>Selecione uma conversa para ver as mensagens</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="sec">📊 Indicadores Principais</div>
-<div class="kpi-grid">
-  <div class="kpi blue"><div class="kpi-icon">👥</div><div class="kpi-label">Total de Leads</div><div class="kpi-value" id="k1">–</div><div class="kpi-sub">Base total</div></div>
-  <div class="kpi yellow"><div class="kpi-icon">💼</div><div class="kpi-label">Negócios Abertos</div><div class="kpi-value" id="k2">–</div><div class="kpi-sub">Em andamento</div></div>
-  <div class="kpi green"><div class="kpi-icon">✅</div><div class="kpi-label">Negócios Ganhos</div><div class="kpi-value" id="k3">–</div><div class="kpi-sub">Conversões</div></div>
-  <div class="kpi red"><div class="kpi-icon">❌</div><div class="kpi-label">Negócios Perdidos</div><div class="kpi-value" id="k4">–</div><div class="kpi-sub" id="k4s">–</div></div>
-</div>
-<div class="sec">📈 Gráficos</div>
-<div class="charts">
-  <div class="chart-card"><div class="chart-title">Negócios por Dia</div><div class="chart-sub">Últimos 14 dias</div><canvas id="cDays"></canvas></div>
-  <div class="chart-card"><div class="chart-title">Por Atendente</div><div class="chart-sub">Negócios atribuídos</div><canvas id="cAtt"></canvas></div>
-  <div class="chart-card full"><div class="chart-title">Funil de Vendas — Pipeline API</div><div class="chart-sub">Negócios por etapa</div><div class="funnel" id="funnel"><div style="color:var(--muted);text-align:center;padding:20px"><span class="spin"></span></div></div></div>
-</div>
-<div class="sec">👤 Atendentes</div>
-<div class="chart-card" style="margin-bottom:28px;padding:22px"><div class="att-grid" id="atts"><div style="color:var(--muted);text-align:center"><span class="spin"></span></div></div></div>
-<div class="sec">📋 Leads Recentes</div>
-<div class="tbl">
-  <div class="th"><h3>Últimos Leads Cadastrados</h3><input class="search" type="text" placeholder="🔍 Pesquisar..." oninput="filter(this.value)"></div>
-  <div style="overflow-x:auto"><table><thead><tr><th>Lead</th><th>Telefone</th><th>Tag</th><th>Negócios</th><th>Cadastrado</th></tr></thead><tbody id="tbody"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)"><span class="spin"></span></td></tr></tbody></table></div>
-</div>
-</div>
-<div class="footer">Dashboard Datacrazy — LN Marketing de Vendas Ltda • Atualizado: <span id="upd">–</span></div>
+
 <script>
-const TOKEN='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
-const BASE='https://crm.g1.datacrazy.io/api/crm';
-const H={'Authorization':'Bearer '+TOKEN};
-const CLR=['#6366f1','#3b82f6','#22c55e','#f59e0b','#ef4444','#8b5cf6','#10b981','#f97316','#ec4899'];
-const SC={'APRESENTAÇÃO':'#6B7280','SONDAGEM':'#3B82F6','GERAÇÃO DE VALOR':'#6366F1','NEGOCIAÇÃO':'#84CC16','FECHAMENTO':'#F59E0B','FOLLOW-UP':'#FDBA74','DESQUALIFICADO':'#EF4444','AGENDADO':'#10B981','BASE ANTIGA':'#8B5CF6','LEAD PRA O FUTURO':'#EC4899'};
-let cD,cA,leads=[];
-const $=(id)=>document.getElementById(id);
-const fmt=(n)=>Number(n||0).toLocaleString('pt-BR');
-const fd=(d)=>{if(!d)return '–';const dt=new Date(d);return dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});};
-const fp=(p)=>{if(!p)return '–';const n=String(p).replace(/\D/g,'');if(n.length>=12)return '+'+n.slice(0,2)+' ('+n.slice(2,4)+') '+n.slice(4,9)+'-'+n.slice(9);return p;};
-async function api(path){const r=await fetch(BASE+path,{headers:H});if(!r.ok)throw new Error(r.status);return r.json();}
-async function load(){
-  $('info').textContent='Carregando...';
-  try{
-    const[lR,bR,aR]=await Promise.all([api('/leads?take=20&skip=0&order[createdAt]=desc'),api('/businesses?take=200&skip=0&order[createdAt]=desc'),api('/attendants')]);
-    const tl=lR.count||0,tb=bR.count||0;
-    let w=0,ls=0,op=0;
-    const bS={},bA={},bD={};
-    bR.data.forEach(b=>{
-      if(b.status==='won')w++;else if(b.status==='lost')ls++;else op++;
-      const sn=b.stage?.name||'Outros';bS[sn]=(bS[sn]||0)+1;
-      const an=b.attendant?.name?.split(' ')[0]||'?';bA[an]=(bA[an]||0)+1;
-      const dy=b.createdAt?.slice(0,10);if(dy)bD[dy]=(bD[dy]||0)+1;
-    });
-    $('k1').textContent=fmt(tl);$('k2').textContent=fmt(op);$('k3').textContent=fmt(w);$('k4').textContent=fmt(ls);
-    $('k4s').textContent='Taxa: '+(tb?Math.round(ls/tb*100):0)+'%';
-    $('s1').textContent=fmt(tl);$('s2').textContent=fmt(tb);$('s3').textContent=fmt(op);$('s4').textContent=fmt(w);$('s5').textContent=fmt(ls);$('s6').textContent=fmt(aR.count);
-    const days=Object.keys(bD).sort().slice(-14);
-    const dl=days.map(d=>{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});});
-    if(cD)cD.destroy();
-    cD=new Chart($('cDays'),{type:'bar',data:{labels:dl,datasets:[{label:'Negócios',data:days.map(d=>bD[d]),backgroundColor:'rgba(99,102,241,0.7)',borderColor:'#6366f1',borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}}}}});
-    const an=Object.keys(bA);
-    if(cA)cA.destroy();
-    cA=new Chart($('cAtt'),{type:'doughnut',data:{labels:an,datasets:[{data:an.map(n=>bA[n]),backgroundColor:CLR,borderColor:'#1a1d27',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'#e2e8f0',font:{size:12},padding:12}}}}});
-    const fc=$('funnel');fc.innerHTML='';
-    const mx=Math.max(...Object.values(bS),1);
-    Object.entries(bS).sort((a,b)=>b[1]-a[1]).forEach(([nm,cnt])=>{
-      const pct=Math.max(8,Math.round(cnt/mx*100)),col=SC[nm]||'#6366f1';
-      const el=document.createElement('div');el.className='fi';
-      el.innerHTML='<div class="fl">'+nm+'</div><div class="fw"><div class="fb" style="width:'+pct+'%;background:'+col+'">'+cnt+'</div></div><div class="fc">'+cnt+'</div>';
-      fc.appendChild(el);
-    });
-    const ag=$('atts');ag.innerHTML='';
-    aR.data.forEach((a,i)=>{
-      const fn=a.name?.split(' ')[0]||'?',cnt=bA[fn]||0;
-      const ini=a.name?.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase()||'?';
-      const el=document.createElement('div');el.className='att';
-      el.innerHTML='<div class="att-av" style="background:linear-gradient(135deg,'+CLR[i%CLR.length]+','+CLR[(i+3)%CLR.length]+')">'+ini+'</div><div class="att-name">'+a.name?.split(' ').slice(0,2).join(' ')+'</div><div class="att-count">'+cnt+'</div><div class="att-lbl">negócios</div>';
-      ag.appendChild(el);
-    });
-    leads=lR.data;renderTable(leads);
-    $('upd').textContent=new Date().toLocaleTimeString('pt-BR');
-    $('info').textContent='LN Marketing de Vendas Ltda — Pipeline: API';
-  }catch(e){console.error(e);$('info').textContent='Erro: '+e.message;}
+const API = 'dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
+const CRM = 'https://crm.g1.datacrazy.io/api/crm';
+const MSG = 'https://messaging.g1.datacrazy.io/api/messaging';
+const PIPE_ID = '827986b4-56a9-4074-a54e-440b6b7be6a5';
+const h = { 'Authorization': 'Bearer ' + API, 'Content-Type': 'application/json' };
+let chartDias, chartAtt, chartConvAtt;
+
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
 }
-function renderTable(data){
-  const tb=$('tbody');
-  if(!data.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Nenhum lead</td></tr>';return;}
-  tb.innerHTML=data.map(l=>{
-    const tg=l.tags?.[0];
-    const th=tg?'<span class="tag" style="background:'+tg.color+'22;color:'+tg.color+';border:1px solid '+tg.color+'44">'+tg.name+'</span>':'<span style="color:var(--muted)">–</span>';
-    const ini=(l.name||'?').split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
-    const cols=['#6366f1','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#10b981'];
-    const col=cols[ini.charCodeAt(0)%cols.length];
-    return '<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:'+col+'">'+ini+'</div><div><div class="lname">'+(l.name||'–')+'</div></div></div></td><td style="color:var(--muted);font-size:12px">'+fp(l.rawPhone)+'</td><td>'+th+'</td><td style="color:#f59e0b;font-weight:600">'+(l.metrics?.openBusinessesCount||0)+'</td><td style="color:var(--muted);font-size:12px">'+fd(l.createdAt)+'</td></tr>';
+
+function fmtDate(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function timeAgo(d) {
+  if (!d) return '';
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + 'min';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h';
+  return Math.floor(hrs / 24) + 'd';
+}
+
+async function api(url) {
+  const r = await fetch(url, { headers: h });
+  return r.json();
+}
+
+async function loadCRM() {
+  const [leadsR, bizR, attR] = await Promise.all([
+    api(CRM + '/leads?take=10&order[createdAt]=desc'),
+    api(CRM + '/businesses?take=1000&pipelineId=' + PIPE_ID),
+    api(CRM + '/attendants?take=100')
+  ]);
+
+  const leads = leadsR.leads || leadsR.data || leadsR || [];
+  const totalLeads = leadsR.meta?.total || leadsR.total || leads.length;
+  const bizAll = bizR.businesses || bizR.data || bizR || [];
+  const atts = attR.attendants || attR.data || attR || [];
+
+  document.getElementById('kLeads').textContent = totalLeads.toLocaleString('pt-BR');
+  document.getElementById('kNeg').textContent = bizAll.length.toLocaleString('pt-BR');
+
+  let ganhos = 0, perdidos = 0;
+  const porAtt = {}, porDia = {}, porStage = {};
+  const hoje = new Date();
+
+  bizAll.forEach(b => {
+    if (b.won) ganhos++;
+    if (b.lost) perdidos++;
+    const an = b.attendant?.name || b.attendants?.[0]?.name || 'Sem atendente';
+    porAtt[an] = (porAtt[an] || 0) + 1;
+    const s = b.stage?.name || b.stageName || 'Sem etapa';
+    porStage[s] = (porStage[s] || 0) + 1;
+    if (b.createdAt) {
+      const d = new Date(b.createdAt);
+      const diff = Math.floor((hoje - d) / 86400000);
+      if (diff <= 30) {
+        const key = d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+        porDia[key] = (porDia[key] || 0) + 1;
+      }
+    }
+  });
+
+  document.getElementById('kGanhos').textContent = ganhos;
+  document.getElementById('kPerdidos').textContent = perdidos;
+  document.getElementById('kAbertos').textContent = (bizAll.length - ganhos - perdidos).toLocaleString('pt-BR');
+
+  // Chart dias
+  const diasKeys = Object.keys(porDia).sort((a,b) => {
+    const [da,ma] = a.split('/'); const [db,mb] = b.split('/');
+    return new Date(2024, parseInt(ma)-1, parseInt(da)) - new Date(2024, parseInt(mb)-1, parseInt(db));
+  }).slice(-20);
+  const diasVals = diasKeys.map(k => porDia[k]);
+
+  if (chartDias) chartDias.destroy();
+  chartDias = new Chart(document.getElementById('chartDias'), {
+    type: 'bar',
+    data: { labels: diasKeys, datasets: [{ label: 'Negócios', data: diasVals, backgroundColor: 'rgba(99,179,237,0.7)', borderColor: '#63b3ed', borderWidth: 1, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#718096', font: { size: 10 } }, grid: { color: '#2d3748' } }, y: { ticks: { color: '#718096' }, grid: { color: '#2d3748' } } } }
+  });
+
+  // Chart atendentes
+  const attKeys = Object.keys(porAtt);
+  const attVals = attKeys.map(k => porAtt[k]);
+  const colors = ['#63b3ed','#68d391','#f6ad55','#fc8181','#b794f4','#76e4f7'];
+
+  if (chartAtt) chartAtt.destroy();
+  chartAtt = new Chart(document.getElementById('chartAtt'), {
+    type: 'doughnut',
+    data: { labels: attKeys, datasets: [{ data: attVals, backgroundColor: colors, borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#a0aec0', font: { size: 11 }, padding: 12 } } } }
+  });
+
+  // Funil
+  const stageOrder = ['APRESENTAÇÃO','SONDAGEM','GERAÇÃO DE VALOR','NEGOCIAÇÃO','FECHAMENTO','FOLLOW-UP','AGENDADO','LEAD PRA O FUTURO','BASE ANTIGA','DESQUALIFICADO'];
+  const stages = stageOrder.filter(s => porStage[s]).concat(Object.keys(porStage).filter(s => !stageOrder.includes(s)));
+  const maxVal = Math.max(...stages.map(s => porStage[s] || 0));
+  const funnelHtml = stages.map(s => {
+    const v = porStage[s] || 0;
+    const pct = maxVal > 0 ? Math.round((v / maxVal) * 100) : 0;
+    return `<div class="funnel-item">
+      <div class="funnel-label">${s}</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct}%"><span>${v}</span></div></div>
+    </div>`;
   }).join('');
+  document.getElementById('funnelWrap').innerHTML = funnelHtml;
+
+  // Atendentes grid
+  const attGrid = atts.map(a => {
+    const nome = a.name || a.email || '?';
+    const negQtd = porAtt[nome] || 0;
+    return `<div class="att-card">
+      <div class="att-name">👤 ${nome}</div>
+      <div class="att-stat"><span>Negócios</span><span>${negQtd}</span></div>
+      <div class="att-stat"><span>Email</span><span style="font-size:0.75rem">${a.email || '-'}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('attGrid').innerHTML = attGrid || '<div style="color:#718096">Sem atendentes</div>';
+
+  // Leads recentes
+  const lArr = Array.isArray(leads) ? leads : leads.leads || [];
+  const leadsHtml = lArr.slice(0, 20).map(l => {
+    const nome = l.name || l.fullName || '?';
+    const tel = l.phone || l.phoneNumber || '-';
+    const email = l.email || '-';
+    const att = l.attendant?.name || l.attendants?.[0]?.name || '-';
+    const orig = l.source || l.origin || '-';
+    return `<tr><td>${nome}</td><td>${tel}</td><td>${email}</td><td>${att}</td><td>${orig}</td><td>${fmtDate(l.createdAt)}</td></tr>`;
+  }).join('');
+  document.getElementById('leadsBody').innerHTML = leadsHtml || '<tr><td colspan="6" style="color:#718096">Sem leads</td></tr>';
 }
-function filter(q){const ql=q.toLowerCase();renderTable(leads.filter(l=>(l.name||'').toLowerCase().includes(ql)||(l.rawPhone||'').includes(ql)||l.tags?.some(t=>(t.name||'').toLowerCase().includes(ql))));}
-load();
+
+async function loadConversations() {
+  const r = await api(MSG + '/conversations?take=50&order[updatedAt]=desc');
+  const convs = r.conversations || r.data || r || [];
+  const total = r.meta?.total || r.total || convs.length;
+
+  let cOpened = 0, cWaiting = 0, cAuto = 0, cUnstarted = 0;
+  const porAttConv = {};
+
+  convs.forEach(c => {
+    const status = c.statuses?.[0]?.status || c.status || '';
+    if (status === 'opened') cOpened++;
+    else if (status === 'waiting') cWaiting++;
+    else if (status === 'automation') cAuto++;
+    else if (status === 'unstarted') cUnstarted++;
+    const an = c.attendants?.[0]?.name || 'Sem atendente';
+    porAttConv[an] = (porAttConv[an] || 0) + 1;
+  });
+
+  document.getElementById('cTotal').textContent = total.toLocaleString('pt-BR');
+  document.getElementById('cOpened').textContent = cOpened;
+  document.getElementById('cWaiting').textContent = cWaiting;
+  document.getElementById('cAuto').textContent = cAuto;
+
+  // Chart atendentes de conversas
+  const ck = Object.keys(porAttConv);
+  const cv = ck.map(k => porAttConv[k]);
+  const colors = ['#63b3ed','#68d391','#f6ad55','#fc8181','#b794f4','#76e4f7'];
+  if (chartConvAtt) chartConvAtt.destroy();
+  chartConvAtt = new Chart(document.getElementById('chartConvAtt'), {
+    type: 'bar',
+    data: { labels: ck, datasets: [{ label: 'Conversas', data: cv, backgroundColor: colors.slice(0,ck.length), borderWidth: 0, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a0aec0' }, grid: { color: '#2d3748' } }, y: { ticks: { color: '#a0aec0' }, grid: { color: '#2d3748' } } } }
+  });
+
+  // Lista de conversas
+  const listHtml = convs.map(c => {
+    const id = c.id || c._id || '';
+    const nome = c.name || c.contact?.name || c.contact?.phoneNumber || '?';
+    const att = c.attendants?.[0]?.name || '';
+    const lastMsg = c.lastMessage?.body || c.lastMessage?.text || '...';
+    const status = c.statuses?.[0]?.status || c.status || 'unstarted';
+    const time = timeAgo(c.lastMessageDate || c.updatedAt);
+    const badgeClass = 'badge badge-' + status;
+    return `<div class="conv-item" onclick="loadMessages('${id}', '${nome.replace(/'/g,"\\'")}', '${att}')" id="ci-${id}">
+      <div class="conv-item-top">
+        <span class="conv-name">${nome}</span>
+        <span class="conv-time">${time}</span>
+      </div>
+      <div class="conv-preview">${lastMsg}</div>
+      <div class="conv-meta">
+        <span class="${badgeClass}">${status}</span>
+        ${att ? `<span class="conv-att">${att}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('convList').innerHTML = listHtml || '<div style="padding:20px;color:#718096">Nenhuma conversa</div>';
+}
+
+async function loadMessages(id, nome, att) {
+  document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+  const ci = document.getElementById('ci-' + id);
+  if (ci) ci.classList.add('active');
+
+  document.getElementById('convDetail').innerHTML = `
+    <h3>${nome}</h3>
+    <div class="att-info">Atendente: ${att || 'Não atribuído'}</div>
+    <div class="messages-area"><div class="msg-loading">Carregando mensagens...</div></div>
+  `;
+
+  try {
+    const r = await api(MSG + '/conversations/' + id + '/messages?take=30');
+    const msgs = r.messages || r.data || r || [];
+    const msgsHtml = msgs.slice().reverse().map(m => {
+      const body = m.body || m.text || m.content || '[mídia]';
+      const isOut = m.fromMe === true || m.direction === 'outgoing';
+      const t = fmtDate(m.timestamp || m.createdAt);
+      return `<div class="msg-bubble ${isOut ? 'msg-out' : 'msg-in'}">
+        ${body}
+        <div class="msg-time">${t}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('convDetail').innerHTML = `
+      <h3>${nome}</h3>
+      <div class="att-info">Atendente: ${att || 'Não atribuído'}</div>
+      <div class="messages-area">${msgsHtml || '<div class="msg-loading">Sem mensagens</div>'}</div>
+    `;
+    const ma = document.querySelector('.messages-area');
+    if (ma) ma.scrollTop = ma.scrollHeight;
+  } catch(e) {
+    document.getElementById('convDetail').innerHTML = `<h3>${nome}</h3><div class="att-info">Erro ao carregar mensagens</div>`;
+  }
+}
+
+async function loadAll() {
+  const btn = document.getElementById('btnRefresh');
+  btn.disabled = true;
+  btn.textContent = '⏳ Carregando...';
+  document.getElementById('loadingOverlay').classList.add('show');
+  try {
+    await Promise.all([loadCRM(), loadConversations()]);
+  } catch(e) {
+    console.error(e);
+  }
+  document.getElementById('loadingOverlay').classList.remove('show');
+  btn.disabled = false;
+  btn.textContent = '🔄 Atualizar';
+}
+
+loadAll();
 </script>
 </body>
 </html>
