@@ -2,366 +2,429 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>Dashboard LN Marketing</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg0:#080b12;--bg1:#0d1117;--bg2:#161b22;--bg3:#1c2130;--bg4:#21262d;
-  --border:#30363d;--text1:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --bg0:#07090f;--bg1:#0d1117;--bg2:#161b22;--bg3:#1c2130;--bg4:#21262d;
+  --border:#21262d;--border2:#30363d;
+  --t1:#e6edf3;--t2:#8b949e;--t3:#484f58;
   --accent:#f97316;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--purple:#a855f7;
+  --col-left:340px;
 }
-html,body{height:100%;overflow:hidden}
-body{font-family:'Inter',sans-serif;background:var(--bg0);color:var(--text1);font-size:14px;display:flex;flex-direction:column}
-/* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap}
-.hdr-left{display:flex;align-items:center;gap:10px}
-.hdr-logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000}
-.hdr-title{font-size:15px;font-weight:700;color:var(--text1)}
-.hdr-sub{font-size:11px;color:var(--text2);margin-top:1px}
-.hdr-right{display:flex;align-items:center;gap:8px}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
-.live-text{font-size:11px;color:var(--text2)}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.btn-refresh{background:var(--bg4);border:1px solid var(--border);color:var(--text1);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg0);color:var(--t1);font-size:13px}
+
+/* ── LAYOUT ROOT ─────────────────────────────── */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* ── TOPBAR ──────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 16px;background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;flex-wrap:wrap;min-height:48px
+}
+.topbar-brand{display:flex;align-items:center;gap:8px;margin-right:4px}
+.brand-logo{width:28px;height:28px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#000;flex-shrink:0}
+.brand-name{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap}
+.brand-sub{font-size:10px;color:var(--t3);white-space:nowrap}
+.metric-badges{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.mbadge{
+  display:flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:20px;
+  background:var(--bg3);border:1px solid var(--border2);
+  cursor:pointer;transition:all .15s;white-space:nowrap
+}
+.mbadge:hover{border-color:var(--t3)}
+.mbadge.active-filter{border-color:var(--accent)}
+.mbadge-num{font-size:13px;font-weight:700}
+.mbadge-num.red{color:var(--red)}
+.mbadge-num.yellow{color:var(--yellow)}
+.mbadge-num.blue{color:var(--blue)}
+.mbadge-label{font-size:10px;color:var(--t2);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.live{display:flex;align-items:center;gap:5px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.live-time{font-size:10px;color:var(--t2)}
+.btn-refresh{background:var(--bg3);border:1px solid var(--border2);color:var(--t1);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
 .btn-refresh:hover{background:var(--accent);border-color:var(--accent);color:#000}
-.btn-refresh:disabled{opacity:.5;cursor:not-allowed}
-/* ALERT CARDS */
-.alert-cards{display:flex;gap:12px;padding:16px 20px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.alert-card{flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.alert-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.alert-card.red-card::before{background:var(--red)}
-.alert-card.yellow-card::before{background:var(--yellow)}
-.alert-card.blue-card::before{background:var(--blue)}
-.alert-card.active,.alert-card:hover{border-color:var(--border);background:var(--bg3);transform:translateY(-1px)}
-.alert-card.red-card.active,.alert-card.red-card:hover{border-color:var(--red)}
-.alert-card.yellow-card.active,.alert-card.yellow-card:hover{border-color:var(--yellow)}
-.alert-card.blue-card.active,.alert-card.blue-card:hover{border-color:var(--blue)}
-.ac-number{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
-.red-card .ac-number{color:var(--red)}
-.yellow-card .ac-number{color:var(--yellow)}
-.blue-card .ac-number{color:var(--blue)}
-.ac-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
-/* TABS */
-.tabs-bar{display:flex;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.tabs-bar::-webkit-scrollbar{display:none}
-.tab-btn{padding:10px 18px;font-size:12px;font-weight:600;color:var(--text2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:'Inter',sans-serif;background:none;border-top:none;border-left:none;border-right:none}
-.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-btn:hover:not(.active){color:var(--text1)}
-/* MAIN */
-.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.tab-pane{display:none;flex:1;overflow-y:auto;padding:20px}
-.tab-pane.active{display:block}
-/* SECTION HEADERS */
-.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.section-title{font-size:13px;font-weight:700;color:var(--text1);text-transform:uppercase;letter-spacing:.5px}
-.section-badge{background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:2px 9px;font-size:11px;color:var(--text2);font-weight:600}
-/* LEAD CARDS */
-.lead-section{margin-bottom:24px}
-.lead-section-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.priority-badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700}
-.badge-red-bg{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2)}
-.badge-yellow-bg{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
-.badge-blue-bg{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
-.badge-green-bg{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2)}
-.badge-purple-bg{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
-.lead-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-.lead-card:hover{background:var(--bg3);border-color:var(--border)}
+.btn-refresh:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── BODY (two columns) ──────────────────────── */
+.body{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ── LEFT COLUMN ─────────────────────────────── */
+.col-left{
+  width:var(--col-left);min-width:var(--col-left);
+  display:flex;flex-direction:column;
+  background:var(--bg1);border-right:1px solid var(--border);
+  overflow:hidden;flex-shrink:0
+}
+.left-tabs{display:flex;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0}
+.lt{
+  flex:1;padding:9px 4px;text-align:center;font-size:11px;font-weight:600;
+  color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;
+  font-family:'Inter',sans-serif;white-space:nowrap
+}
+.lt.active{color:var(--accent);border-bottom-color:var(--accent)}
+.lt:hover:not(.active){color:var(--t2)}
+.lt-badge{
+  display:inline-block;background:var(--bg4);border-radius:8px;
+  padding:1px 5px;font-size:9px;margin-left:3px;color:var(--t2)
+}
+.left-body{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0}
+.left-body::-webkit-scrollbar{width:3px}
+.left-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── SECTION HEADERS ─────────────────────────── */
+.sec-hdr{
+  padding:8px 12px;background:var(--bg2);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  display:flex;align-items:center;gap:6px;
+  position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border)
+}
+.sec-count{background:var(--bg4);border-radius:8px;padding:1px 6px;font-size:9px;color:var(--t2);font-weight:600}
+
+/* ── LEAD CARDS ──────────────────────────────── */
+.lead-card{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+  border-left:2px solid transparent;
+}
+.lead-card:hover,.lead-card.sel{background:var(--bg3)}
+.lead-card.sel{border-left-color:var(--accent)}
 .lead-card.lc-red{border-left-color:var(--red)}
+.lead-card.lc-red.sel{border-left-color:var(--accent)}
 .lead-card.lc-yellow{border-left-color:var(--yellow)}
-.lead-card.lc-blue{border-left-color:var(--blue)}
-.lead-card.lc-purple{border-left-color:var(--purple)}
-.lc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.lc-name{font-weight:600;font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lc-time{font-size:11px;color:var(--text3);white-space:nowrap}
-.lc-msg{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:5px}
-.lc-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.lc-vendor{font-size:11px;color:var(--text2);font-weight:500}
-.lc-kw{font-size:11px;color:var(--accent);font-weight:600}
-/* VENDORS */
-.vendor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
-.vendor-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s}
-.vendor-card:hover{border-color:var(--text3);background:var(--bg3)}
-.vc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.vc-name{font-size:15px;font-weight:700}
-.vc-rank{font-size:20px}
-.vc-stats{display:flex;flex-direction:column;gap:8px}
-.vc-stat{display:flex;justify-content:space-between;align-items:center}
-.vc-stat-label{font-size:11px;color:var(--text2)}
-.vc-stat-val{font-size:13px;font-weight:700}
-.vc-bar-wrap{background:var(--bg4);border-radius:4px;height:3px;margin-top:8px}
-.vc-bar{height:3px;border-radius:4px;transition:width .6s}
-/* CHAT (WhatsApp style) */
-.conv-layout{display:grid;grid-template-columns:320px 1fr;gap:0;height:100%;max-height:calc(100vh - 160px);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-@media(max-width:700px){.conv-layout{grid-template-columns:1fr;max-height:none}}
-.conv-list-panel{border-right:1px solid var(--border);overflow-y:auto;background:var(--bg1)}
-.conv-list-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
-.conv-list-search{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:7px 12px;font-size:12px;width:100%;outline:none;font-family:'Inter',sans-serif}
-.conv-list-search:focus{border-color:var(--accent)}
-.conv-filters{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);overflow-x:auto}
-.cf-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer
-;border:1px solid var(--border);background:none;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;transition:all .15s}
-.cf-btn.active,.cf-btn:hover{background:var(--accent);border-color:var(--accent);color:#000}
-.conv-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-.conv-item:hover,.conv-item.selected{background:var(--bg3)}
-.conv-item.pending{border-left-color:var(--red)}
-.ci-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.ci-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
-.ci-time{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:6px}
-.ci-preview{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
-.ci-meta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-.ci-badge{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600}
-/* CHAT PANEL */
-.chat-panel{display:flex;flex-direction:column;background:var(--bg0);overflow:hidden;min-height:0}
-.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.chat-header-name{font-weight:700;font-size:14px}
-.chat-header-sub{font-size:11px;color:var(--text2);margin-top:2px}
-.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--bg0);min-height:0}
-.msg-row{display:flex;flex-direction:column;max-width:75%}
+.lead-card.lc-yellow.sel{border-left-color:var(--accent)}
+.lc-row1{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.lc-name{font-weight:600;font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
+.lc-time{font-size:10px;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.lc-preview{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;line-height:1.3}
+.lc-row3{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lc-vendor{font-size:10px;color:var(--t2)}
+.lc-phone{font-size:10px;color:var(--t3)}
+.lc-kw{font-size:10px;color:var(--accent);font-weight:600}
+.pill{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap}
+.pill-red{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.pill-yellow{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+.pill-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.pill-green{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.pill-orange{background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.2)}
+
+/* ── ALERT ITEMS (Alertas tab) ───────────────── */
+.alert-item{padding:10px 12px;border-bottom:1px solid var(--border);border-left:2px solid transparent;cursor:pointer;transition:background .12s}
+.alert-item:hover{background:var(--bg3)}
+.alert-item.ali-red{border-left-color:var(--red)}
+.alert-item.ali-yellow{border-left-color:var(--yellow)}
+.alert-item.ali-blue{border-left-color:var(--blue)}
+.ai-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:2px}
+.ai-name{font-weight:600;font-size:12px;color:var(--t1)}
+.ai-time{font-size:10px;color:var(--t3);flex-shrink:0}
+.ai-sub{font-size:11px;color:var(--t2);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── RIGHT COLUMN (CHAT) ─────────────────────── */
+.col-right{
+  flex:1;display:flex;flex-direction:column;
+  background:var(--bg0);overflow:hidden;min-height:0;min-width:0
+}
+.chat-hdr{
+  padding:10px 16px;background:var(--bg1);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;gap:10px
+}
+.chat-hdr-info{flex:1;min-width:0}
+.chat-hdr-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-hdr-sub{font-size:11px;color:var(--t2);margin-top:1px}
+.chat-hdr-badges{display:flex;gap:5px;flex-shrink:0}
+.chat-messages{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:14px 16px;
+  display:flex;flex-direction:column;gap:6px;
+  min-height:0;background:var(--bg0)
+}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── MESSAGE BUBBLES ─────────────────────────── */
+.msg-row{display:flex;flex-direction:column;max-width:72%}
 .msg-row.from-lead{align-self:flex-start}
 .msg-row.from-vendor{align-self:flex-end}
 .msg-row.from-bot{align-self:flex-end}
-.msg-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
-.from-lead .msg-bubble{background:#1c3a5e;border-radius:2px 12px 12px 12px}
-.from-vendor .msg-bubble{background:#2d1b5e;border-radius:12px 2px 12px 12px}
-.from-bot .msg-bubble{background:#1a3a1a;border-radius:12px 2px 12px 12px}
-.msg-sender-name{font-size:10px;font-weight:700;margin-bottom:3px;padding:0 2px}
-.from-lead .msg-sender-name{color:#60a5fa}
-.from-vendor .msg-sender-name{color:#c084fc}
-.from-bot .msg-sender-name{color:#4ade80}
-.msg-time-row{font-size:10px;color:var(--text3);margin-top:3px;padding:0 2px;text-align:right}
-.from-lead .msg-time-row{text-align:left}
-.msg-audio-label{font-style:italic;color:var(--text2);font-size:12px}
-.msg-transcription{background:rgba(255,255,255,.06);border-radius:6px;padding:6px 8px;margin-top:6px;font-size:11px;color:var(--text2)}
-.msg-transcription-lbl{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600}
-/* EMPTY / LOADING */
-.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
-.empty-icon{font-size:32px;margin-bottom:10px}
-.empty-text{font-size:13px}
-.loading-state{display:flex;align-items:center;justify-content:center;gap:8px;padding:30px;color:var(--text2);font-size:13px}
-.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* ALERT LIST */
-.alert-list-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;border-left:3px solid transparent;transition:all .15s}
-.alert-list-item.ali-red{border-left-color:var(--red)}
-.alert-list-item.ali-yellow{border-left-color:var(--yellow)}
-.alert-list-item.ali-blue{border-left-color:var(--blue)}
-.ali-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
-.ali-name{font-weight:600;font-size:13px}
-.ali-badge{flex-shrink:0}
-.ali-sub{font-size:12px;color:var(--text2)}
-/* RESPONSIVE */
-@media(max-width:600px){
-  .alert-cards{gap:8px;padding:12px 14px}
-  .alert-card{min-width:130px;padding:12px}
-  .ac-number{font-size:24px}
-  .tab-pane{padding:14px}
-  .vendor-grid{grid-template-columns:1fr 1fr}
-  .conv-layout{max-height:none}
-  .tabs-bar .tab-btn{padding:8px 12px;font-size:11px}
-  .hdr{padding:10px 14px}
+.msg-sname{font-size:10px;font-weight:600;margin-bottom:3px;padding:0 3px}
+.from-lead .msg-sname{color:#60a5fa}
+.from-vendor .msg-sname{color:#c084fc}
+.from-bot .msg-sname{color:#4ade80}
+.msg-bubble{
+  padding:8px 12px;font-size:12px;line-height:1.5;
+  word-break:break-word;white-space:pre-wrap
 }
-@media(max-width:400px){
-  .vendor-grid{grid-template-columns:1fr}
+.from-lead .msg-bubble{
+  background:#1a3a5c;border-radius:3px 12px 12px 12px;
+  color:#dbeafe
 }
-.no-select{user-select:none}
-/* HOT LEADS INLINE CHAT */
-.hot-layout{display:grid;grid-template-columns:1fr 380px;gap:0;height:calc(100vh - 220px);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-@media(max-width:800px){.hot-layout{grid-template-columns:1fr;height:auto}}
-.hot-list-panel{overflow-y:auto;background:var(--bg1);border-right:1px solid var(--border)}
-.hot-chat-panel{display:flex;flex-direction:column;background:var(--bg0);overflow:hidden;min-height:0}
-.hot-chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--text3);gap:10px}
-.hot-chat-empty-icon{font-size:36px}
-.hot-chat-empty-text{font-size:13px}
-.hot-lead-card{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-.hot-lead-card:hover,.hot-lead-card.selected{background:var(--bg3)}
-.hot-lead-card.hlc-red{border-left-color:var(--red)}
-.hot-lead-card.hlc-yellow{border-left-color:var(--yellow)}
-.hot-section-header{padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:1}
+.from-vendor .msg-bubble{
+  background:#2d1654;border-radius:12px 3px 12px 12px;
+  color:#e9d5ff
+}
+.from-bot .msg-bubble{
+  background:#14361f;border-radius:12px 3px 12px 12px;
+  color:#bbf7d0
+}
+.msg-time{font-size:10px;color:var(--t3);margin-top:3px;padding:0 3px}
+.from-lead .msg-time{text-align:left}
+.from-vendor .msg-time,.from-bot .msg-time{text-align:right}
+.msg-audio{font-style:italic;color:var(--t2);font-size:11px}
+.msg-transcript{background:rgba(255,255,255,.05);border-radius:6px;padding:5px 8px;margin-top:5px;font-size:11px;color:var(--t2)}
+.msg-transcript-lbl{font-size:9px;color:var(--t3);font-weight:700;margin-bottom:2px;letter-spacing:.5px}
 
+/* ── EMPTY / LOADING ─────────────────────────── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--t3);gap:8px;padding:20px;text-align:center}
+.empty-icon{font-size:28px;opacity:.5}
+.empty-text{font-size:12px}
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;color:var(--t2);font-size:11px}
+.spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── VENDEDORES (right panel) ────────────────── */
+.vendor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.vendor-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px;border-top:2px solid transparent}
+.vc-name{font-size:13px;font-weight:700;margin-bottom:10px}
+.vc-stats{display:flex;flex-direction:column;gap:6px}
+.vc-row{display:flex;justify-content:space-between;align-items:center}
+.vc-lbl{font-size:10px;color:var(--t2)}
+.vc-val{font-size:12px;font-weight:700}
+.vc-bar-bg{background:var(--bg4);height:2px;border-radius:2px;margin-top:8px}
+.vc-bar{height:2px;border-radius:2px;transition:width .5s}
+
+/* ── CONVERSAS FILTER BAR ────────────────────── */
+.conv-filters{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap}
+.cf{padding:3px 9px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--t2);font-family:'Inter',sans-serif;transition:all .12s;white-space:nowrap}
+.cf.active,.cf:hover{background:var(--accent);border-color:var(--accent);color:#000}
+.conv-search{padding:7px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.conv-search input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--t1);padding:6px 10px;font-size:11px;outline:none;font-family:'Inter',sans-serif}
+.conv-search input:focus{border-color:var(--accent)}
+
+/* ── TABS IN RIGHT PANEL ─────────────────────── */
+.right-tabs{display:flex;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0}
+.rt{flex:1;padding:9px;text-align:center;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;white-space:nowrap}
+.rt.active{color:var(--accent);border-bottom-color:var(--accent)}
+.rt:hover:not(.active){color:var(--t2)}
+
+/* ── CHAT PLACEHOLDER ────────────────────────── */
+.chat-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--t3);gap:10px}
+.chat-placeholder-icon{font-size:40px;opacity:.3}
+.chat-placeholder-text{font-size:12px;opacity:.5}
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media(max-width:680px){
+  :root{--col-left:100vw}
+  .col-left{position:absolute;left:0;top:0;height:100%;z-index:10;transform:translateX(-100%);transition:transform .25s;border-right:none;box-shadow:4px 0 20px #000a}
+  .col-left.mob-open{transform:translateX(0)}
+  .col-right{width:100%}
+  .topbar{padding:6px 12px}
+  .metric-badges{display:none}
+  .mob-menu-btn{display:flex!important}
+}
+.mob-menu-btn{display:none;align-items:center;justify-content:center;width:30px;height:30px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;color:var(--t1);font-size:16px}
 </style>
 </head>
 <body>
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-left">
-    <div class="hdr-logo">LN</div>
-    <div>
-      <div class="hdr-title">Dashboard LN Marketing</div>
-      <div class="hdr-sub">Datacrazy CRM &bull; Tempo Real &bull; Ultimas 24h</div>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">LN</div>
+    <div><div class="brand-name">LN Marketing</div><div class="brand-sub">Datacrazy &bull; 24h</div></div>
+  </div>
+  <div class="metric-badges">
+    <div class="mbadge" id="mb-semvendedor" onclick="filterAlert('semvendedor')">
+      <span class="mbadge-num red" id="cnt-semvendedor">-</span>
+      <span class="mbadge-label">Sem Vendedor</span>
+    </div>
+    <div class="mbadge" id="mb-semnegocio" onclick="filterAlert('semnegocio')">
+      <span class="mbadge-num yellow" id="cnt-semnegocio">-</span>
+      <span class="mbadge-label">Sem Neg&oacute;cio</span>
+    </div>
+    <div class="mbadge" id="mb-pendente" onclick="filterAlert('pendente')">
+      <span class="mbadge-num blue" id="cnt-pendente">-</span>
+      <span class="mbadge-label">Pendentes</span>
     </div>
   </div>
-  <div class="hdr-right">
-    <div class="live-dot" id="liveDot"></div>
-    <span class="live-text" id="lastUpdate">--:--</span>
+  <div class="topbar-right">
+    <div class="mob-menu-btn" onclick="toggleMobMenu()" title="Menu">&#9776;</div>
+    <div class="live"><div class="live-dot" id="liveDot"></div><span class="live-time" id="lastUpdate">--:--</span></div>
     <button class="btn-refresh" id="btnRefresh" onclick="loadAll()">Atualizar</button>
   </div>
 </div>
 
-<!-- ALERT CARDS -->
-<div class="alert-cards">
-  <div class="alert-card red-card" id="card-semvendedor" onclick="filterByAlert('semvendedor')">
-    <div class="ac-number" id="cnt-semvendedor">-</div>
-    <div class="ac-label">Conversas Sem Vendedor</div>
-  </div>
-  <div class="alert-card yellow-card" id="card-semnegocio" onclick="filterByAlert('semnegocio')">
-    <div class="ac-number" id="cnt-semnegocio">-</div>
-    <div class="ac-label">Leads Sem Negocio no CRM</div>
-  </div>
-  <div class="alert-card blue-card" id="card-pendente" onclick="filterByAlert('pendente')">
-    <div class="ac-number" id="cnt-pendente">-</div>
-    <div class="ac-label">Clientes Pendentes</div>
-  </div>
-</div>
+<!-- BODY -->
+<div class="body">
 
-<!-- TABS -->
-<div class="tabs-bar">
-  <button class="tab-btn active" onclick="showTab('alertas',this)">Alertas</button>
-  <button class="tab-btn" onclick="showTab('hotleads',this)">Leads Quentes</button>
-  <button class="tab-btn" onclick="showTab('vendedores',this)">Vendedores</button>
-  <button class="tab-btn" onclick="showTab('conversas',this)">Conversas</button>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="main">
-
-<!-- TAB: ALERTAS -->
-<div id="pane-alertas" class="tab-pane active">
-  <div id="alertas-content"><div class="loading-state"><div class="spinner"></div>Carregando dados...</div></div>
-</div>
-
-<!-- TAB: HOT LEADS -->
-<div id="pane-hotleads" class="tab-pane" style="padding:0;height:calc(100vh - 220px)">
-  <div class="hot-layout">
-    <div class="hot-list-panel" id="hotListPanel">
-      <div class="loading-state"><div class="spinner"></div>Carregando leads quentes...</div>
+  <!-- LEFT COLUMN -->
+  <div class="col-left" id="colLeft">
+    <div class="left-tabs">
+      <button class="lt active" id="lt-alertas" onclick="switchLeft('alertas')">Alertas</button>
+      <button class="lt" id="lt-hot" onclick="switchLeft('hot')">&#9889; Quentes</button>
+      <button class="lt" id="lt-convs" onclick="switchLeft('convs')">Conversas</button>
     </div>
-    <div class="hot-chat-panel" id="hotChatPanel">
-      <div class="chat-header" id="hotChatHeader">
-        <div class="chat-header-name">Selecione um lead</div>
-        <div class="chat-header-sub">Clique em um lead quente para ver o chat</div>
+
+    <!-- ALERTAS PANE -->
+    <div class="left-body" id="lp-alertas">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
+    </div>
+
+    <!-- HOT LEADS PANE -->
+    <div class="left-body" id="lp-hot" style="display:none">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
+    </div>
+
+    <!-- CONVERSAS PANE -->
+    <div class="left-body" id="lp-convs" style="display:none;flex-direction:column">
+      <div class="conv-search"><input type="text" id="convSearch" placeholder="Buscar lead ou telefone..." oninput="renderConvList()"></div>
+      <div class="conv-filters">
+        <button class="cf active" data-f="all" onclick="setConvF('all',this)">Todos</button>
+        <button class="cf" data-f="pending" onclick="setConvF('pending',this)">Pendentes</button>
+        <button class="cf" data-f="waiting" onclick="setConvF('waiting',this)">Aguardando</button>
+        <button class="cf" data-f="novendor" onclick="setConvF('novendor',this)">Sem Vendedor</button>
       </div>
-      <div class="chat-messages" id="hotChatMessages">
-        <div class="hot-chat-empty">
-          <div class="hot-chat-empty-icon">&#128172;</div>
-          <div class="hot-chat-empty-text">Clique em um lead para abrir o chat</div>
+      <div id="convListBody" style="overflow-y:auto;flex:1;min-height:0"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-right">
+    <!-- Right tabs (Vendedores only extra) -->
+    <div class="right-tabs">
+      <button class="rt active" id="rt-chat" onclick="switchRight('chat')">Chat</button>
+      <button class="rt" id="rt-vendors" onclick="switchRight('vendors')">Vendedores</button>
+    </div>
+
+    <!-- CHAT VIEW -->
+    <div id="rv-chat" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden">
+      <div class="chat-hdr" id="chatHdr">
+        <div class="chat-hdr-info">
+          <div class="chat-hdr-name">Selecione um lead</div>
+          <div class="chat-hdr-sub">Clique em qualquer lead para abrir o chat</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMsgs">
+        <div class="chat-placeholder">
+          <div class="chat-placeholder-icon">&#128172;</div>
+          <div class="chat-placeholder-text">Nenhuma conversa selecionada</div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<div id="pane-vendedores" class="tab-pane">
-  <div class="vendor-grid" id="vendorGrid"></div>
-</div>
 
-<!-- TAB: CONVERSAS -->
-<div id="pane-conversas" class="tab-pane" style="padding:0;height:calc(100vh - 160px)">
-  <div class="conv-layout" style="height:100%">
-    <div class="conv-list-panel">
-      <div class="conv-list-header">
-        <input type="text" class="conv-list-search" id="convSearch" placeholder="Buscar lead ou telefone..." oninput="renderConvList()">
-      </div>
-      <div class="conv-filters">
-        <button class="cf-btn active" data-filter="all" onclick="setConvFilter('all',this)">Todos</button>
-        <button class="cf-btn" data-filter="pending" onclick="setConvFilter('pending',this)">Pendentes</button>
-        <button class="cf-btn" data-filter="waiting" onclick="setConvFilter('waiting',this)">Aguardando</button>
-        <button class="cf-btn" data-filter="novendor" onclick="setConvFilter('novendor',this)">Sem Vendedor</button>
-      </div>
-      <div id="convList"></div>
-    </div>
-    <div class="chat-panel" id="chatPanel">
-      <div class="chat-header" id="chatHeader">
-        <div class="chat-header-name">Selecione uma conversa</div>
-        <div class="chat-header-sub">Clique em um lead para ver o chat</div>
-      </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Selecione uma conversa</div></div>
+    <!-- VENDORS VIEW -->
+    <div id="rv-vendors" style="display:none;flex:1;overflow-y:auto;min-height:0">
+      <div class="vendor-grid" id="vendorGrid">
+        <div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Carregando...</div>
       </div>
     </div>
   </div>
-</div>
 
-</div><!-- /main -->
+</div><!-- /body -->
+</div><!-- /app -->
 <script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════ */
 const TOKEN='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
 const CRM='https://crm.g1.datacrazy.io/api/crm';
 const MSG='https://messaging.g1.datacrazy.io/api/messaging';
 const H={'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'};
 const VENDORS=['Jeremias','Alysson','Luan','Michele'];
-const VENDOR_COLORS={'Jeremias':'#22c55e','Alysson':'#f97316','Luan':'#3b82f6','Michele':'#a855f7'};
-const VENDOR_RANKS=['Jeremias','Alysson','Luan','Michele'];
+const VCOLORS={'Jeremias':'#22c55e','Alysson':'#f97316','Luan':'#3b82f6','Michele':'#a855f7'};
+const PURCHASE_KW=['pix','cartao','boleto','link','desconto','comprar','valor','preco','quanto e','fechar','manda o link','quero o','aceito'];
+const MSG_PADRAO=['ola doutor, quero saber mais','olá doutor, quero saber mais'];
+const BOT_SKIP=['dr. roberto','dr roberto','seja bem-vindo','consultorios','vitalidade','zencaps','condicao especial','garantia total','frete gratis'];
 
-// 24h boundary
-const get24hAgo=()=>new Date(Date.now()-24*60*60*1000);
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let allConvs=[], allBiz=[], alertFilter=null, convFilter='all', leftPane='alertas', rightPane='chat';
 
-// Purchase intent keywords (exact match)
-const PURCHASE_KEYWORDS=['pix','cartao','boleto','link','desconto','comprar','valor','preco','quanto e','fechar','manda o link'];
-const MSG_PADRAO=['ola doutor, quero saber mais','olá doutor, quero saber mais','ola, quero saber mais'];
-const BOT_SKIP=['dr. roberto','dr roberto','seja bem-vindo','consultorios','vitalidade','condicao especial','garantia total','frete gratis','zencaps'];
-
-let allConvs=[], allBiz=[], convFilter='all', activeAlertFilter=null;
-
-function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function timeAgo(d){const s=(Date.now()-new Date(d))/1000;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
-function is24h(d){return new Date(d)>=get24hAgo();}
-function getVendorKey(name){if(!name)return '';const n=name.toLowerCase();return VENDORS.find(v=>n.includes(v.toLowerCase()))||'';}
-function isBot(text){const t=(text||'').toLowerCase();return BOT_SKIP.some(k=>t.includes(k));}
-function isMsgPadrao(text){const t=(text||'').toLowerCase().trim();return MSG_PADRAO.some(k=>t.includes(k));}
-
-async function apiFetch(url){
-  const r=await fetch(url,{headers:H});
-  if(!r.ok)throw new Error(r.status);
-  return r.json();
+/* ═══════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════ */
+const escH=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function timeAgo(d){const s=(Date.now()-new Date(d))/1e3;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
+const is24h=d=>new Date(d)>=new Date(Date.now()-86400000);
+function getVK(name){if(!name)return '';const n=name.toLowerCase();return VENDORS.find(v=>n.includes(v.toLowerCase()))||'';}
+const isBot=t=>(t||'').toLowerCase().split('').length>0&&BOT_SKIP.some(k=>(t||'').toLowerCase().includes(k));
+const isPadrao=t=>MSG_PADRAO.some(k=>(t||'').toLowerCase().trim().includes(k));
+function normPhone(p){return (p||'').replace(/\D/g,'');}
+function convByPhone(phone){
+  const n=normPhone(phone);
+  if(!n)return null;
+  return allConvs.find(c=>{const cp=normPhone((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'');return cp===n||cp.endsWith(n)||n.endsWith(cp);})||null;
 }
 
+/* ═══════════════════════════════════════════════════════
+   SCROLL
+═══════════════════════════════════════════════════════ */
+function scrollToBottom(){
+  const el=document.getElementById('chatMsgs');
+  if(!el)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight+9999;}));
+}
+
+/* ═══════════════════════════════════════════════════════
+   API
+═══════════════════════════════════════════════════════ */
+async function apiFetch(url){const r=await fetch(url,{headers:H});if(!r.ok)throw new Error(r.status);return r.json();}
+
 async function fetchConvs(){
-  let all=[],skip=0;
-  const cutoff=get24hAgo();
+  let all=[],skip=0;const cut=new Date(Date.now()-86400000);
   while(true){
     const d=await apiFetch(MSG+'/conversations?take=100&skip='+skip+'&order[updatedAt]=desc');
     const items=d.data||d.conversations||[];
     if(!items.length)break;
-    // filter to 24h
-    const fresh=items.filter(c=>new Date(c.updatedAt||c.createdAt)>=cutoff);
+    const fresh=items.filter(c=>new Date(c.updatedAt||c.createdAt)>=cut);
     all=all.concat(fresh);
-    // if the last item is older than 24h, stop
     const last=items[items.length-1];
-    if(!last||new Date(last.updatedAt||last.createdAt)<cutoff)break;
+    if(!last||new Date(last.updatedAt||last.createdAt)<cut)break;
     if(all.length>=(d.total||9999))break;
-    skip+=100;
-    if(items.length<100)break;
+    skip+=100;if(items.length<100)break;
   }
   return all;
 }
 
 async function fetchBiz(){
-  let all=[],skip=0;
-  const cutoff=get24hAgo();
+  let all=[],skip=0;const cut=new Date(Date.now()-86400000);
   while(true){
     const d=await apiFetch(CRM+'/businesses?order[updatedAt]=desc&take=100&skip='+skip);
     const items=d.businesses||d.data||[];
     if(!items.length)break;
-    const fresh=items.filter(b=>new Date(b.updatedAt||b.createdAt)>=cutoff);
+    const fresh=items.filter(b=>new Date(b.updatedAt||b.createdAt)>=cut);
     all=all.concat(fresh);
     const last=items[items.length-1];
-    if(!last||new Date(last.updatedAt||last.createdAt)<cutoff)break;
+    if(!last||new Date(last.updatedAt||last.createdAt)<cut)break;
     if(all.length>=(d.total||9999))break;
-    skip+=100;
-    if(items.length<100)break;
+    skip+=100;if(items.length<100)break;
   }
   return all;
 }
 
+/* ═══════════════════════════════════════════════════════
+   LOAD ALL
+═══════════════════════════════════════════════════════ */
 async function loadAll(){
   const btn=document.getElementById('btnRefresh');
-  btn.disabled=true;btn.textContent='Carregando...';
+  btn.disabled=true;btn.textContent='...';
   document.getElementById('liveDot').style.background='#f59e0b';
   try{
-    const [convs,biz]=await Promise.all([fetchConvs(),fetchBiz()]);
-    allConvs=convs;allBiz=biz;
-    updateAlertCards();
-    renderCurrentTab();
+    const [c,b]=await Promise.all([fetchConvs(),fetchBiz()]);
+    allConvs=c;allBiz=b;
+    updateMetrics();
+    renderCurrentLeft();
+    if(rightPane==='vendors')renderVendors();
     document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('liveDot').style.background='#22c55e';
   }catch(e){
@@ -371,121 +434,129 @@ async function loadAll(){
   btn.disabled=false;btn.textContent='Atualizar';
 }
 
-function updateAlertCards(){
-  const semVendedor=allConvs.filter(c=>!(c.attendants&&c.attendants.length));
-  const semNegocio=allConvs.filter(c=>{
-    const att=(c.attendants||[]).some(a=>getVendorKey(a.name));
-    return att&&!c.businessId;
+/* ═══════════════════════════════════════════════════════
+   METRICS
+═══════════════════════════════════════════════════════ */
+function updateMetrics(){
+  document.getElementById('cnt-semvendedor').textContent=allConvs.filter(c=>!(c.attendants&&c.attendants.length)).length;
+  document.getElementById('cnt-semnegocio').textContent=allConvs.filter(c=>{const a=(c.attendants||[]).some(a=>getVK(a.name));return a&&!c.businessId;}).length;
+  document.getElementById('cnt-pendente').textContent=allConvs.filter(c=>c.isPending).length;
+}
+
+function filterAlert(type){
+  document.querySelectorAll('.mbadge').forEach(m=>m.classList.remove('active-filter'));
+  if(alertFilter===type){alertFilter=null;}
+  else{alertFilter=type;const mb=document.getElementById('mb-'+type);if(mb)mb.classList.add('active-filter');}
+  if(leftPane==='alertas')renderAlertas();
+}
+/* ═══════════════════════════════════════════════════════
+   LEFT PANEL NAV
+═══════════════════════════════════════════════════════ */
+function switchLeft(pane){
+  leftPane=pane;
+  ['alertas','hot','convs'].forEach(p=>{
+    document.getElementById('lt-'+p).classList.toggle('active',p===pane);
+    const el=document.getElementById('lp-'+p);
+    if(el){el.style.display=p===pane?(p==='convs'?'flex':'block'):'none';}
   });
-  const pendentes=allConvs.filter(c=>c.isPending);
-  document.getElementById('cnt-semvendedor').textContent=semVendedor.length;
-  document.getElementById('cnt-semnegocio').textContent=semNegocio.length;
-  document.getElementById('cnt-pendente').textContent=pendentes.length;
+  if(pane==='alertas')renderAlertas();
+  else if(pane==='hot')renderHotLeads();
+  else if(pane==='convs')renderConvList();
 }
 
-function filterByAlert(type){
-  document.querySelectorAll('.alert-card').forEach(c=>{c.classList.remove('active')});
-  const card=document.getElementById('card-'+type);
-  if(activeAlertFilter===type){activeAlertFilter=null;}
-  else{activeAlertFilter=type;if(card)card.classList.add('active');}
-  renderAlertas();
+function renderCurrentLeft(){
+  if(leftPane==='alertas')renderAlertas();
+  else if(leftPane==='hot')renderHotLeads();
+  else if(leftPane==='convs')renderConvList();
 }
 
-function showTab(name,btn){
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('pane-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(name==='hotleads')renderHotLeads();
-  if(name==='vendedores')renderVendedores();
-  if(name==='conversas')renderConvList();
-  if(name==='alertas')renderAlertas();
+/* ═══════════════════════════════════════════════════════
+   RIGHT PANEL NAV
+═══════════════════════════════════════════════════════ */
+function switchRight(pane){
+  rightPane=pane;
+  ['chat','vendors'].forEach(p=>{
+    document.getElementById('rt-'+p).classList.toggle('active',p===pane);
+    const el=document.getElementById('rv-'+p);
+    if(el)el.style.display=p===pane?(p==='vendors'?'block':'flex'):'none';
+  });
+  if(pane==='vendors')renderVendors();
 }
 
-function renderCurrentTab(){
-  const active=document.querySelector('.tab-pane.active');
-  if(!active)return;
-  const id=active.id.replace('pane-','');
-  if(id==='alertas')renderAlertas();
-  else if(id==='hotleads')renderHotLeads();
-  else if(id==='vendedores')renderVendedores();
-  else if(id==='conversas')renderConvList();
-}
+/* ═══════════════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════════════ */
+function toggleMobMenu(){document.getElementById('colLeft').classList.toggle('mob-open');}
+
+/* ═══════════════════════════════════════════════════════
+   ALERTAS
+═══════════════════════════════════════════════════════ */
 function renderAlertas(){
-  const semVendedor=allConvs.filter(c=>!(c.attendants&&c.attendants.length));
-  const semNegocio=allConvs.filter(c=>{
-    const att=(c.attendants||[]).some(a=>getVendorKey(a.name));
-    return att&&!c.businessId;
-  });
-  const pendentes=allConvs.filter(c=>c.isPending);
+  const el=document.getElementById('lp-alertas');
+  const semV=allConvs.filter(c=>!(c.attendants&&c.attendants.length));
+  const semN=allConvs.filter(c=>{const a=(c.attendants||[]).some(a=>getVK(a.name));return a&&!c.businessId;});
+  const pend=allConvs.filter(c=>c.isPending);
 
-  let filtered;
-  if(activeAlertFilter==='semvendedor')filtered={type:'semvendedor',list:semVendedor,label:'Conversas Sem Vendedor',cls:'ali-red'};
-  else if(activeAlertFilter==='semnegocio')filtered={type:'semnegocio',list:semNegocio,label:'Leads Sem Negocio no CRM',cls:'ali-yellow'};
-  else if(activeAlertFilter==='pendente')filtered={type:'pendente',list:pendentes,label:'Clientes Pendentes (Aguardando Resposta)',cls:'ali-blue'};
-  else filtered=null;
+  let list, cls, label;
+  if(alertFilter==='semvendedor'){list=semV;cls='ali-red';label='Sem Vendedor';}
+  else if(alertFilter==='semnegocio'){list=semN;cls='ali-yellow';label='Sem Negócio';}
+  else if(alertFilter==='pendente'){list=pend;cls='ali-blue';label='Pendentes';}
 
-  let html='';
-  if(filtered){
-    html+='<div class="section-hdr"><div class="section-title">'+escH(filtered.label)+'</div><span class="section-badge">'+filtered.list.length+'</span></div>';
-    if(!filtered.list.length){html+='<div class="empty-state"><div class="empty-icon">&#10003;</div><div class="empty-text">Nenhum nas ultimas 24h</div></div>';}
-    else{filtered.list.forEach(c=>{
+  if(!allConvs.length){el.innerHTML='<div class="loading"><div class="spinner"></div>Aguardando dados...</div>';return;}
+
+  if(list){
+    let h='<div class="sec-hdr"><span>'+escH(label)+'</span><span class="sec-count">'+list.length+'</span></div>';
+    if(!list.length)h+='<div class="empty"><div class="empty-icon">&#10003;</div><div class="empty-text">Nenhum nas últimas 24h</div></div>';
+    else list.slice(0,30).forEach(c=>{
       const name=(c.contact&&c.contact.name)||'Lead';
       const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
       const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
       const msg=(c.lastMessage&&c.lastMessage.body)||'';
-      html+='<div class="alert-list-item '+filtered.cls+'">';
-      html+='<div class="ali-top"><div class="ali-name">'+escH(name)+(phone?' <span style="color:var(--text3);font-size:11px">'+escH(phone)+'</span>':'')+'</div>';
-      html+='<span style="font-size:11px;color:var(--text3)">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
-      html+='<div class="ali-sub">Vendedor: '+escH(att);
-      if(msg)html+=' &bull; '+escH(msg.substring(0,70));
-      html+='</div></div>';
-    });}
-  } else {
-    // Show all 3 sections
-    const sections=[
-      {list:semVendedor,label:'Conversas Sem Vendedor',cls:'ali-red',emoji:'&#128308;'},
-      {list:semNegocio,label:'Leads Sem Negocio no CRM',cls:'ali-yellow',emoji:'&#128993;'},
-      {list:pendentes,label:'Clientes Pendentes (Aguardando Resposta)',cls:'ali-blue',emoji:'&#128309;'}
-    ];
-    if(!allConvs.length){
-      html='<div class="loading-state"><div class="spinner"></div>Carregando dados das ultimas 24h...</div>';
-    } else {
-      sections.forEach(s=>{
-        html+='<div style="margin-bottom:20px"><div class="section-hdr"><div class="section-title">'+s.emoji+' '+escH(s.label)+'</div><span class="section-badge">'+s.list.length+'</span></div>';
-        if(!s.list.length){html+='<div class="empty-state"><div class="empty-icon">&#10003;</div><div class="empty-text">Nenhum nas ultimas 24h</div></div>';}
-        else{
-          s.list.slice(0,15).forEach(c=>{
-            const name=(c.contact&&c.contact.name)||'Lead';
-            const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
-            const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
-            const msg=(c.lastMessage&&c.lastMessage.body)||'';
-            html+='<div class="alert-list-item '+s.cls+'">';
-            html+='<div class="ali-top"><div class="ali-name">'+escH(name)+(phone?' <span style="color:var(--text3);font-size:11px">'+escH(phone)+'</span>':'')+'</div>';
-            html+='<span style="font-size:11px;color:var(--text3)">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
-            html+='<div class="ali-sub">Vendedor: '+escH(att);
-            if(msg)html+=' &bull; '+escH(msg.substring(0,60));
-            html+='</div></div>';
-          });
-          if(s.list.length>15)html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--text2)">+' +(s.list.length-15)+' mais...</div>';
-        }
-        html+='</div>';
-      });
-    }
+      h+='<div class="alert-item '+cls+'" data-cid="'+escH(c.id)+'" onclick="openConvDirect(this)">';
+      h+='<div class="ai-row1"><span class="ai-name">'+escH(name)+'</span><span class="ai-time">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+      h+='<div class="ai-sub">'+escH(att)+(msg?' • '+escH(msg.substring(0,55)):'')+'</div>';
+      h+='</div>';
+    });
+    el.innerHTML=h;return;
   }
-  document.getElementById('alertas-content').innerHTML=html;
-    }
+
+  // All 3 sections
+  const sections=[
+    {list:semV,cls:'ali-red',label:'&#128308; Sem Vendedor'},
+    {list:semN,cls:'ali-yellow',label:'&#128993; Sem Negócio'},
+    {list:pend,cls:'ali-blue',label:'&#128309; Pendentes'}
+  ];
+  let h='';
+  sections.forEach(s=>{
+    h+='<div class="sec-hdr"><span>'+s.label+'</span><span class="sec-count">'+s.list.length+'</span></div>';
+    if(!s.list.length)h+='<div class="empty" style="padding:12px"><div class="empty-icon" style="font-size:18px">&#10003;</div><div class="empty-text">Nenhum</div></div>';
+    else s.list.slice(0,15).forEach(c=>{
+      const name=(c.contact&&c.contact.name)||'Lead';
+      const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
+      const msg=(c.lastMessage&&c.lastMessage.body)||'';
+      h+='<div class="alert-item '+s.cls+'" data-cid="'+escH(c.id)+'" onclick="openConvDirect(this)">';
+      h+='<div class="ai-row1"><span class="ai-name">'+escH(name)+'</span><span class="ai-time">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+      h+='<div class="ai-sub">'+escH(att)+(msg?' • '+escH(msg.substring(0,50)):'')+'</div>';
+      h+='</div>';
+    });
+    if(s.list.length>15)h+='<div style="text-align:center;padding:6px;font-size:10px;color:var(--t3)">+' +(s.list.length-15)+' mais</div>';
+  });
+  el.innerHTML=h;
+                             }
+/* ═══════════════════════════════════════════════════════
+   HOT LEADS
+═══════════════════════════════════════════════════════ */
 async function renderHotLeads(){
-  const panel = document.getElementById('hotListPanel');
-  if(panel) panel.innerHTML='<div class="loading-state"><div class="spinner"></div>Buscando leads quentes...</div>';
+  const el=document.getElementById('lp-hot');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Analisando mensagens...</div>';
 
   // Section 1: Fechamento from CRM
-  const fechamentoBiz=allBiz.filter(b=>{
+  const fechBiz=allBiz.filter(b=>{
     const sn=((b.stage&&(b.stage.name||b.stage.externalId||''))||'').toUpperCase();
     return sn.includes('FECHAMENTO');
   });
 
-  // Section 2: Purchase intent from messages
+  // Section 2: Purchase intent
   const results=[];
   const batches=[];
   for(let i=0;i<allConvs.length;i+=8)batches.push(allConvs.slice(i,i+8));
@@ -494,192 +565,77 @@ async function renderHotLeads(){
       try{
         const d=await apiFetch(MSG+'/conversations/'+c.id+'/messages?take=30&order[createdAt]=desc');
         const msgs=d.messages||[];
-        let bestKw='',bestMsg='';
+        let kw='',msg='';
         for(const m of msgs){
           if(!m.received)continue;
           let txt=m.body||'';
           if(m.interpretedContent&&!m.interpretedContentPending)txt=m.interpretedContent;
-          if(!txt||!txt.trim())continue;
-          if(isMsgPadrao(txt)||isBot(txt))continue;
+          if(!txt||!txt.trim()||isPadrao(txt)||isBot(txt))continue;
           const t=txt.toLowerCase();
-          const kw=PURCHASE_KEYWORDS.find(k=>t.includes(k));
-          if(kw){bestKw=kw;bestMsg=txt.substring(0,100);break;}
+          const k=PURCHASE_KW.find(k=>t.includes(k));
+          if(k){kw=k;msg=txt.substring(0,100);break;}
         }
-        if(bestKw){
+        if(kw){
           const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
-          results.push({c,att,kw:bestKw,msg:bestMsg,ts:c.updatedAt||c.createdAt});
+          results.push({c,att,kw,msg,ts:c.updatedAt||c.createdAt});
         }
       }catch(e){}
     }));
   }
   results.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
 
-  // Update counters
-  const cntF=document.getElementById('cnt-fechamento');if(cntF)cntF.textContent=fechamentoBiz.length;
-  const cntI=document.getElementById('cnt-intencao');if(cntI)cntI.textContent=results.length;
+  let h='';
 
-  // Build the list panel HTML
-  let html='';
-
-  // Section 1
-  html+='<div class="hot-section-header" style="color:var(--red)">&#128680; ALERTA DE FECHAMENTO <span class="section-badge">'+fechamentoBiz.length+'</span></div>';
-  if(!fechamentoBiz.length){
-    html+='<div class="empty-state"><div class="empty-icon">&#8987;</div><div class="empty-text">Nenhum lead em fechamento nas ultimas 24h</div></div>';
+  // FECHAMENTO section
+  h+='<div class="sec-hdr" style="color:var(--red)">&#128680; FECHAMENTO <span class="sec-count">'+fechBiz.length+'</span></div>';
+  if(!fechBiz.length){
+    h+='<div class="empty" style="padding:12px"><div class="empty-icon" style="font-size:18px">&#8987;</div><div class="empty-text">Nenhum em fechamento</div></div>';
   } else {
-    fechamentoBiz.forEach(b=>{
+    fechBiz.forEach(b=>{
       const name=(b.lead&&b.lead.name)||b.name||'Lead';
       const att=(b.attendant&&b.attendant.name)||'Sem vendedor';
       const since=b.stageUpdatedAt||b.updatedAt||b.createdAt;
-      // Resolve convId by phone match against allConvs
       const phone=(b.lead&&b.lead.phone)||'';
-      const normPhone=phone.replace(/\D/g,'');
-      const matchedConv=normPhone?allConvs.find(c=>{const cp=((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'').replace(/\D/g,'');return cp===normPhone||cp.endsWith(normPhone)||normPhone.endsWith(cp);}):null;
-      const convId=matchedConv?matchedConv.id:'';
-      html+='<div class="hot-lead-card hlc-red" data-convid="'+escH(convId)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" data-phone="'+escH(phone)+'" onclick="openHotChat(this)">';
-      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(since)+'</div></div>';
-      const lastMsg=(matchedConv&&matchedConv.lastMessage&&matchedConv.lastMessage.body)||'';
-      if(lastMsg)html+='<div class="lc-msg">'+escH(lastMsg.substring(0,90))+'</div>';
-      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span>';
-      const ph2=(matchedConv&&matchedConv.contact&&(matchedConv.contact.phoneNumber||matchedConv.contact.phone))||phone;
-      if(ph2)html+='<span style="font-size:11px;color:var(--text2)">'+escH(ph2)+'</span>';
-      html+='<span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
-      html+='</div>';
-      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(att)+'</span><span class="priority-badge badge-red-bg">FECHAMENTO</span></div>';
-      html+='</div>';
+      const mc=convByPhone(phone);
+      const cid=mc?mc.id:'';
+      const lastMsg=(mc&&mc.lastMessage&&mc.lastMessage.body)||'';
+      const ph2=(mc&&mc.contact&&(mc.contact.phoneNumber||mc.contact.phone))||phone;
+      h+='<div class="lead-card lc-red" data-cid="'+escH(cid)+'" data-phone="'+escH(phone)+'" data-name="'+escH(name)+'" data-att="'+escH(att)+'" data-ts="'+escH(since)+'" onclick="openLeadCard(this)">';
+      h+='<div class="lc-row1"><span class="lc-name">'+escH(name)+'</span><span class="lc-time">'+timeAgo(since)+'</span></div>';
+      if(lastMsg)h+='<div class="lc-preview">'+escH(lastMsg.substring(0,80))+'</div>';
+      h+='<div class="lc-row3"><span class="lc-vendor">&#128100; '+escH(att)+'</span>';
+      if(ph2)h+='<span class="lc-phone">'+escH(ph2)+'</span>';
+      h+='<span class="pill pill-red">FECHAMENTO</span></div>';
+      h+='</div>';
     });
   }
 
-  // Section 2
-  html+='<div class="hot-section-header" style="color:var(--yellow);margin-top:0">&#9889; INTENCAO DE COMPRA <span class="section-badge">'+results.length+'</span></div>';
+  // INTENT section
+  h+='<div class="sec-hdr" style="color:var(--yellow)">&#9889; INTEN&Ccedil;&Atilde;O DE COMPRA <span class="sec-count">'+results.length+'</span></div>';
   if(!results.length){
-    html+='<div class="empty-state"><div class="empty-icon">&#128270;</div><div class="empty-text">Nenhuma intencao de compra nas ultimas 24h</div></div>';
+    h+='<div class="empty" style="padding:12px"><div class="empty-icon" style="font-size:18px">&#128270;</div><div class="empty-text">Nenhuma inten&ccedil;&atilde;o detectada</div></div>';
   } else {
     results.forEach(r=>{
       const name=(r.c.contact&&r.c.contact.name)||'Lead';
       const phone=(r.c.contact&&(r.c.contact.phone||r.c.contact.phoneNumber))||'';
-      const id=r.c.id;
-      html+='<div class="hot-lead-card hlc-yellow" data-convid="'+escH(id)+'" data-name="'+escH(name)+'" data-att="'+escH(r.att)+'" data-ts="'+escH(r.ts)+'" onclick="openHotChat(this)">';
-      html+='<div class="lc-top"><div class="lc-name">'+escH(name)+'</div><div class="lc-time">'+timeAgo(r.ts)+'</div></div>';
-      html+='<div class="lc-msg">'+escH(r.msg)+'</div>';
-      html+='<div class="lc-meta"><span class="lc-vendor">&#128100; '+escH(r.att)+'</span>';
-      if(phone)html+='<span style="font-size:11px;color:var(--text2)">'+escH(phone)+'</span>';
-      html+='<span class="lc-kw">&#128737; '+escH(r.kw)+'</span></div>';
-      html+='</div>';
+      h+='<div class="lead-card lc-yellow" data-cid="'+escH(r.c.id)+'" data-name="'+escH(name)+'" data-att="'+escH(r.att)+'" data-ts="'+escH(r.ts)+'" onclick="openLeadCard(this)">';
+      h+='<div class="lc-row1"><span class="lc-name">'+escH(name)+'</span><span class="lc-time">'+timeAgo(r.ts)+'</span></div>';
+      h+='<div class="lc-preview">'+escH(r.msg)+'</div>';
+      h+='<div class="lc-row3"><span class="lc-vendor">&#128100; '+escH(r.att)+'</span>';
+      if(phone)h+='<span class="lc-phone">'+escH(phone)+'</span>';
+      h+='<span class="lc-kw">&#128737; '+escH(r.kw)+'</span></div>';
+      h+='</div>';
     });
   }
 
-  if(panel) panel.innerHTML=html;
-}
-
-function openHotChat(el){
-  document.querySelectorAll('.hot-lead-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-  let convId=el.dataset.convid||'';
-  const name=el.dataset.name||'Lead';
-  const att=el.dataset.att||'';
-  const ts=el.dataset.ts||'';
-  const phone=el.dataset.phone||'';
-  // Fallback: resolve convId via phone match if not set
-  if(!convId&&phone){
-    const normPhone=phone.replace(/\D/g,'');
-    const matched=normPhone?allConvs.find(c=>{const cp=((c.contact&&(c.contact.phoneNumber||c.contact.phone))||'').replace(/\D/g,'');return cp===normPhone||cp.endsWith(normPhone)||normPhone.endsWith(cp);}):null;
-    if(matched)convId=matched.id;
-  }
-  document.getElementById('hotChatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(att)+(ts?' &bull; '+timeAgo(ts):'')+'</div>';
-  if(!convId){document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Conversa nao encontrada para este lead</div></div>';return;}
-  loadHotMessages(convId);
-}
-
-async function loadHotMessages(convId){
-  const conv=allConvs.find(c=>c.id===convId);
-  document.getElementById('hotChatMessages').innerHTML='<div class="loading-state"><div class="spinner"></div>Carregando mensagens...</div>';
-  try{
-    let allMsgs=[],skip=0;
-    while(true){
-      const d=await apiFetch(MSG+'/conversations/'+convId+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
-      const msgs=d.messages||[];
-      if(!msgs.length)break;
-      allMsgs=allMsgs.concat(msgs);
-      if(msgs.length<50)break;
-      skip+=50;
-      if(allMsgs.length>300)break;
-    }
-    if(!allMsgs.length){document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Sem mensagens</div></div>';return;}
-    const validMsgs=allMsgs.filter(m=>{
-      const hasText=m.body&&m.body.trim().length>0;
-      const hasT=m.interpretedContent&&!m.interpretedContentPending;
-      const isMedia=m.type&&['audio','image','video'].includes(m.type);
-      const isMimeAudio=m.mimeType&&m.mimeType.includes('audio');
-      return hasText||hasT||isMedia||isMimeAudio;
-    });
-    let html='';
-    validMsgs.forEach(m=>{
-      const isReceived=m.received===true;
-      const msgAttName=(m.attendant&&m.attendant.name)||'';
-      const isVendor=!isReceived&&!!msgAttName;
-      let rowCls,senderName,senderColor;
-      if(isReceived){rowCls='from-lead';senderName=(conv&&conv.contact&&conv.contact.name)||'Lead';senderColor='#60a5fa';}
-      else if(isVendor){rowCls='from-vendor';senderName=msgAttName;senderColor='#c084fc';}
-      else{rowCls='from-bot';senderName='Dr. Roberto (Bot)';senderColor='#4ade80';}
-      const body=m.body||'';
-      const hasT=m.interpretedContent&&!m.interpretedContentPending;
-      const isAudio=m.type==='audio'||(m.mimeType&&m.mimeType.includes('audio'));
-      const isImg=m.type==='image'||(m.mimeType&&m.mimeType.includes('image'));
-      const isVid=m.type==='video'||(m.mimeType&&m.mimeType.includes('video'));
-      let content='';
-      if(isAudio){content='<div class="msg-audio-label">&#127911; Audio</div>';if(hasT)content+='<div class="msg-transcription"><div class="msg-transcription-lbl">TRANSCRICAO</div>'+escH(m.interpretedContent)+'</div>';else if(m.interpretedContentPending)content+='<div class="msg-transcription" style="color:var(--text3)">Transcrevendo...</div>';}
-      else if(isImg){content='<div class="msg-audio-label">&#128247; Imagem</div>';}
-      else if(isVid){content='<div class="msg-audio-label">&#127916; Video</div>';}
-      else{content=escH(body);}
-      const t=m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-      html+='<div class="msg-row '+rowCls+'"><div class="msg-sender-name" style="color:'+senderColor+'">'+escH(senderName)+'</div><div class="msg-bubble">'+content+'</div><div class="msg-time-row">'+t+'</div></div>';
-    });
-    document.getElementById('hotChatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
-    const panel=document.getElementById('hotChatMessages');
-    requestAnimationFrame(()=>{requestAnimationFrame(()=>{panel.scrollTop=panel.scrollHeight;});});
-  }catch(e){
-    document.getElementById('hotChatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
-  }
-}
-function renderVendedores(){
-  const stats={};
-  VENDOR_RANKS.forEach(v=>{stats[v]={name:v,biz:0,convs:0,pending:0,noBiz:0};});
-  allBiz.forEach(b=>{
-    const v=getVendorKey(b.attendant&&b.attendant.name);
-    if(v&&stats[v])stats[v].biz++;
-  });
-  allConvs.forEach(c=>{
-    (c.attendants||[]).forEach(a=>{
-      const v=getVendorKey(a.name);
-      if(v&&stats[v]){
-        stats[v].convs++;
-        if(c.isPending)stats[v].pending++;
-        if(!c.businessId)stats[v].noBiz++;
-      }
-    });
-  });
-  const sorted=VENDOR_RANKS.map(v=>stats[v]).sort((a,b)=>b.biz-a.biz);
-  const maxBiz=Math.max(...sorted.map(s=>s.biz),1);
-  const medals=['&#129351;','&#129352;','&#129353;','4'];
-  let html='';
-  sorted.forEach((s,i)=>{
-    const color=VENDOR_COLORS[s.name]||'#666';
-    const pct=(s.biz/maxBiz*100).toFixed(0);
-    html+='<div class="vendor-card" style="border-top:3px solid '+color+'">';
-    html+='<div class="vc-top"><div class="vc-name" style="color:'+color+'">'+escH(s.name)+'</div><div class="vc-rank">'+medals[i]+'</div></div>';
-    html+='<div class="vc-bar-wrap"><div class="vc-bar" style="width:'+pct+'%;background:'+color+'"></div></div>';
-    html+='<div class="vc-stats" style="margin-top:12px">';
-    html+='<div class="vc-stat"><span class="vc-stat-label">Negocios ativos (24h)</span><span class="vc-stat-val" style="color:'+color+'">'+s.biz+'</span></div>';
-    html+='<div class="vc-stat"><span class="vc-stat-label">Conversas abertas</span><span class="vc-stat-val">'+s.convs+'</span></div>';
-    html+='<div class="vc-stat"><span class="vc-stat-label">Clientes Largados &#128680;</span><span class="vc-stat-val" style="color:var(--red)">'+s.pending+'</span></div>';
-    html+='</div></div>';
-  });
-  document.getElementById('vendorGrid').innerHTML=html||'<div class="empty-state"><div class="empty-text">Nenhum dado nas ultimas 24h</div></div>';
-}
-
-function setConvFilter(f,btn){
+  el.innerHTML=h;
+             }
+/* ═══════════════════════════════════════════════════════
+   CONVERSAS
+═══════════════════════════════════════════════════════ */
+function setConvF(f,btn){
   convFilter=f;
-  document.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.cf').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   renderConvList();
 }
@@ -697,80 +653,102 @@ function renderConvList(){
     }
     return true;
   });
-  const stBadge={'waiting':'badge-red-bg','opened':'badge-green-bg','unstarted':'badge-blue-bg','automation':'badge-yellow-bg'};
-  let html='';
-  if(!list.length){html='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Nenhuma conversa</div></div>';}
-  list.slice(0,80).forEach(c=>{
+  const stMap={'waiting':'pill-red','opened':'pill-green','unstarted':'pill-blue','automation':'pill-orange'};
+  let h='';
+  if(!list.length)h='<div class="empty"><div class="empty-icon">&#128172;</div><div class="empty-text">Nenhuma conversa</div></div>';
+  list.slice(0,100).forEach(c=>{
     const name=(c.contact&&c.contact.name)||c.id||'Lead';
-    const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
     const att=(c.attendants&&c.attendants[0]&&c.attendants[0].name)||'Sem vendedor';
     const st=(c.statuses&&c.statuses[0])||'';
     const msg=(c.lastMessage&&c.lastMessage.body)||'';
-    const id=c.id;
-    const badge=stBadge[st]||'badge-blue-bg';
-    html+='<div class="conv-item'+(c.isPending?' pending':'')+'" data-id="'+escH(id)+'" onclick="openConv(this)">';
-    html+='<div class="ci-top"><div class="ci-name">'+escH(name)+'</div><span class="ci-time">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
-    html+='<div class="ci-preview">'+escH(msg.substring(0,55))+'</div>';
-    html+='<div class="ci-meta"><span class="ci-badge '+badge+'">'+escH(st||'?')+'</span>';
-    html+='<span style="font-size:10px;color:var(--text2)">'+escH(att)+'</span>';
-    if(c.isPending)html+='<span class="ci-badge badge-red-bg">PENDENTE</span>';
-    html+='</div></div>';
+    const phone=(c.contact&&(c.contact.phone||c.contact.phoneNumber))||'';
+    h+='<div class="lead-card'+(c.isPending?' lc-red':'')+'" data-cid="'+escH(c.id)+'" onclick="openConvDirect(this)">';
+    h+='<div class="lc-row1"><span class="lc-name">'+escH(name)+'</span><span class="lc-time">'+timeAgo(c.updatedAt||c.createdAt)+'</span></div>';
+    if(msg)h+='<div class="lc-preview">'+escH(msg.substring(0,70))+'</div>';
+    h+='<div class="lc-row3"><span class="lc-vendor">'+escH(att)+'</span>';
+    if(st)h+='<span class="pill '+(stMap[st]||'pill-blue')+'">'+escH(st)+'</span>';
+    if(c.isPending)h+='<span class="pill pill-red">PENDENTE</span>';
+    h+='</div></div>';
   });
-  document.getElementById('convList').innerHTML=html;
+  document.getElementById('convListBody').innerHTML=h;
 }
 
-function openConv(el){
-  document.querySelectorAll('.conv-item').forEach(e=>e.classList.remove('selected'));
-  el.classList.add('selected');
-  loadMessages(el.dataset.id,el);
+/* ═══════════════════════════════════════════════════════
+   OPEN CONV
+═══════════════════════════════════════════════════════ */
+function openConvDirect(el){
+  const cid=el.dataset.cid;
+  document.querySelectorAll('[data-cid]').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  if(window.innerWidth<=680)document.getElementById('colLeft').classList.remove('mob-open');
+  if(rightPane!=='chat')switchRight('chat');
+  loadMessages(cid);
+}
+
+function openLeadCard(el){
+  let cid=el.dataset.cid||'';
+  const phone=el.dataset.phone||'';
+  const name=el.dataset.name||'Lead';
+  const att=el.dataset.att||'';
+  const ts=el.dataset.ts||'';
+  if(!cid&&phone){const mc=convByPhone(phone);if(mc)cid=mc.id;}
+  document.querySelectorAll('[data-cid]').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  if(window.innerWidth<=680)document.getElementById('colLeft').classList.remove('mob-open');
+  if(rightPane!=='chat')switchRight('chat');
+  // Update header immediately
+  document.getElementById('chatHdr').innerHTML='<div class="chat-hdr-info"><div class="chat-hdr-name">'+escH(name)+'</div><div class="chat-hdr-sub">'+escH(att)+(ts?' • '+timeAgo(ts):'')+'</div></div>';
+  if(!cid){
+    document.getElementById('chatMsgs').innerHTML='<div class="empty"><div class="empty-icon">&#128172;</div><div class="empty-text">Conversa não encontrada para este lead</div></div>';
+    return;
   }
-async function loadMessages(convId,elRef){
-  const conv=allConvs.find(c=>c.id===convId);
-  const name=conv&&conv.contact&&conv.contact.name?conv.contact.name:'Lead';
-  const atts=conv&&conv.attendants?conv.attendants.map(a=>a.name||'').filter(Boolean):[];
-  const attDisplay=atts.length?atts.join(', '):'Sem vendedor';
-  document.getElementById('chatHeader').innerHTML='<div class="chat-header-name">'+escH(name)+'</div><div class="chat-header-sub">'+escH(attDisplay)+' &bull; '+timeAgo(conv?conv.updatedAt||conv.createdAt:new Date())+'</div>';
-  document.getElementById('chatMessages').innerHTML='<div class="loading-state"><div class="spinner"></div>Carregando mensagens...</div>';
+  loadMessages(cid);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOAD MESSAGES
+═══════════════════════════════════════════════════════ */
+async function loadMessages(cid){
+  if(!cid)return;
+  const conv=allConvs.find(c=>c.id===cid);
+  const name=(conv&&conv.contact&&conv.contact.name)||cid;
+  const att=(conv&&conv.attendants&&conv.attendants[0]&&conv.attendants[0].name)||'Sem vendedor';
+  // Update header
+  document.getElementById('chatHdr').innerHTML=
+    '<div class="chat-hdr-info">'+
+    '<div class="chat-hdr-name">'+escH(name)+'</div>'+
+    '<div class="chat-hdr-sub">'+escH(att)+' • '+timeAgo((conv&&(conv.updatedAt||conv.createdAt))||new Date())+'</div>'+
+    '</div>'+
+    (conv&&conv.isPending?'<div class="chat-hdr-badges"><span class="pill pill-red">PENDENTE</span></div>':'');
+  document.getElementById('chatMsgs').innerHTML='<div class="loading"><div class="spinner"></div>Carregando mensagens...</div>';
+
   try{
-    let allMsgs=[],skip=0;
+    let all=[],skip=0;
     while(true){
-      const d=await apiFetch(MSG+'/conversations/'+convId+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
+      const d=await apiFetch(MSG+'/conversations/'+cid+'/messages?take=50&skip='+skip+'&order[createdAt]=asc');
       const msgs=d.messages||[];
       if(!msgs.length)break;
-      allMsgs=allMsgs.concat(msgs);
+      all=all.concat(msgs);
       if(msgs.length<50)break;
-      skip+=50;
-      if(allMsgs.length>300)break;
+      skip+=50;if(all.length>400)break;
     }
-    if(!allMsgs.length){document.getElementById('chatMessages').innerHTML='<div class="empty-state"><div class="empty-icon">&#128172;</div><div class="empty-text">Sem mensagens</div></div>';return;}
-    const validMsgs=allMsgs.filter(m=>{
+    const valid=all.filter(m=>{
       const hasText=m.body&&m.body.trim().length>0;
-      const hasTranscription=m.interpretedContent&&!m.interpretedContentPending;
-      const isMedia=m.type&&['audio','image','video'].includes(m.type);
-      const isMimeAudio=m.mimeType&&m.mimeType.includes('audio');
-      const isMimeImg=m.mimeType&&m.mimeType.includes('image');
-      return hasText||hasTranscription||isMedia||isMimeAudio||isMimeImg;
+      const hasT=m.interpretedContent&&!m.interpretedContentPending;
+      const isAudio=m.type==='audio'||(m.mimeType&&m.mimeType.includes('audio'));
+      const isImg=m.type==='image'||(m.mimeType&&m.mimeType.includes('image'));
+      return hasText||hasT||isAudio||isImg;
     });
-    let html='';
-    validMsgs.forEach(m=>{
-      const isReceived=m.received===true;
-      const msgAttName=(m.attendant&&m.attendant.name)||'';
-      const isVendor=!isReceived&&!!msgAttName;
-      const isBot2=!isReceived&&!msgAttName;
-      let rowCls,senderName,senderColor;
-      if(isReceived){
-        rowCls='from-lead';
-        senderName=(conv&&conv.contact&&conv.contact.name)||'Lead';
-        senderColor='#60a5fa';
-      } else if(isVendor){
-        rowCls='from-vendor';
-        senderName=msgAttName;
-        senderColor='#c084fc';
-      } else {
-        rowCls='from-bot';
-        senderName='Dr. Roberto (Bot)';
-        senderColor='#4ade80';
-      }
+    if(!valid.length){document.getElementById('chatMsgs').innerHTML='<div class="empty"><div class="empty-icon">&#128172;</div><div class="empty-text">Sem mensagens</div></div>';return;}
+    let h='';
+    valid.forEach(m=>{
+      const isRcv=m.received===true;
+      const attName=(m.attendant&&m.attendant.name)||'';
+      const isVendor=!isRcv&&!!attName;
+      let rowCls,sName,sColor;
+      if(isRcv){rowCls='from-lead';sName=(conv&&conv.contact&&conv.contact.name)||'Lead';sColor='#60a5fa';}
+      else if(isVendor){rowCls='from-vendor';sName=attName;sColor='#c084fc';}
+      else{rowCls='from-bot';sName='Dr. Roberto (Bot)';sColor='#4ade80';}
       const body=m.body||'';
       const hasT=m.interpretedContent&&!m.interpretedContentPending;
       const isAudio=m.type==='audio'||(m.mimeType&&m.mimeType.includes('audio'));
@@ -778,35 +756,61 @@ async function loadMessages(convId,elRef){
       const isVid=m.type==='video'||(m.mimeType&&m.mimeType.includes('video'));
       let content='';
       if(isAudio){
-        content='<div class="msg-audio-label">&#127911; Audio</div>';
-        if(hasT)content+='<div class="msg-transcription"><div class="msg-transcription-lbl">TRANSCRICAO</div>'+escH(m.interpretedContent)+'</div>';
-        else if(m.interpretedContentPending)content+='<div class="msg-transcription" style="color:var(--text3)">Transcrevendo...</div>';
-      } else if(isImg){
-        content='<div class="msg-audio-label">&#128247; Imagem</div>';
-      } else if(isVid){
-        content='<div class="msg-audio-label">&#127916; Video</div>';
-      } else {
-        content=escH(body);
-      }
+        content='<div class="msg-audio">&#127911; Áudio</div>';
+        if(hasT)content+='<div class="msg-transcript"><div class="msg-transcript-lbl">TRANSCRIÇÃO</div>'+escH(m.interpretedContent)+'</div>';
+        else if(m.interpretedContentPending)content+='<div class="msg-transcript" style="color:var(--t3)">Transcrevendo...</div>';
+      } else if(isImg)content='<div class="msg-audio">&#128247; Imagem</div>';
+      else if(isVid)content='<div class="msg-audio">&#127916; Vídeo</div>';
+      else content=escH(body);
       const t=m.createdAt?new Date(m.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-      html+='<div class="msg-row '+rowCls+'">';
-      html+='<div class="msg-sender-name" style="color:'+senderColor+'">'+escH(senderName)+'</div>';
-      html+='<div class="msg-bubble">'+content+'</div>';
-      html+='<div class="msg-time-row">'+t+'</div>';
-      html+='</div>';
+      h+='<div class="msg-row '+rowCls+'">'+
+        '<div class="msg-sname" style="color:'+sColor+'">'+escH(sName)+'</div>'+
+        '<div class="msg-bubble">'+content+'</div>'+
+        '<div class="msg-time">'+t+'</div>'+
+        '</div>';
     });
-    document.getElementById('chatMessages').innerHTML=html||'<div class="empty-state"><div class="empty-text">Sem mensagens validas</div></div>';
-    const panel=document.getElementById('chatMessages');
-    requestAnimationFrame(()=>{requestAnimationFrame(()=>{panel.scrollTop=panel.scrollHeight;});});
+    document.getElementById('chatMsgs').innerHTML=h;
+    scrollToBottom();
   }catch(e){
-    document.getElementById('chatMessages').innerHTML='<div class="empty-state"><div class="empty-text">Erro ao carregar mensagens</div></div>';
+    document.getElementById('chatMsgs').innerHTML='<div class="empty"><div class="empty-icon">&#9888;</div><div class="empty-text">Erro ao carregar</div></div>';
   }
+    }
+/* ═══════════════════════════════════════════════════════
+   VENDEDORES
+═══════════════════════════════════════════════════════ */
+function renderVendors(){
+  const stats={};
+  VENDORS.forEach(v=>{stats[v]={name:v,biz:0,convs:0,pending:0};});
+  allBiz.forEach(b=>{const v=getVK(b.attendant&&b.attendant.name);if(v&&stats[v])stats[v].biz++;});
+  allConvs.forEach(c=>{
+    (c.attendants||[]).forEach(a=>{
+      const v=getVK(a.name);
+      if(v&&stats[v]){stats[v].convs++;if(c.isPending)stats[v].pending++;}
+    });
+  });
+  const sorted=VENDORS.map(v=>stats[v]).sort((a,b)=>b.biz-a.biz);
+  const maxBiz=Math.max(...sorted.map(s=>s.biz),1);
+  const medals=['&#129351;','&#129352;','&#129353;','4'];
+  let h='';
+  sorted.forEach((s,i)=>{
+    const color=VCOLORS[s.name]||'#666';
+    const pct=(s.biz/maxBiz*100).toFixed(0);
+    h+='<div class="vendor-card" style="border-top-color:'+color+'">'+
+      '<div class="vc-name" style="color:'+color+'">'+medals[i]+' '+escH(s.name)+'</div>'+
+      '<div class="vc-bar-bg"><div class="vc-bar" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<div class="vc-stats">'+
+      '<div class="vc-row"><span class="vc-lbl">Negócios (24h)</span><span class="vc-val" style="color:'+color+'">'+s.biz+'</span></div>'+
+      '<div class="vc-row"><span class="vc-lbl">Conversas</span><span class="vc-val">'+s.convs+'</span></div>'+
+      '<div class="vc-row"><span class="vc-lbl">&#128680; Largados</span><span class="vc-val" style="color:var(--red)">'+s.pending+'</span></div>'+
+      '</div></div>';
+  });
+  document.getElementById('vendorGrid').innerHTML=h;
 }
 
-window.addEventListener('load',function(){
-  loadAll();
-  setInterval(loadAll,180000);
-});
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('load',()=>{loadAll();setInterval(loadAll,180000);});
 </script>
 </body>
 </html>
