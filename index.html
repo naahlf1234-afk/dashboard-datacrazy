@@ -42,9 +42,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 .lc-meta{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
 .lc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .lc-time{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0}
-.lc-preview{font-size:12px;color:var(--preview);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.lc-preview{font-size:12px;color:var(--preview);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px;min-height:18px}
 .lc-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.lc-phone{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.lc-phone{font-size:10px;color:var(--muted)}
 .lc-kw{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(108,99,255,.15);color:var(--accent);text-transform:uppercase}
 .lc-open-btn{font-size:10px;color:var(--accent);font-weight:600;background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);padding:3px 9px;border-radius:6px;white-space:nowrap}
 .lc.fech .lc-open-btn{color:var(--red);background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)}
@@ -87,15 +87,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
   <div class="tb-r"><span class="upd" id="upd-time">Carregando...</span><button class="btn-r" onclick="loadAll()">↺ Atualizar</button></div>
 </div>
 <div id="main">
-  <div id="sect-fech">
-    <div class="sh">🚨 <span style="color:#ef4444">ALERTA DE FECHAMENTO</span> <span class="sc" id="cnt-fech" style="border-color:#ef4
-444;color:#ef4444">0</span></div>
-    <div class="lead-grid" id="grid-fech"><div class="em">Carregando...</div></div>
-  </div>
-  <div id="sect-int">
-    <div class="sh">⚡ <span style="color:#eab308">INTENÇÃO DE COMPRA</span> <span class="sc" id="cnt-int" style="border-color:#eab308;color:#eab308">0</span></div>
-    <div class="lead-grid" id="grid-int"><div class="em">Carregando...</div></div>
-  </div>
+  <div><div class="sh">🚨 <span style="color:#ef4444">ALERTA DE FECHAMENTO</span> <span class="sc" id="cnt-fech" style="border-color:#ef4444;color:#ef4444">0</span></div><div class="lead-grid" id="grid-fech"><div class="em">Carregando...</div></div></div>
+  <div><div class="sh">⚡ <span style="color:#eab308">INTENÇÃO DE COMPRA</span> <span class="sc" id="cnt-int" style="border-color:#eab308;color:#eab308">0</span></div><div class="lead-grid" id="grid-int"><div class="em">Carregando...</div></div></div>
 </div>
 <div id="chat-overlay" onclick="overlayClose(event)">
   <div id="chat-panel">
@@ -111,112 +104,80 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 const TK='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
 const CRM='https://crm.g1.datacrazy.io/api/crm';
 const MSG='https://messaging.g1.datacrazy.io/api/messaging';
+const FECHAMENTO_ID='17804096-eec5-4c99-bf5f-085153fab099';
 const VE=['Jeremias','Alysson','Luan','Michele'];
 const VC={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};
 const BKW=['pix','cartão','boleto','link de pagamento','desconto','comprar','valor','preço','quanto é','fechar','manda o link','quero comprar','como pago','forma de pagamento'];
-const IGN=['olá doutor, quero saber mais','ola doutor, quero saber mais'];
-let _aa=null,_cv=[],_ct={},_dl=[],_cm={};
-async function apiFetch(base,path,params={}){const u=new URL(base+path);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});if(!r.ok)throw new Error(r.status+' '+path);return r.json()}
+let _aa=null,_cv=[],_acts=[],_cm={};
+async function apiFetch(b,p,q={}){const u=new URL(b+p);Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});if(!r.ok)throw new Error(r.status+' '+p);return r.json()}
 function s24(){return new Date(Date.now()-86400000).toISOString()}
 function nph(p){return p?p.replace(/\D/g,''):''}
 function tAgo(s){if(!s)return '–';const d=Date.now()-new Date(s).getTime(),m=Math.floor(d/60000);if(m<1)return 'agora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d'}
 function vColor(n){for(const v of VE)if(n&&n.toLowerCase().includes(v.toLowerCase()))return VC[v];return '#7070a0'}
 function vInit(n){if(!n)return '?';const p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function cleanTxt(s){return (s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').trim()}
-function bestClientMsg(msgs){const rev=[...msgs].reverse();const best=rev.find(m=>{const b=cleanTxt(m.content||m.text||m.body||m.interpretedContent||'').toLowerCase();if(!b)return false;if(b.includes('olá doutor, quero saber mais')||b.includes('ola doutor, quero saber mais'))return false;return true});return best||msgs[msgs.length-1]||null}
-async function loadAll(){document.getElementById('upd-time').textContent='Atualizando...';try{await Promise.all([loadDeals(),loadConvs()]);document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR')}catch(e){document.getElementById('upd-time').textContent='Erro: '+e.message}}
-async function loadDeals(){try{const since=s24();const d=await apiFetch(CRM,'/deals',{limit:300,updatedAfter:since});_dl=(d.data||d.deals||d||[]).filter(x=>(x.updatedAt||x.lastActivity||'')>=since);const ids=['jer','aly','lua','mic'];VE.forEach((v,i)=>{const cnt=_dl.filter(x=>(x.assignedTo||x.owner||x.vendorName||'').toLowerCase().includes(v.toLowerCase())).length;const el=document.getElementById('vp-'+ids[i]);if(el)el.textContent=cnt})}catch(e){_dl=[];console.error('loadDeals',e)}}
-async function loadConvs(){
-  try{
-    const since=s24();
-    const cd=await apiFetch(MSG,'/contacts',{limit:500});
-    const ca=cd.data||cd.contacts||cd||[];
-    _ct={};ca.forEach(c=>{if(c.phoneNumber)_ct[nph(c.phoneNumber)]=c;if(c.id)_ct['i'+c.id]=c});
-    const vd=await apiFetch(MSG,'/conversations',{limit:300,updatedAfter:since});
-    const all=vd.data||vd.conversations||vd||[];
-    _cv=all.filter(c=>(c.updatedAt||c.lastMessageAt||c.createdAt||'')>=since);
-    let nv=0,pd=0;
-    _cv.forEach(c=>{if(!(c.assignedTo||c.assignee||c.userId))nv++;const st=(c.status||'').toLowerCase();if(st==='pending'||st==='open')pd++});
-    document.getElementById('cnt-nv').textContent=nv;
-    document.getElementById('cnt-pd').textContent=pd;
-    const cph=new Set(_cv.map(c=>{const ct=_ct['i'+(c.contactId||c.contact?.id||'')];return ct?nph(ct.phoneNumber):''}).filter(Boolean));
-    const dph=new Set(_dl.map(d=>nph(d.phone||d.contactPhone||'')).filter(Boolean));
-    let nn=0;cph.forEach(p=>{if(!dph.has(p))nn++});
-    document.getElementById('cnt-nn').textContent=nn;
-    _cm={};
-    await Promise.all(_cv.slice(0,150).map(async c=>{
-      try{
-        const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});
-        const allMsgs=(md.data||md.messages||md||[]).filter(m=>{const b=(m.content||m.text||m.body||m.interpretedContent||'').trim();const t=(m.type||'').toLowerCase();return b&&!['event','system','notification','activity'].includes(t)});
-        const clientMsgs=allMsgs.filter(m=>m.received===true||m.direction==='inbound');
-        const lastClientMsg=clientMsgs.length>0?bestClientMsg(clientMsgs):null;
-        _cm[c.id]={conv:c,allMsgs,clientMsgs,lastClientMsg};
-      }catch(e){_cm[c.id]={conv:c,allMsgs:[],clientMsgs:[],lastClientMsg:null}}
-    }));
-    renderLeads();
-  }catch(e){console.error('loadConvs',e);['cnt-nv','cnt-pd','cnt-nn'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='?'});renderLeads()}
-}
-function fAlert(t){if(_aa===t){_aa=null;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'))}else{_aa=t;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'));const map={nv:'ab-nv',nn:'ab-nn',pd:'ab-pd'};document.getElementById(map[t])?.classList.add('act')}renderLeads()}
+function getMsgText(m){return(m.body||m.interpretedContent||'').trim()}
+function cleanTxt(s){return(s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').trim()}
+function isDefault(b){const l=b.toLowerCase();return l.includes('olá doutor, quero saber mais')||l.includes('ola doutor, quero saber mais')}
+function bestClientMsg(msgs){const rev=[...msgs].reverse();return rev.find(m=>{const b=cleanTxt(getMsgText(m));return b&&!isDefault(b)})||null}
+async function loadAll(){document.getElementById('upd-time').textContent='Atualizando...';try{await Promise.all([loadActivities(),loadConvs()]);document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR')}catch(e){console.error(e);document.getElementById('upd-time').textContent='Erro: '+e.message}}
+async function loadActivities(){try{const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID});_acts=d.data||d||[];const ids=['jer','aly','lua','mic'];VE.forEach((v,i)=>{const cnt=_acts.filter(a=>(a.attendant?.name||'').toLowerCase().includes(v.toLowerCase())).length;const el=document.getElementById('vp-'+ids[i]);if(el)el.textContent=cnt})}catch(e){_acts=[];console.error('loadActivities',e)}}
+async function loadConvs(){try{const since=s24();const vd=await apiFetch(MSG,'/conversations',{limit:300,updatedAfter:since});const all=vd.data||vd.conversations||vd||[];_cv=all.filter(c=>(c.updatedAt||c.lastMessageAt||c.createdAt||'')>=since);
+let nv=0,pd=0;_cv.forEach(c=>{if(!(c.attendants||[]).length)nv++;const st=(c.status||'').toLowerCase();if(st==='pending'||st==='open')pd++});
+document.getElementById('cnt-nv').textContent=nv;document.getElementById('cnt-pd').textContent=pd;
+const actPh=new Set(_acts.map(a=>nph(a.lead?.phone||a.lead?.rawPhone||'')).filter(Boolean));
+let nn=0;_cv.forEach(c=>{const ph=nph(c.contact?.phoneNumber||c.contact?.contactId||'');if(ph&&!actPh.has(ph))nn++});
+document.getElementById('cnt-nn').textContent=nn;
+_cm={};
+await Promise.all(_cv.slice(0,150).map(async c=>{try{const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});const all=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal);const cl=all.filter(m=>m.received===true);const lc=bestClientMsg(cl);_cm[c.id]={conv:c,allMsgs:all,clientMsgs:cl,lastClientMsg:lc}}catch(e){_cm[c.id]={conv:c,allMsgs:[],clientMsgs:[],lastClientMsg:null}}}));
+renderLeads()}catch(e){console.error('loadConvs',e);['cnt-nv','cnt-pd','cnt-nn'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='?'});renderLeads()}}
+function fAlert(t){if(_aa===t){_aa=null;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'))}else{_aa=t;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'));document.getElementById({nv:'ab-nv',nn:'ab-nn',pd:'ab-pd'}[t])?.classList.add('act')}renderLeads()}
 function renderLeads(){
-  let fech=_dl.filter(d=>{const st=(d.stage||d.pipelineStage||d.stageName||'').toLowerCase();return st.includes('fechamento')||st.includes('fechar')||st.includes('closing')});
-  if(_aa==='nv')fech=fech.filter(d=>!(d.assignedTo||d.owner));
-  let inten=[];
-  Object.values(_cm).forEach(({conv,clientMsgs,lastClientMsg})=>{
-    let kw='';
-    for(const m of clientMsgs){const b=(m.content||m.text||m.body||m.interpretedContent||'').toLowerCase().trim();if(IGN.includes(b))continue;const k=BKW.find(x=>b.includes(x));if(k){kw=k;break}}
-    if(!kw)return;
-    const ct=_ct['i'+(conv.contactId||conv.contact?.id||'')];
-    inten.push({conv,ct,lastClientMsg,kw});
-  });
-  if(_aa==='nv')inten=inten.filter(x=>!(x.conv.assignedTo||x.conv.assignee||x.conv.userId));
+  let fech=_acts;if(_aa==='nv')fech=fech.filter(a=>!a.attendant?.name);
+  let inten=[];Object.values(_cm).forEach(({conv,clientMsgs,lastClientMsg})=>{let kw='';for(const m of clientMsgs){const b=cleanTxt(getMsgText(m)).toLowerCase();if(!b||isDefault(b))continue;const k=BKW.find(x=>b.includes(x));if(k){kw=k;break}}if(!kw)return;inten.push({conv,ct:conv.contact||{},lastClientMsg,kw})});
+  if(_aa==='nv')inten=inten.filter(x=>!(x.conv.attendants||[]).length);
   if(_aa==='pd')inten=inten.filter(x=>{const s=(x.conv.status||'').toLowerCase();return s==='pending'||s==='open'});
   document.getElementById('cnt-fech').textContent=fech.length;
   const gf=document.getElementById('grid-fech');
-  if(!fech.length){gf.innerHTML='<div class="em">Nenhum lead em fechamento nas últimas 24h</div>'}
-  else gf.innerHTML=fech.map(d=>{
-    const nm=esc(d.name||d.contactName||d.title||'Lead');
-    const vn=d.assignedTo||d.owner||d.vendorName||'';
-    const ph=nph(d.phone||d.contactPhone||'');
-    const ag=tAgo(d.updatedAt||d.lastActivity||'');
-    const cl=vColor(vn);const ini=vInit(nm);
-    let pv='Nenhuma mensagem do cliente.';
-    if(ph){const mc=Object.values(_cm).find(cm=>{const cid=cm.conv.contactId||cm.conv.contact?.id||'';const ct=_ct['i'+cid];return ct&&nph(ct.phoneNumber)===ph});if(mc&&mc.lastClientMsg){pv=esc(cleanTxt(mc.lastClientMsg.content||mc.lastClientMsg.text||mc.lastClientMsg.body||mc.lastClientMsg.interpretedContent||'').trim().substring(0,100))}}
-    return '<div class="lc fech" data-type="deal" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><span class="lc-badge">Fechamento</span><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<span class="lc-open-btn">Ver conversa →</span></div></div>';
+  if(!fech.length)gf.innerHTML='<div class="em">Nenhum lead em fechamento nas últimas 24h</div>';
+  else gf.innerHTML=fech.map(a=>{
+    const nm=esc(a.lead?.name||'Lead');const ph=nph(a.lead?.phone||a.lead?.rawPhone||'');const vn=a.attendant?.name||'';const ag=tAgo(a.createdAt);const cl=vColor(vn);const ini=vInit(nm);
+    let pv='Sem mensagem recente do cliente.';
+    if(ph){const mc=Object.values(_cm).find(cm=>nph(cm.conv.contact?.phoneNumber||cm.conv.contact?.contactId||'')===ph);if(mc?.lastClientMsg){const t=cleanTxt(getMsgText(mc.lastClientMsg));if(t)pv=esc(t.substring(0,100))}}
+    return '<div class="lc fech" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><span class="lc-badge">Fechamento</span><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<span class="lc-open-btn">Ver conversa →</span></div></div>';
   }).join('');
   document.getElementById('cnt-int').textContent=inten.length;
   const gi=document.getElementById('grid-int');
-  if(!inten.length){gi.innerHTML='<div class="em">Nenhuma intenção de compra detectada nas últimas 24h</div>'}
+  if(!inten.length)gi.innerHTML='<div class="em">Nenhuma intenção de compra detectada nas últimas 24h</div>';
   else gi.innerHTML=inten.map(({conv,ct,lastClientMsg,kw})=>{
-    const nm=esc(ct?.name||conv.contactName||conv.name||'Contato');
-    const ph=nph(ct?.phoneNumber||conv.phone||'');
-    const vn=conv.assignedTo||conv.assignee||'';
-    const cl=vColor(vn);const ini=vInit(nm);
-    const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
-    const pv=lastClientMsg?esc(cleanTxt(lastClientMsg.content||lastClientMsg.text||lastClientMsg.body||lastClientMsg.interpretedContent||'').trim().substring(0,100)):'Nenhuma mensagem do cliente.';
-    return '<div class="lc" data-type="conv" data-cid="'+conv.id+'" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<div style="display:flex;align-items:center;gap:6px"><span class="lc-kw">'+esc(kw)+'</span><span class="lc-open-btn">Ver conversa →</span></div></div></div>';
+    const nm=esc(ct.name||conv.name||'Contato');const ph=nph(ct.phoneNumber||ct.contactId||'');const vn=(conv.attendants||[])[0]?.name||'';const cl=vColor(vn);const ini=vInit(nm);const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
+    let pv='Sem mensagem recente do cliente.';if(lastClientMsg){const t=cleanTxt(getMsgText(lastClientMsg));if(t)pv=esc(t.substring(0,100))}
+    return '<div class="lc" data-cid="'+conv.id+'" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<div style="display:flex;align-items:center;gap:6px"><span class="lc-kw">'+esc(kw)+'</span><span class="lc-open-btn">Ver conversa →</span></div></div></div>';
   }).join('');
 }
 async function openChat(el){
   const nm=el.dataset.nm||'Lead';const vn=el.dataset.vn||'';const ph=el.dataset.ph||'';let cid=el.dataset.cid||'';
   const av=document.getElementById('ch-av');av.textContent=vInit(nm);av.style.background=vColor(vn||nm);
-  document.getElementById('ch-nm').textContent=nm;
-  document.getElementById('ch-sb').textContent=vn?'Vendedor: '+vn:(ph||'—');
-  const overlay=document.getElementById('chat-overlay');overlay.classList.add('open');document.body.style.overflow='hidden';
-  const msgs=document.getElementById('chat-msgs');msgs.innerHTML='<div class="ml">Carregando conversa...</div>';
+  document.getElementById('ch-nm').textContent=nm;document.getElementById('ch-sb').textContent=vn?'Vendedor: '+vn:(ph||'—');
+  const ov=document.getElementById('chat-overlay');ov.classList.add('open');document.body.style.overflow='hidden';
+  const ms=document.getElementById('chat-msgs');ms.innerHTML='<div class="ml">Carregando conversa...</div>';
   try{
-    if(!cid&&ph){const mc=_cv.find(c=>{const ct=_ct['i'+(c.contactId||c.contact?.id||'')];return ct&&nph(ct.phoneNumber)===ph});if(mc)cid=mc.id}
-    if(!cid){msgs.innerHTML='<div class="ml">Conversa não encontrada para este lead.</div>';return}
+    if(!cid&&ph){const mc=_cv.find(c=>nph(c.contact?.phoneNumber||c.contact?.contactId||'')===ph);if(mc)cid=mc.id}
+    if(!cid){ms.innerHTML='<div class="ml">Conversa não encontrada.</div>';return}
     const md=await apiFetch(MSG,'/conversations/'+cid+'/messages',{limit:100});
-    const arr=(md.data||md.messages||md||[]).filter(m=>{const b=(m.content||m.text||m.body||m.interpretedContent||'').trim();const t=(m.type||'').toLowerCase();return b&&!['event','system','notification','activity'].includes(t)});
-    arr.sort((a,b)=>new Date(a.createdAt||a.timestamp||0)-new Date(b.createdAt||b.timestamp||0));
-    if(!arr.length){msgs.innerHTML='<div class="ml">Nenhuma mensagem encontrada.</div>';return}
+    const arr=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal&&cleanTxt(getMsgText(m)));
+    arr.sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));
+    if(!arr.length){ms.innerHTML='<div class="ml">Nenhuma mensagem encontrada.</div>';return}
     let h='';
-    arr.forEach(m=>{const b=esc(cleanTxt(m.content||m.text||m.body||m.interpretedContent||'').trim());const rcv=m.received===true||m.direction==='inbound';const ts=m.createdAt||m.timestamp||'';const tm=ts?new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';if(rcv){h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>'}else{const sn=m.senderName||m.agentName||m.userName||m.sender?.name||'';const isBot=!sn||sn.toLowerCase().includes('roberto')||sn.toLowerCase().includes('bot')||sn.toLowerCase().includes('auto')||m.automated===true||m.isBot===true;if(isBot){h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>'}else{h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>'}}});
-    msgs.innerHTML=h;scrollBot();
-  }catch(e){msgs.innerHTML='<div class="ml">Erro: '+esc(e.message)+'</div>'}
+    arr.forEach(m=>{const b=esc(cleanTxt(getMsgText(m)));if(!b)return;const rcv=m.received===true;const tm=m.createdAt?new Date(m.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+    if(rcv){h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>'}
+    else{const sn=m.attendant?.name||'';const isBot=!sn||/roberto|bot|auto/i.test(sn)||m.automated===true;
+    if(isBot)h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>';
+    else h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>'}});
+    ms.innerHTML=h||'<div class="ml">Sem conteúdo de texto.</div>';scrollBot();
+  }catch(e){ms.innerHTML='<div class="ml">Erro: '+esc(e.message)+'</div>'}
 }
-function scrollBot(){const el=document.getElementById('chat-msgs');if(!el)return;requestAnimationFrame(()=>requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight}))}
+function scrollBot(){const e=document.getElementById('chat-msgs');if(e)requestAnimationFrame(()=>requestAnimationFrame(()=>{e.scrollTop=e.scrollHeight}))}
 function closeChat(){document.getElementById('chat-overlay').classList.remove('open');document.body.style.overflow=''}
 function overlayClose(e){if(e.target===document.getElementById('chat-overlay'))closeChat()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChat()});
