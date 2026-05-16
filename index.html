@@ -401,7 +401,8 @@ inten.push({conv,ct:conv.contact||{},lastClientMsg,kw});
 
 if(_aa==='nv') inten=inten.filter(x=>!(x.conv.attendants||[]).length);
 if(_aa==='pd') inten=inten.filter(x=>{ const s=(x.conv.status||'').toLowerCase(); return s==='pending'||s==='open'; });
-
+fech=[...fech].sort((a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0));
+  inten=[...inten].sort((a,b)=>new Date(b.conv.updatedAt||b.conv.lastMessageAt||0)-new Date(a.conv.updatedAt||a.conv.lastMessageAt||0));
 document.getElementById('cnt-fech').textContent=fech.length;
 const gf=document.getElementById('grid-fech');
 if(!fech.length){
