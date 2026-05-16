@@ -158,7 +158,8 @@ if(i+batchSize<arr.length) await sleep(delayMs);
 }
 }
 
-function s24(){ return new Date(Date.now()-86400000).toISOString(); }
+function sToday(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+  function s24(){ return new Date(Date.now()-86400000).toISOString(); }
 
 // Normaliza telefone: tira não-dígitos, remove DDI 55, retorna número limpo
 function nph(p){
@@ -275,7 +276,7 @@ document.getElementById('upd-time').textContent='Erro: '+e.message;
 
 async function loadActivities(){
 try{
-const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID});
+const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID,createdAfter:sToday()});
 _acts=d.data||d||[];
 const ids=['jer','aly','lua','mic'];
 VE.forEach((v,i)=>{
