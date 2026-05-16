@@ -86,10 +86,18 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
   <div class="vp" style="border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.08)"><div class="d" style="background:#a855f7"></div><span style="color:#a855f7">Michele</span>&nbsp;<span id="vp-mic" style="color:var(--muted)">–</span></div>
   <div class="tb-r"><span class="upd" id="upd-time">Carregando...</span><button class="btn-r" onclick="loadAll()">↺ Atualizar</button></div>
 </div>
+
 <div id="main">
-  <div><div class="sh">🚨 <span style="color:#ef4444">ALERTA DE FECHAMENTO</span> <span class="sc" id="cnt-fech" style="border-color:#ef4444;color:#ef4444">0</span></div><div class="lead-grid" id="grid-fech"><div class="em">Carregando...</div></div></div>
-  <div><div class="sh">⚡ <span style="color:#eab308">INTENÇÃO DE COMPRA</span> <span class="sc" id="cnt-int" style="border-color:#eab308;color:#eab308">0</span></div><div class="lead-grid" id="grid-int"><div class="em">Carregando...</div></div></div>
+  <div>
+    <div class="sh">🚨 <span style="color:#ef4444">ALERTA DE FECHAMENTO</span> <span class="sc" id="cnt-fech" style="border-color:#ef4444;color:#ef4444">0</span></div>
+    <div class="lead-grid" id="grid-fech"><div class="em">Carregando...</div></div>
+  </div>
+  <div>
+    <div class="sh">⚡ <span style="color:#eab308">INTENÇÃO DE COMPRA</span> <span class="sc" id="cnt-int" style="border-color:#eab308;color:#eab308">0</span></div>
+    <div class="lead-grid" id="grid-int"><div class="em">Carregando...</div></div>
+  </div>
 </div>
+
 <div id="chat-overlay" onclick="overlayClose(event)">
   <div id="chat-panel">
     <div id="chat-hdr">
@@ -100,6 +108,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
     <div id="chat-msgs"></div>
   </div>
 </div>
+
 <script>
 const TK='dc_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY2N2IwMTg4NTc3ODM5YmFhZmI5YiIsInRlbmFudElkIjoiMGNkN2ZiM2YtYTQwMS00Y2I5LWEzOTYtZjAwZWYxN2I5ZGMwIiwibmFtZSI6IkNsYXVkZSIsInJvbGVzIjpbImFkbWluIl0sImlzQWRtaW4iOnRydWUsImlhdCI6MTc3ODgwNDY1N30.ZfDi6HWtD67qwYZzhU-Rrd3hAy1N5fMMU8WpiXKwSqA';
 const CRM='https://crm.g1.datacrazy.io/api/crm';
@@ -108,81 +117,332 @@ const FECHAMENTO_ID='17804096-eec5-4c99-bf5f-085153fab099';
 const VE=['Jeremias','Alysson','Luan','Michele'];
 const VC={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};
 const BKW=['pix','cartão','boleto','link de pagamento','desconto','comprar','valor','preço','quanto é','fechar','manda o link','quero comprar','como pago','forma de pagamento'];
-let _aa=null,_cv=[],_acts=[],_cm={};
-async function apiFetch(b,p,q={}){const u=new URL(b+p);Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});if(!r.ok)throw new Error(r.status+' '+p);return r.json()}
-function s24(){return new Date(Date.now()-86400000).toISOString()}
-function nph(p){return p?p.replace(/\D/g,''):''}
-function tAgo(s){if(!s)return '–';const d=Date.now()-new Date(s).getTime(),m=Math.floor(d/60000);if(m<1)return 'agora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d'}
-function vColor(n){for(const v of VE)if(n&&n.toLowerCase().includes(v.toLowerCase()))return VC[v];return '#7070a0'}
-function vInit(n){if(!n)return '?';const p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function getMsgText(m){return(m.body||m.interpretedContent||'').trim()}
-function cleanTxt(s){return(s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').trim()}
-function isDefault(b){const l=b.toLowerCase();return l.includes('olá doutor, quero saber mais')||l.includes('ola doutor, quero saber mais')}
-function bestClientMsg(msgs){const rev=[...msgs].reverse();return rev.find(m=>{const b=cleanTxt(getMsgText(m));return b&&!isDefault(b)})||null}
-async function loadAll(){document.getElementById('upd-time').textContent='Atualizando...';try{await Promise.all([loadActivities(),loadConvs()]);document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR')}catch(e){console.error(e);document.getElementById('upd-time').textContent='Erro: '+e.message}}
-async function loadActivities(){try{const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID});_acts=d.data||d||[];const ids=['jer','aly','lua','mic'];VE.forEach((v,i)=>{const cnt=_acts.filter(a=>(a.attendant?.name||'').toLowerCase().includes(v.toLowerCase())).length;const el=document.getElementById('vp-'+ids[i]);if(el)el.textContent=cnt})}catch(e){_acts=[];console.error('loadActivities',e)}}
-async function loadConvs(){try{const since=s24();const vd=await apiFetch(MSG,'/conversations',{limit:300,updatedAfter:since});const all=vd.data||vd.conversations||vd||[];_cv=all.filter(c=>(c.updatedAt||c.lastMessageAt||c.createdAt||'')>=since);
-let nv=0,pd=0;_cv.forEach(c=>{if(!(c.attendants||[]).length)nv++;const st=(c.status||'').toLowerCase();if(st==='pending'||st==='open')pd++});
-document.getElementById('cnt-nv').textContent=nv;document.getElementById('cnt-pd').textContent=pd;
-const actPh=new Set(_acts.map(a=>nph(a.lead?.phone||a.lead?.rawPhone||'')).filter(Boolean));
-let nn=0;_cv.forEach(c=>{const ph=nph(c.contact?.phoneNumber||c.contact?.contactId||'');if(ph&&!actPh.has(ph))nn++});
-document.getElementById('cnt-nn').textContent=nn;
-_cm={};
-await Promise.all(_cv.slice(0,150).map(async c=>{try{const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});const all=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal);const cl=all.filter(m=>m.received===true);const lc=bestClientMsg(cl);_cm[c.id]={conv:c,allMsgs:all,clientMsgs:cl,lastClientMsg:lc}}catch(e){_cm[c.id]={conv:c,allMsgs:[],clientMsgs:[],lastClientMsg:null}}}));
-renderLeads()}catch(e){console.error('loadConvs',e);['cnt-nv','cnt-pd','cnt-nn'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='?'});renderLeads()}}
-function fAlert(t){if(_aa===t){_aa=null;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'))}else{_aa=t;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act'));document.getElementById({nv:'ab-nv',nn:'ab-nn',pd:'ab-pd'}[t])?.classList.add('act')}renderLeads()}
+
+let _aa=null, _cv=[], _acts=[], _cm={};
+
+async function apiFetch(b,p,q={}){
+  const u=new URL(b+p);
+  Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});
+  if(!r.ok) throw new Error(r.status+' '+p);
+  return r.json();
+}
+
+function s24(){ return new Date(Date.now()-86400000).toISOString(); }
+
+// Normaliza telefone: remove não-dígitos, remove DDI 55, pega últimos 11 dígitos
+function nph(p){
+  if(!p) return '';
+  let d=String(p).replace(/\D/g,'');
+  if(d.length>=12 && d.startsWith('55')) d=d.slice(2);
+  return d.slice(-11);
+}
+
+// Compara dois telefones de forma tolerante
+function phEq(a,b){
+  const na=nph(a), nb=nph(b);
+  if(!na||!nb) return false;
+  if(na===nb) return true;
+  // fallback: últimos 9 dígitos (ignora DDD)
+  if(na.length>=9 && nb.length>=9 && na.slice(-9)===nb.slice(-9)) return true;
+  return false;
+}
+
+function tAgo(s){
+  if(!s) return '–';
+  const d=Date.now()-new Date(s).getTime(), m=Math.floor(d/60000);
+  if(m<1) return 'agora';
+  if(m<60) return m+'m';
+  const h=Math.floor(m/60);
+  if(h<24) return h+'h';
+  return Math.floor(h/24)+'d';
+}
+
+function vColor(n){ for(const v of VE) if(n&&n.toLowerCase().includes(v.toLowerCase())) return VC[v]; return '#7070a0'; }
+function vInit(n){ if(!n) return '?'; const p=n.trim().split(' '); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function getMsgText(m){ return (m.body||m.interpretedContent||'').trim(); }
+function cleanTxt(s){ return (s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').trim(); }
+function isDefault(b){ const l=b.toLowerCase(); return l.includes('olá doutor, quero saber mais')||l.includes('ola doutor, quero saber mais'); }
+function bestClientMsg(msgs){ const rev=[...msgs].reverse(); return rev.find(m=>{ const b=cleanTxt(getMsgText(m)); return b&&!isDefault(b); })||null; }
+
+// Busca conversa pelo telefone usando phEq
+function findConvByPhone(ph){
+  if(!ph) return null;
+  // primeiro busca em _cm (já tem mensagens carregadas)
+  for(const cm of Object.values(_cm)){
+    const cph=cm.conv.contact?.phoneNumber||cm.conv.contact?.contactId||'';
+    if(phEq(ph,cph)) return cm;
+  }
+  // fallback: busca em _cv sem mensagens
+  const c=_cv.find(c=>phEq(ph, c.contact?.phoneNumber||c.contact?.contactId||''));
+  if(c) return {conv:c, allMsgs:[], clientMsgs:[], lastClientMsg:null};
+  return null;
+}
+
+async function loadAll(){
+  document.getElementById('upd-time').textContent='Atualizando...';
+  try{
+    await Promise.all([loadActivities(), loadConvs()]);
+    document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR');
+  }catch(e){
+    console.error(e);
+    document.getElementById('upd-time').textContent='Erro: '+e.message;
+  }
+}
+
+async function loadActivities(){
+  try{
+    const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID});
+    _acts=d.data||d||[];
+    const ids=['jer','aly','lua','mic'];
+    VE.forEach((v,i)=>{
+      const cnt=_acts.filter(a=>(a.attendant?.name||'').toLowerCase().includes(v.toLowerCase())).length;
+      const el=document.getElementById('vp-'+ids[i]);
+      if(el) el.textContent=cnt;
+    });
+  }catch(e){ _acts=[]; console.error('loadActivities',e); }
+}
+
+async function loadConvs(){
+  try{
+    const since=s24();
+    const vd=await apiFetch(MSG,'/conversations',{limit:300,updatedAfter:since});
+    const all=vd.data||vd.conversations||vd||[];
+    _cv=all.filter(c=>(c.updatedAt||c.lastMessageAt||c.createdAt||'')>=since);
+
+    let nv=0, pd=0;
+    _cv.forEach(c=>{
+      if(!(c.attendants||[]).length) nv++;
+      const st=(c.status||'').toLowerCase();
+      if(st==='pending'||st==='open') pd++;
+    });
+    document.getElementById('cnt-nv').textContent=nv;
+    document.getElementById('cnt-pd').textContent=pd;
+
+    const actPh=new Set(_acts.map(a=>nph(a.lead?.phone||a.lead?.rawPhone||'')).filter(Boolean));
+    let nn=0;
+    _cv.forEach(c=>{
+      const ph=nph(c.contact?.phoneNumber||c.contact?.contactId||'');
+      if(ph&&!actPh.has(ph)) nn++;
+    });
+    document.getElementById('cnt-nn').textContent=nn;
+
+    _cm={};
+    await Promise.all(_cv.slice(0,150).map(async c=>{
+      try{
+        const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});
+        const allM=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal);
+        const cl=allM.filter(m=>m.received===true);
+        const lc=bestClientMsg(cl);
+        _cm[c.id]={conv:c, allMsgs:allM, clientMsgs:cl, lastClientMsg:lc};
+      }catch(e){
+        _cm[c.id]={conv:c, allMsgs:[], clientMsgs:[], lastClientMsg:null};
+      }
+    }));
+
+    renderLeads();
+  }catch(e){
+    console.error('loadConvs',e);
+    ['cnt-nv','cnt-pd','cnt-nn'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='?'; });
+    renderLeads();
+  }
+}
+
+function fAlert(t){
+  if(_aa===t){ _aa=null; document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act')); }
+  else{ _aa=t; document.querySelectorAll('.ab').forEach(b=>b.classList.remove('act')); document.getElementById({nv:'ab-nv',nn:'ab-nn',pd:'ab-pd'}[t])?.classList.add('act'); }
+  renderLeads();
+}
+
 function renderLeads(){
-  let fech=_acts;if(_aa==='nv')fech=fech.filter(a=>!a.attendant?.name);
-  let inten=[];Object.values(_cm).forEach(({conv,clientMsgs,lastClientMsg})=>{let kw='';for(const m of clientMsgs){const b=cleanTxt(getMsgText(m)).toLowerCase();if(!b||isDefault(b))continue;const k=BKW.find(x=>b.includes(x));if(k){kw=k;break}}if(!kw)return;inten.push({conv,ct:conv.contact||{},lastClientMsg,kw})});
-  if(_aa==='nv')inten=inten.filter(x=>!(x.conv.attendants||[]).length);
-  if(_aa==='pd')inten=inten.filter(x=>{const s=(x.conv.status||'').toLowerCase();return s==='pending'||s==='open'});
+  let fech=_acts;
+  if(_aa==='nv') fech=fech.filter(a=>!a.attendant?.name);
+
+  let inten=[];
+  Object.values(_cm).forEach(({conv,clientMsgs,lastClientMsg})=>{
+    let kw='';
+    for(const m of clientMsgs){
+      const b=cleanTxt(getMsgText(m)).toLowerCase();
+      if(!b||isDefault(b)) continue;
+      const k=BKW.find(x=>b.includes(x));
+      if(k){ kw=k; break; }
+    }
+    if(!kw) return;
+    inten.push({conv, ct:conv.contact||{}, lastClientMsg, kw});
+  });
+
+  if(_aa==='nv') inten=inten.filter(x=>!(x.conv.attendants||[]).length);
+  if(_aa==='pd') inten=inten.filter(x=>{ const s=(x.conv.status||'').toLowerCase(); return s==='pending'||s==='open'; });
+
+  // --- FECHAMENTO ---
   document.getElementById('cnt-fech').textContent=fech.length;
   const gf=document.getElementById('grid-fech');
-  if(!fech.length)gf.innerHTML='<div class="em">Nenhum lead em fechamento nas últimas 24h</div>';
-  else gf.innerHTML=fech.map(a=>{
-    const nm=esc(a.lead?.name||'Lead');const ph=nph(a.lead?.phone||a.lead?.rawPhone||'');const vn=a.attendant?.name||'';const ag=tAgo(a.createdAt);const cl=vColor(vn);const ini=vInit(nm);
-    let pv='Sem mensagem recente do cliente.';
-    if(ph){const mc=Object.values(_cm).find(cm=>nph(cm.conv.contact?.phoneNumber||cm.conv.contact?.contactId||'')===ph);if(mc?.lastClientMsg){const t=cleanTxt(getMsgText(mc.lastClientMsg));if(t)pv=esc(t.substring(0,100))}}
-    return '<div class="lc fech" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><span class="lc-badge">Fechamento</span><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<span class="lc-open-btn">Ver conversa →</span></div></div>';
-  }).join('');
+  if(!fech.length){
+    gf.innerHTML='<div class="em">Nenhum lead em fechamento nas últimas 24h</div>';
+  } else {
+    gf.innerHTML=fech.map(a=>{
+      const nm=esc(a.lead?.name||'Lead');
+      const phRaw=a.lead?.phone||a.lead?.rawPhone||'';
+      const phDisp=phRaw.replace(/\D/g,'');
+      const vn=a.attendant?.name||'';
+      const ag=tAgo(a.createdAt||a.updatedAt);
+      const cl=vColor(vn);
+      const ini=vInit(nm);
+
+      // preview usando phEq
+      let pv='Sem mensagem recente do cliente.';
+      let convId='';
+      const mc=findConvByPhone(phRaw);
+      if(mc){
+        convId=mc.conv.id;
+        if(mc.lastClientMsg){
+          const t=cleanTxt(getMsgText(mc.lastClientMsg));
+          if(t) pv=esc(t.substring(0,100));
+        }
+      }
+
+      return '<div class="lc fech" data-cid="'+convId+'" data-ph="'+esc(phDisp)+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)">'+
+        '<span class="lc-badge">Fechamento</span>'+
+        '<div class="lc-top">'+
+          '<div class="lc-av" style="background:'+cl+'">'+ini+'</div>'+
+          '<div class="lc-info">'+
+            '<div class="lc-name">'+nm+'</div>'+
+            '<div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div>'+
+          '</div>'+
+          '<div class="lc-time">'+ag+'</div>'+
+        '</div>'+
+        '<div class="lc-preview">'+pv+'</div>'+
+        '<div class="lc-footer">'+
+          (phDisp?'<span class="lc-phone">📱 '+phDisp+'</span>':'<span></span>')+
+          '<span class="lc-open-btn">Ver conversa →</span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  // --- INTENÇÃO DE COMPRA ---
   document.getElementById('cnt-int').textContent=inten.length;
   const gi=document.getElementById('grid-int');
-  if(!inten.length)gi.innerHTML='<div class="em">Nenhuma intenção de compra detectada nas últimas 24h</div>';
-  else gi.innerHTML=inten.map(({conv,ct,lastClientMsg,kw})=>{
-    const nm=esc(ct.name||conv.name||'Contato');const ph=nph(ct.phoneNumber||ct.contactId||'');const vn=(conv.attendants||[])[0]?.name||'';const cl=vColor(vn);const ini=vInit(nm);const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
-    let pv='Sem mensagem recente do cliente.';if(lastClientMsg){const t=cleanTxt(getMsgText(lastClientMsg));if(t)pv=esc(t.substring(0,100))}
-    return '<div class="lc" data-cid="'+conv.id+'" data-ph="'+ph+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)"><div class="lc-top"><div class="lc-av" style="background:'+cl+'">'+ini+'</div><div class="lc-info"><div class="lc-name">'+nm+'</div><div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div></div><div class="lc-time">'+ag+'</div></div><div class="lc-preview">'+pv+'</div><div class="lc-footer">'+(ph?'<span class="lc-phone">📱 '+ph+'</span>':'<span></span>')+'<div style="display:flex;align-items:center;gap:6px"><span class="lc-kw">'+esc(kw)+'</span><span class="lc-open-btn">Ver conversa →</span></div></div></div>';
-  }).join('');
+  if(!inten.length){
+    gi.innerHTML='<div class="em">Nenhuma intenção de compra detectada nas últimas 24h</div>';
+  } else {
+    gi.innerHTML=inten.map(({conv,ct,lastClientMsg,kw})=>{
+      const nm=esc(ct.name||conv.name||'Contato');
+      const phRaw=ct.phoneNumber||ct.contactId||'';
+      const phDisp=phRaw.replace(/\D/g,'');
+      const vn=(conv.attendants||[])[0]?.name||'';
+      const cl=vColor(vn);
+      const ini=vInit(nm);
+      const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
+      let pv='Sem mensagem recente do cliente.';
+      if(lastClientMsg){ const t=cleanTxt(getMsgText(lastClientMsg)); if(t) pv=esc(t.substring(0,100)); }
+      return '<div class="lc" data-cid="'+conv.id+'" data-ph="'+esc(phDisp)+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)">'+
+        '<div class="lc-top">'+
+          '<div class="lc-av" style="background:'+cl+'">'+ini+'</div>'+
+          '<div class="lc-info">'+
+            '<div class="lc-name">'+nm+'</div>'+
+            '<div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div>'+
+          '</div>'+
+          '<div class="lc-time">'+ag+'</div>'+
+        '</div>'+
+        '<div class="lc-preview">'+pv+'</div>'+
+        '<div class="lc-footer">'+
+          (phDisp?'<span class="lc-phone">📱 '+phDisp+'</span>':'<span></span>')+
+          '<div style="display:flex;align-items:center;gap:6px">'+
+            '<span class="lc-kw">'+esc(kw)+'</span>'+
+            '<span class="lc-open-btn">Ver conversa →</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
 }
+
 async function openChat(el){
-  const nm=el.dataset.nm||'Lead';const vn=el.dataset.vn||'';const ph=el.dataset.ph||'';let cid=el.dataset.cid||'';
-  const av=document.getElementById('ch-av');av.textContent=vInit(nm);av.style.background=vColor(vn||nm);
-  document.getElementById('ch-nm').textContent=nm;document.getElementById('ch-sb').textContent=vn?'Vendedor: '+vn:(ph||'—');
-  const ov=document.getElementById('chat-overlay');ov.classList.add('open');document.body.style.overflow='hidden';
-  const ms=document.getElementById('chat-msgs');ms.innerHTML='<div class="ml">Carregando conversa...</div>';
+  const nm=el.dataset.nm||'Lead';
+  const vn=el.dataset.vn||'';
+  const ph=el.dataset.ph||'';
+  let cid=el.dataset.cid||'';
+
+  const av=document.getElementById('ch-av');
+  av.textContent=vInit(nm);
+  av.style.background=vColor(vn||nm);
+  document.getElementById('ch-nm').textContent=nm;
+  document.getElementById('ch-sb').textContent=vn?'Vendedor: '+vn:(ph||'—');
+
+  const ov=document.getElementById('chat-overlay');
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+
+  const ms=document.getElementById('chat-msgs');
+  ms.innerHTML='<div class="ml">Carregando conversa...</div>';
+
   try{
-    if(!cid&&ph){const mc=_cv.find(c=>nph(c.contact?.phoneNumber||c.contact?.contactId||'')===ph);if(mc)cid=mc.id}
-    if(!cid&&ph){try{const fd=await apiFetch(MSG,'/conversations',{limit:1000});const fall=fd.data||fd.conversations||fd||[];const fm=fall.find(c=>nph(c.contact?.phoneNumber||c.contact?.contactId||'')===ph);if(fm)cid=fm.id}catch(e){}}
-    if(!cid){ms.innerHTML='<div class="ml">Conversa não encontrada.</div>';return}
+    // 1) usa cid já gravado no data-cid
+    // 2) busca pelo telefone em _cm e _cv com phEq
+    if(!cid&&ph){
+      const mc=findConvByPhone(ph);
+      if(mc) cid=mc.conv.id;
+    }
+    // 3) fallback: busca paginada sem filtro de data
+    if(!cid&&ph){
+      try{
+        for(let page=1; page<=5&&!cid; page++){
+          const fd=await apiFetch(MSG,'/conversations',{limit:200,page});
+          const fall=fd.data||fd.conversations||fd||[];
+          const fm=fall.find(c=>phEq(ph, c.contact?.phoneNumber||c.contact?.contactId||''));
+          if(fm){ cid=fm.id; break; }
+          if(fall.length<200) break;
+        }
+      }catch(e){ console.warn('fallback paginado',e); }
+    }
+
+    if(!cid){
+      ms.innerHTML='<div class="ml">Conversa não encontrada para este lead.</div>';
+      return;
+    }
+
     const md=await apiFetch(MSG,'/conversations/'+cid+'/messages',{limit:100});
     const arr=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal&&cleanTxt(getMsgText(m)));
     arr.sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));
-    if(!arr.length){ms.innerHTML='<div class="ml">Nenhuma mensagem encontrada.</div>';return}
+
+    if(!arr.length){ ms.innerHTML='<div class="ml">Nenhuma mensagem encontrada.</div>'; return; }
+
     let h='';
-    arr.forEach(m=>{const b=esc(cleanTxt(getMsgText(m)));if(!b)return;const rcv=m.received===true;const tm=m.createdAt?new Date(m.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-    if(rcv){h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>'}
-    else{const sn=m.attendant?.name||'';const isBot=!sn||/roberto|bot|auto/i.test(sn)||m.automated===true;
-    if(isBot)h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>';
-    else h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>'}});
-    ms.innerHTML=h||'<div class="ml">Sem conteúdo de texto.</div>';scrollBot();
-  }catch(e){ms.innerHTML='<div class="ml">Erro: '+esc(e.message)+'</div>'}
+    arr.forEach(m=>{
+      const b=esc(cleanTxt(getMsgText(m)));
+      if(!b) return;
+      const rcv=m.received===true;
+      const tm=m.createdAt?new Date(m.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+      if(rcv){
+        h+='<div class="mb rcv">'+b+'<div class="mt">'+tm+'</div></div>';
+      } else {
+        const sn=m.attendant?.name||'';
+        const isBot=!sn||/roberto|bot|auto/i.test(sn)||m.automated===true;
+        if(isBot) h+='<div class="mb bot"><div class="ms bot">🤖 Dr. Roberto</div>'+b+'<div class="mt">'+tm+'</div></div>';
+        else h+='<div class="mb hum"><div class="ms hum">'+esc(sn)+'</div>'+b+'<div class="mt">'+tm+'</div></div>';
+      }
+    });
+
+    ms.innerHTML=h||'<div class="ml">Sem conteúdo de texto.</div>';
+    scrollBot();
+  }catch(e){
+    console.error('openChat',e);
+    ms.innerHTML='<div class="ml">Erro ao carregar: '+esc(e.message)+'</div>';
+  }
 }
-function scrollBot(){const e=document.getElementById('chat-msgs');if(e)requestAnimationFrame(()=>requestAnimationFrame(()=>{e.scrollTop=e.scrollHeight}))}
-function closeChat(){document.getElementById('chat-overlay').classList.remove('open');document.body.style.overflow=''}
-function overlayClose(e){if(e.target===document.getElementById('chat-overlay'))closeChat()}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChat()});
-loadAll();setInterval(loadAll,60000);
+
+function scrollBot(){
+  const e=document.getElementById('chat-msgs');
+  if(e) requestAnimationFrame(()=>requestAnimationFrame(()=>{ e.scrollTop=e.scrollHeight; }));
+}
+function closeChat(){ document.getElementById('chat-overlay').classList.remove('open'); document.body.style.overflow=''; }
+function overlayClose(e){ if(e.target===document.getElementById('chat-overlay')) closeChat(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeChat(); });
+
+loadAll();
+setInterval(loadAll, 60000);
 </script>
 </body>
 </html>
