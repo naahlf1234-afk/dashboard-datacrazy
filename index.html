@@ -277,7 +277,7 @@ document.getElementById('upd-time').textContent='Erro: '+e.message;
 async function loadActivities(){
 try{
 const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID,createdAfter:sToday()});
-_acts=d.data||d||[];
+_acts=(d.data||d||[]).filter(a=>(a.createdAt||'')>=sToday());
 const ids=['jer','aly','lua','mic'];
 VE.forEach((v,i)=>{
 const cnt=_acts.filter(a=>(a.attendant?.name||'').toLowerCase().includes(v.toLowerCase())).length;
