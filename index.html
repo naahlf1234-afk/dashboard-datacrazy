@@ -118,19 +118,47 @@ const VE=['Jeremias','Alysson','Luan','Michele'];
 const VC={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};
 const BKW=['pix','cartão','boleto','link de pagamento','desconto','comprar','valor','preço','quanto é','fechar','manda o link','quero comprar','como pago','forma de pagamento'];
 
+// Batching para evitar net::ERR_FAILED
+const BATCH_SIZE=6;       // requisições paralelas por vez
+const BATCH_DELAY=200;    // ms entre lotes
+const MAX_CONVS=80;       // limite de conversas com mensagens carregadas
+
 let _aa=null, _cv=[], _acts=[], _cm={};
 
-async function apiFetch(b,p,q={}){
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function apiFetch(b,p,q={},retries=2){
   const u=new URL(b+p);
   Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));
-  const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});
-  if(!r.ok) throw new Error(r.status+' '+p);
-  return r.json();
+  for(let i=0;i<=retries;i++){
+    try{
+      const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});
+      if(!r.ok){
+        if(r.status===429||r.status>=500){
+          // rate limit ou erro server: espera e tenta de novo
+          if(i<retries){ await sleep(500*(i+1)); continue; }
+        }
+        throw new Error(r.status+' '+p);
+      }
+      return r.json();
+    }catch(e){
+      if(i<retries){ await sleep(500*(i+1)); continue; }
+      throw e;
+    }
+  }
+}
+
+// Processa array em lotes pequenos, com delay entre lotes
+async function batchProcess(arr, fn, batchSize=BATCH_SIZE, delayMs=BATCH_DELAY){
+  for(let i=0;i<arr.length;i+=batchSize){
+    const chunk=arr.slice(i,i+batchSize);
+    await Promise.all(chunk.map(fn));
+    if(i+batchSize<arr.length) await sleep(delayMs);
+  }
 }
 
 function s24(){ return new Date(Date.now()-86400000).toISOString(); }
 
-// Normaliza telefone: remove não-dígitos, remove DDI 55, pega últimos 11 dígitos
 function nph(p){
   if(!p) return '';
   let d=String(p).replace(/\D/g,'');
@@ -138,12 +166,10 @@ function nph(p){
   return d.slice(-11);
 }
 
-// Compara dois telefones de forma tolerante
 function phEq(a,b){
   const na=nph(a), nb=nph(b);
   if(!na||!nb) return false;
   if(na===nb) return true;
-  // fallback: últimos 9 dígitos (ignora DDD)
   if(na.length>=9 && nb.length>=9 && na.slice(-9)===nb.slice(-9)) return true;
   return false;
 }
@@ -166,15 +192,12 @@ function cleanTxt(s){ return (s||'').replace(/[\u200B\u200C\u200D\uFEFF]/g,'').t
 function isDefault(b){ const l=b.toLowerCase(); return l.includes('olá doutor, quero saber mais')||l.includes('ola doutor, quero saber mais'); }
 function bestClientMsg(msgs){ const rev=[...msgs].reverse(); return rev.find(m=>{ const b=cleanTxt(getMsgText(m)); return b&&!isDefault(b); })||null; }
 
-// Busca conversa pelo telefone usando phEq
 function findConvByPhone(ph){
   if(!ph) return null;
-  // primeiro busca em _cm (já tem mensagens carregadas)
   for(const cm of Object.values(_cm)){
     const cph=cm.conv.contact?.phoneNumber||cm.conv.contact?.contactId||'';
     if(phEq(ph,cph)) return cm;
   }
-  // fallback: busca em _cv sem mensagens
   const c=_cv.find(c=>phEq(ph, c.contact?.phoneNumber||c.contact?.contactId||''));
   if(c) return {conv:c, allMsgs:[], clientMsgs:[], lastClientMsg:null};
   return null;
@@ -183,7 +206,8 @@ function findConvByPhone(ph){
 async function loadAll(){
   document.getElementById('upd-time').textContent='Atualizando...';
   try{
-    await Promise.all([loadActivities(), loadConvs()]);
+    await loadActivities();
+    await loadConvs();
     document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR');
   }catch(e){
     console.error(e);
@@ -228,8 +252,20 @@ async function loadConvs(){
     });
     document.getElementById('cnt-nn').textContent=nn;
 
+    // PRIORIDADE: carregar primeiro as conversas que correspondem aos leads de fechamento
+    const actPhones=_acts.map(a=>a.lead?.phone||a.lead?.rawPhone||'').filter(Boolean);
+    const priority=[];
+    const rest=[];
+    _cv.forEach(c=>{
+      const cph=c.contact?.phoneNumber||c.contact?.contactId||'';
+      if(actPhones.some(p=>phEq(p,cph))) priority.push(c);
+      else rest.push(c);
+    });
+    const toLoad=[...priority, ...rest].slice(0, MAX_CONVS);
+
     _cm={};
-    await Promise.all(_cv.slice(0,150).map(async c=>{
+    // Processa em lotes pequenos para não derrubar a API
+    await batchProcess(toLoad, async c=>{
       try{
         const md=await apiFetch(MSG,'/conversations/'+c.id+'/messages',{limit:20});
         const allM=(md.data||md.messages||md||[]).filter(m=>!m.deleted&&!m.isInternal);
@@ -239,7 +275,7 @@ async function loadConvs(){
       }catch(e){
         _cm[c.id]={conv:c, allMsgs:[], clientMsgs:[], lastClientMsg:null};
       }
-    }));
+    });
 
     renderLeads();
   }catch(e){
@@ -275,7 +311,6 @@ function renderLeads(){
   if(_aa==='nv') inten=inten.filter(x=>!(x.conv.attendants||[]).length);
   if(_aa==='pd') inten=inten.filter(x=>{ const s=(x.conv.status||'').toLowerCase(); return s==='pending'||s==='open'; });
 
-  // --- FECHAMENTO ---
   document.getElementById('cnt-fech').textContent=fech.length;
   const gf=document.getElementById('grid-fech');
   if(!fech.length){
@@ -290,7 +325,6 @@ function renderLeads(){
       const cl=vColor(vn);
       const ini=vInit(nm);
 
-      // preview usando phEq
       let pv='Sem mensagem recente do cliente.';
       let convId='';
       const mc=findConvByPhone(phRaw);
@@ -321,7 +355,6 @@ function renderLeads(){
     }).join('');
   }
 
-  // --- INTENÇÃO DE COMPRA ---
   document.getElementById('cnt-int').textContent=inten.length;
   const gi=document.getElementById('grid-int');
   if(!inten.length){
@@ -379,13 +412,11 @@ async function openChat(el){
   ms.innerHTML='<div class="ml">Carregando conversa...</div>';
 
   try{
-    // 1) usa cid já gravado no data-cid
-    // 2) busca pelo telefone em _cm e _cv com phEq
     if(!cid&&ph){
       const mc=findConvByPhone(ph);
       if(mc) cid=mc.conv.id;
     }
-    // 3) fallback: busca paginada sem filtro de data
+    // Fallback paginado se ainda não achou
     if(!cid&&ph){
       try{
         for(let page=1; page<=5&&!cid; page++){
@@ -394,6 +425,7 @@ async function openChat(el){
           const fm=fall.find(c=>phEq(ph, c.contact?.phoneNumber||c.contact?.contactId||''));
           if(fm){ cid=fm.id; break; }
           if(fall.length<200) break;
+          await sleep(150);
         }
       }catch(e){ console.warn('fallback paginado',e); }
     }
@@ -442,7 +474,7 @@ function overlayClose(e){ if(e.target===document.getElementById('chat-overlay'))
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeChat(); });
 
 loadAll();
-setInterval(loadAll, 60000);
+setInterval(loadAll, 90000);
 </script>
 </body>
 </html>
