@@ -94,6 +94,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 .funil-card-n{font-size:24px;font-weight:700;margin-bottom:2px}
 .funil-card-l{font-size:11px;color:var(--muted)}
 .funil-card-pct{font-size:11px;font-weight:600;margin-top:4px}
+#agendado-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:24px;border-top:3px solid var(--blue)}
+.agend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
+.agend-card{background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;border-left:4px solid transparent}
+.agend-n{font-size:32px;font-weight:700;margin-bottom:2px}
+.agend-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.agend-today{font-size:18px;font-weight:700}
+.agend-today-label{font-size:9px;color:var(--muted);margin-top:2px}
+.agend-sep{height:1px;background:var(--border);margin:8px 0}
 </style>
 </head>
 <body>
@@ -129,6 +137,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 <div class="sh">&#128256; <span style="color:var(--purple)">FUNIL POS-FECHAMENTO</span> <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">saida dos leads do fechamento</span></div>
 <div class="funil-grid" id="funil-grid"><div class="em">Carregando...</div></div>
 </div>
+<div id="agendado-panel">
+<div class="sh">&#128197; <span style="color:var(--blue)">VENDAS — AGENDADO</span> <span style="font-size:9px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(leads que passaram pelo fechamento para agendamento)</span></div>
+<div class="agend-grid" id="agend-grid"><div class="em">Carregando...</div></div>
+</div>
 <div>
 <div class="sh">🚨 <span style="color:#ef4444">ALERTA DE FECHAMENTO</span> <span class="sc" id="cnt-fech" style="border-color:#ef4444;color:#ef4444">0</span></div>
 <div class="lead-grid" id="grid-fech"><div class="em">Carregando...</div></div>
@@ -163,7 +175,7 @@ const VC={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'}
 const BKW=['pix','cartao','boleto','link de pagamento','desconto','comprar','valor','preco','quanto e','fechar','manda o link','quero comprar','como pago','forma de pagamento'];
 const BATCH_SIZE=6,BATCH_DELAY=200,MAX_CONVS_MSGS=80;
 let _aa=null,_vf=null,_cv=[],_cvAll=[],_acts=[],_cm={},_phoneToConv={};
-let _bizFech=[],_bizWon=[],_bizAll=[],_bizByStage={};
+let _bizFech=[],_bizWon=[],_bizAll=[],_bizByStage={},_bizAgendado=[],_bizAgendadoHoje=[];
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function apiFetch(b,p,q,retries){q=q||{};retries=retries===undefined?2:retries;const u=new URL(b+p);Object.entries(q).forEach(function(e){u.searchParams.set(e[0],e[1]);});for(let i=0;i<=retries;i++){try{const r=await fetch(u,{headers:{Authorization:'Bearer '+TK}});if(!r.ok){if(r.status===429||r.status>=500){if(i<retries){await sleep(500*(i+1));continue;}}throw new Error(r.status+' '+p);}return r.json();}catch(e){if(i<retries){await sleep(500*(i+1));continue;}throw e;}}}
 async function loadStages(){try{const d=await apiFetch(API,'/pipelines/'+PIPELINE_ID+'/stages');const stages=d.data||d||[];STAGE_MAP={};stages.forEach(function(s){STAGE_MAP[s.name.toUpperCase()]=s.id;});}catch(e){console.warn('loadStages',e);}}
@@ -185,10 +197,58 @@ function isDefault(b){const l=b.toLowerCase();return l.includes('ola doutor, que
 function bestClientMsg(msgs){const rev=msgs.slice().reverse();return rev.find(function(m){const b=cleanTxt(getMsgText(m));return b&&!isDefault(b);})||null;}
 async function loadAll(){document.getElementById('upd-time').textContent='Atualizando...';const dd=document.getElementById('day-date');if(dd)dd.textContent=todayLabel();try{await loadStages();await Promise.all([loadActivities(),loadBusinesses(),loadConvs()]);document.getElementById('upd-time').textContent='Atualizado: '+new Date().toLocaleTimeString('pt-BR');loadAllConvsBg();}catch(e){console.error(e);document.getElementById('upd-time').textContent='Erro: '+e.message;}}
 async function loadActivities(){try{const d=await apiFetch(CRM,'/activities',{limit:200,stageId:FECHAMENTO_ID,createdAfter:sToday()});_acts=(d.data||d||[]).filter(function(a){return (a.createdAt||'')>=sToday();});const ids=['jer','aly','lua','mic'];VE.forEach(function(v,i){const cnt=_acts.filter(function(a){return (a.attendant&&a.attendant.name||'').toLowerCase().includes(v.toLowerCase());}).length;const el=document.getElementById('vp-'+ids[i]);if(el)el.textContent=cnt;});}catch(e){_acts=[];console.error('loadActivities',e);}}
-async function loadBusinesses(){try{const fData=await apiFetch(API,'/businesses',{'filter[status]':'in_process','take':'500','skip':'0'});const allBiz=fData.data||[];_bizFech=allBiz.filter(function(b){return b.stageId===FECHAMENTO_ID;});const wData=await apiFetch(API,'/businesses',{'filter[status]':'won','take':'500','skip':'0'});_bizWon=wData.data||[];_bizAll=allBiz;_bizByStage={};allBiz.forEach(function(b){if(!_bizByStage[b.stageId])_bizByStage[b.stageId]=[];_bizByStage[b.stageId].push(b);});const tl=document.getElementById('day-total-leads');if(tl)tl.textContent=allBiz.length;renderDaySummary();renderConversaoPorVendedor();renderFunilPosFechamento();}catch(e){console.error('loadBusinesses',e);}}
+async function loadBusinesses(){try{const fData=await apiFetch(API,'/businesses',{'filter[status]':'in_process','take':'500','skip':'0'});const allBiz=fData.data||[];_bizFech=allBiz.filter(function(b){return b.stageId===FECHAMENTO_ID;});const wData=await apiFetch(API,'/businesses',{'filter[status]':'won','take':'500','skip':'0'});_bizWon=wData.data||[];_bizAll=allBiz;_bizByStage={};allBiz.forEach(function(b){if(!_bizByStage[b.stageId])_bizByStage[b.stageId]=[];_bizByStage[b.stageId].push(b);});const tl=document.getElementById('day-total-leads');if(tl)tl.textContent=allBiz.length;renderDaySummary();renderConversaoPorVendedor();renderFunilPosFechamento();await loadAgendado();}catch(e){console.error('loadBusinesses',e);}}
 function renderDaySummary(){const ft=document.getElementById('day-fech-total');if(ft)ft.textContent=_bizFech.length;const wt=document.getElementById('day-won-total');if(wt)wt.textContent=_bizWon.length;const pct=_bizFech.length>0?Math.round((_bizWon.length/_bizFech.length)*100):0;const cp=document.getElementById('day-conv-pct');if(cp)cp.textContent=pct+'% de conversao';const followKey=STAGE_MAP['FOLLOW-UP']||STAGE_MAP['FOLLOWUP']||'';const followCount=followKey?(_bizByStage[followKey]||[]).length:0;const df=document.getElementById('day-followup');if(df)df.textContent=followCount;}
 function renderConversaoPorVendedor(){const grid=document.getElementById('conv-grid');if(!grid)return;const colors={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};const idMap={Jeremias:'jer',Alysson:'aly',Luan:'lua',Michele:'mic'};const stats=VE.map(function(v){const nm=function(b){return (b.attendant&&b.attendant.name)||b.attendantName||'';};const fechV=_bizFech.filter(function(b){return nm(b).toLowerCase().includes(v.toLowerCase());});const allV=_bizAll.filter(function(b){return nm(b).toLowerCase().includes(v.toLowerCase());});const wonV=_bizWon.filter(function(b){return nm(b).toLowerCase().includes(v.toLowerCase());});const pctFech=fechV.length>0?Math.round((wonV.length/fechV.length)*100):0;const pctTotal=allV.length>0?Math.round((wonV.length/allV.length)*100):0;const pctEl=document.getElementById('vp-'+idMap[v]+'-pct');if(pctEl)pctEl.textContent=pctFech+'%';return {v:v,fechV:fechV.length,allV:allV.length,wonV:wonV.length,pctFech:pctFech,pctTotal:pctTotal,color:colors[v]};});grid.innerHTML=stats.map(function(s){return '<div class="conv-card" style="border-left-color:'+s.color+'">'+'<div class="conv-card-name" style="color:'+s.color+'">'+s.v+'</div>'+'<div class="conv-row"><span class="conv-label">No Fechamento</span><span class="conv-val" style="color:var(--red)">'+s.fechV+'</span></div>'+'<div class="conv-row"><span class="conv-label">Leads Totais</span><span class="conv-val" style="color:var(--blue)">'+s.allV+'</span></div>'+'<div class="conv-row"><span class="conv-label">Convertidos</span><span class="conv-val" style="color:var(--green)">'+s.wonV+'</span></div>'+'<div class="conv-pct" style="color:'+s.color+'">'+s.pctFech+'%</div>'+'<div style="font-size:9px;color:var(--muted);margin-top:2px">conversao (fech. ganho)</div>'+'<div class="conv-bar"><div class="conv-bar-fill" style="width:'+Math.min(s.pctFech,100)+'%;background:'+s.color+'"></div></div>'+'<div style="font-size:9px;color:var(--muted);margin-top:6px">'+s.pctTotal+'% sobre total</div>'+'</div>';}).join('');}
 function renderFunilPosFechamento(){const grid=document.getElementById('funil-grid');if(!grid)return;const fechTotal=_bizFech.length;const etapas=[{nome:'FOLLOW-UP',cor:'#f97316'},{nome:'AGENDADO',cor:'#3b82f6'},{nome:'LEAD PRA O FUTURO',cor:'#a855f7'},{nome:'DESQUALIFICADO',cor:'#ef4444'}];grid.innerHTML=etapas.map(function(e){const sid=STAGE_MAP[e.nome]||null;const count=sid?(_bizByStage[sid]||[]).length:0;const pct=fechTotal>0?Math.round((count/fechTotal)*100):0;return '<div class="funil-card" style="border-top-color:'+e.cor+'">'+'<div class="funil-card-n" style="color:'+e.cor+'">'+count+'</div>'+'<div class="funil-card-l">'+e.nome+'</div>'+'<div class="funil-card-pct" style="color:'+e.cor+'">'+pct+'% do fech.</div>'+'</div>';}).join('');}
+async function loadAgendado(){
+  const AGENDADO_ID=STAGE_MAP['AGENDADO']||'4e9c143b-1990-4adb-88f1-74a68f8ddfcb';
+  try{
+    // Usar dados ja carregados em _bizByStage para o total
+    _bizAgendado=(_bizByStage[AGENDADO_ID]||[]);
+    // Chamada extra para pegar movidos hoje para AGENDADO
+    const todayStart=new Date();todayStart.setHours(0,0,0,0);
+    const todayISO=todayStart.toISOString();
+    const r2=await apiFetch(API,'/businesses',{'filter[status]':'in_process','filter[lastMovedAfter]':todayISO,'take':'500','skip':'0'});
+    _bizAgendadoHoje=(r2.data||[]).filter(function(b){return b.stageId===AGENDADO_ID;});
+    renderAgendadoPorVendedor();
+  }catch(e){
+    // Fallback: usar apenas dados do _bizByStage
+    _bizAgendado=(_bizByStage[STAGE_MAP['AGENDADO']||'4e9c143b-1990-4adb-88f1-74a68f8ddfcb']||[]);
+    _bizAgendadoHoje=[];
+    renderAgendadoPorVendedor();
+    console.error('loadAgendado',e);
+  }
+}
+function renderAgendadoPorVendedor(){
+  const grid=document.getElementById('agend-grid');
+  if(!grid)return;
+  const colors={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};
+  const nm=function(b){return (b.attendant&&b.attendant.name)||b.attendantName||'';};
+  // Total geral
+  const totalAll=_bizAgendado.length;
+  const totalHoje=_bizAgendadoHoje.length;
+  let html='<div class="agend-card" style="border-left-color:var(--blue)">'+
+    '<div class="agend-n" style="color:var(--blue)">'+totalAll+'</div>'+
+    '<div class="agend-label">Total em Agendado</div>'+
+    '<div class="agend-sep"></div>'+
+    '<div class="agend-today" style="color:var(--green)">'+totalHoje+'</div>'+
+    '<div class="agend-today-label">movidos hoje</div>'+
+    '</div>';
+  VE.forEach(function(v){
+    const color=colors[v];
+    const vAll=_bizAgendado.filter(function(b){return nm(b).toLowerCase().includes(v.toLowerCase());});
+    const vHoje=_bizAgendadoHoje.filter(function(b){return nm(b).toLowerCase().includes(v.toLowerCase());});
+    html+='<div class="agend-card" style="border-left-color:'+color+'">'+
+      '<div class="agend-n" style="color:'+color+'">'+vAll.length+'</div>'+
+      '<div class="agend-label" style="color:'+color+'">'+v+'</div>'+
+      '<div class="agend-sep"></div>'+
+      '<div class="agend-today" style="color:var(--green)">'+vHoje.length+'</div>'+
+      '<div class="agend-today-label">hoje</div>'+
+      '</div>';
+  });
+  grid.innerHTML=html;
+}
 async function loadConvs(){
 try{
 const since=s24();
