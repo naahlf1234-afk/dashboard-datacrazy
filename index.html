@@ -102,6 +102,30 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 .agend-today{font-size:18px;font-weight:700}
 .agend-today-label{font-size:9px;color:var(--muted);margin-top:2px}
 .agend-sep{height:1px;background:var(--border);margin:8px 0}
+
+/* WEBHOOK ALERTA DE VENDA */
+#venda-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#venda-overlay.open{display:flex}
+#venda-box{background:linear-gradient(135deg,#0f1f0f,#0a2a0a);border:3px solid #22c55e;border-radius:20px;padding:32px 40px;text-align:center;max-width:480px;width:90%;box-shadow:0 0 60px rgba(34,197,94,.5),0 0 120px rgba(34,197,94,.2);animation:vendaPulse 1s ease-in-out infinite alternate}
+@keyframes vendaPulse{from{box-shadow:0 0 40px rgba(34,197,94,.4),0 0 80px rgba(34,197,94,.15)}to{box-shadow:0 0 80px rgba(34,197,94,.8),0 0 160px rgba(34,197,94,.35)}}
+.venda-icon{font-size:56px;margin-bottom:12px;animation:vendaSpin .6s ease-in-out}
+@keyframes vendaSpin{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.venda-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#22c55e;margin-bottom:8px}
+.venda-msg{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.3}
+.venda-val{font-size:36px;font-weight:700;color:#22c55e;margin-bottom:20px}
+.venda-close{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#22c55e;padding:8px 28px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s}
+.venda-close:hover{background:rgba(34,197,94,.3)}
+
+/* HOT LEADS - borda dourada + fogo */
+.lc.hot{border:2px solid #f59e0b;background:rgba(245,158,11,.07);box-shadow:0 0 18px rgba(245,158,11,.25)}
+.lc.hot:hover{border-color:#f59e0b;background:rgba(245,158,11,.14);box-shadow:0 0 28px rgba(245,158,11,.4)}
+.hot-badge{position:absolute;top:10px;right:10px;background:rgba(245,158,11,.2);color:#f59e0b;font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;border:1px solid rgba(245,158,11,.4)}
+.hot-kw{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(245,158,11,.2);color:#f59e0b;text-transform:uppercase;border:1px solid rgba(245,158,11,.4)}
+
+/* CRONOMETRO JANELA 24H */
+.lc-timer{font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;padding:2px 7px;border-radius:5px;background:rgba(34,197,94,.1);color:#22c55e}
+.lc-timer.urgent{color:#ef4444;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);animation:timerBlink .8s step-end infinite}
+@keyframes timerBlink{0%,100%{opacity:1}50%{opacity:.35}}
 </style>
 </head>
 <body>
@@ -151,6 +175,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 </div>
 </div>
 
+
+<div id="venda-overlay" onclick="closeVendaAlert()">
+<div id="venda-box" onclick="event.stopPropagation()">
+<div class="venda-icon" id="venda-icon">&#127881;</div>
+<div class="venda-title">&#128176; ALERTA DE VENDA / AGENDADO</div>
+<div class="venda-msg" id="venda-msg">Nova Venda!</div>
+<div class="venda-val" id="venda-val">R$ 0,00</div>
+<button class="venda-close" onclick="closeVendaAlert()">&#10003; Confirmar</button>
+</div>
+</div>
+
 <div id="chat-overlay" onclick="overlayClose(event)">
 <div id="chat-panel">
 <div id="chat-hdr">
@@ -172,7 +207,7 @@ const FECHAMENTO_ID='17804096-eec5-4c99-bf5f-085153fab099';
 let STAGE_MAP={};
 const VE=['Jeremias','Alysson','Luan','Michele'];
 const VC={Jeremias:'#22c55e',Alysson:'#f97316',Luan:'#3b82f6',Michele:'#a855f7'};
-const BKW=['pix','cartao','boleto','link de pagamento','desconto','comprar','valor','preco','quanto e','fechar','manda o link','quero comprar','como pago','forma de pagamento'];
+const BKW_HOT=['link de pagamento','boleto','manda o link'];const BKW_WARM=['pix','cartao','desconto','comprar','valor','preco','quanto e','fechar','quero comprar','como pago','forma de pagamento'];const BKW=[...BKW_HOT,...BKW_WARM];
 const BATCH_SIZE=6,BATCH_DELAY=200,MAX_CONVS_MSGS=80;
 let _aa=null,_vf=null,_cv=[],_cvAll=[],_acts=[],_cm={},_phoneToConv={};
 let _bizFech=[],_bizWon=[],_bizAll=[],_bizByStage={},_bizAgendado=[],_bizAgendadoHoje=[];
@@ -354,21 +389,30 @@ if(_vf) fech=fech.filter(a=>(a.attendant&&a.attendant.name||'').toLowerCase().in
 
 let inten=[];
 Object.values(_cm).forEach(({conv,clientMsgs,lastClientMsg})=>{
-let kw='';
+let kw='',hot=false;
 for(const m of clientMsgs){
 const b=cleanTxt(getMsgText(m)).toLowerCase();
 if(!b||isDefault(b)) continue;
-const k=BKW.find(x=>b.includes(x));
-if(k){ kw=k; break; }
+const kh=BKW_HOT.find(x=>b.includes(x));
+if(kh){kw=kh;hot=true;break;}
+const kw2=BKW_WARM.find(x=>b.includes(x));
+if(kw2){kw=kw2;}
 }
 if(!kw) return;
-inten.push({conv,ct:conv.contact||{},lastClientMsg,kw});
+const ts=conv.updatedAt||conv.lastMessageAt||conv.createdAt||'';
+inten.push({conv,ct:conv.contact||{},lastClientMsg,kw,hot,ts});
 });
 
 if(_aa==='nv') inten=inten.filter(x=>!(x.conv.attendants||[]).length);
 if(_aa==='pd') inten=inten.filter(x=>{ const s=(x.conv.status||'').toLowerCase(); return s==='pending'||s==='open'; });
 fech=[...fech].sort((a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0));
-  inten=[...inten].sort((a,b)=>new Date(b.conv.updatedAt||b.conv.lastMessageAt||0)-new Date(a.conv.updatedAt||a.conv.lastMessageAt||0));
+// HOT first, depois por data mais recente
+inten.sort((a,b)=>{
+if(a.hot&&!b.hot) return -1;
+if(!a.hot&&b.hot) return 1;
+return new Date(b.ts||0)-new Date(a.ts||0);
+});
+
 document.getElementById('cnt-fech').textContent=fech.length;
 const gf=document.getElementById('grid-fech');
 if(!fech.length){
@@ -416,37 +460,51 @@ const gi=document.getElementById('grid-int');
 if(!inten.length){
 gi.innerHTML='<div class="em">Nenhuma intenção de compra detectada nas últimas 24h</div>';
 } else {
-gi.innerHTML=inten.map(({conv,ct,lastClientMsg,kw})=>{
+gi.innerHTML=inten.map(({conv,ct,lastClientMsg,kw,hot,ts})=>{
 const nm=esc(ct.name||conv.name||'Contato');
 const phRaw=ct.phoneNumber||ct.contactId||'';
 const phDisp=phRaw.replace(/\D/g,'');
 const vn=(conv.attendants||[])[0]?.name||'';
 const cl=vColor(vn);
 const ini=vInit(nm);
-const ag=tAgo(conv.updatedAt||conv.lastMessageAt||'');
 let pv='Sem mensagem recente do cliente.';
-if(lastClientMsg){ const t=cleanTxt(getMsgText(lastClientMsg)); if(t) pv=esc(t.substring(0,100)); }
-return '<div class="lc" data-cid="'+conv.id+'" data-ph="'+esc(phDisp)+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)">'+
+if(lastClientMsg){const t=cleanTxt(getMsgText(lastClientMsg));if(t)pv=esc(t.substring(0,100));}
+// Cronometro regressivo 24h
+const msElapsed=ts?Date.now()-new Date(ts).getTime():0;
+const msLeft=Math.max(0,86400000-msElapsed);
+const hLeft=Math.floor(msLeft/3600000);
+const mLeft=Math.floor((msLeft%3600000)/60000);
+const timerStr=(hLeft>0?hLeft+'h ':'')+(mLeft+'m');
+const urgent=hLeft<4;
+const timerCls='lc-timer'+(urgent?' urgent':'');
+const hotCls=hot?' hot':'';
+const kwCls=hot?'hot-kw':'lc-kw';
+return '<div class="lc'+hotCls+'" data-cid="'+conv.id+'" data-ph="'+esc(phDisp)+'" data-nm="'+nm+'" data-vn="'+esc(vn)+'" onclick="openChat(this)">'+
+(hot?'<span class="hot-badge">🔥 DINHEIRO NA MESA</span>':'')+
 '<div class="lc-top">'+
 '<div class="lc-av" style="background:'+cl+'">'+ini+'</div>'+
 '<div class="lc-info">'+
 '<div class="lc-name">'+nm+'</div>'+
 '<div class="lc-meta"><div class="lc-dot" style="background:'+cl+'"></div>'+esc(vn||'Sem vendedor')+'</div>'+
 '</div>'+
-'<div class="lc-time">'+ag+'</div>'+
+'<span class="'+timerCls+'">⏱ '+timerStr+'</span>'+
 '</div>'+
 '<div class="lc-preview">'+pv+'</div>'+
 '<div class="lc-footer">'+
 (phDisp?'<span class="lc-phone">📱 '+phDisp+'</span>':'<span></span>')+
 '<div style="display:flex;align-items:center;gap:6px">'+
-'<span class="lc-kw">'+esc(kw)+'</span>'+
+'<span class="'+kwCls+'">'+esc(kw)+'</span>'+
 '<span class="lc-open-btn">Ver conversa →</span>'+
 '</div>'+
 '</div>'+
 '</div>';
 }).join('');
+// Agendar atualizacao dos timers
+clearTimeout(window._timerRefresh);
+window._timerRefresh=setTimeout(renderLeads,30000);
 }
 }
+
 
 async function openChat(el){
 const nm=el.dataset.nm||'Lead';
@@ -515,6 +573,60 @@ if(e) requestAnimationFrame(()=>requestAnimationFrame(()=>{ e.scrollTop=e.scroll
 function closeChat(){ document.getElementById('chat-overlay').classList.remove('open'); document.body.style.overflow=''; }
 function overlayClose(e){ if(e.target===document.getElementById('chat-overlay')) closeChat(); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeChat(); });
+
+
+// ======= WEBHOOK ALERTA DE VENDA =======
+const NTFY_TOPIC='lnmkt-venda-agendado-2026';
+let _lastNtfy=0;
+
+function showVendaAlert(nome,valor){
+const overlay=document.getElementById('venda-overlay');
+const msg=document.getElementById('venda-msg');
+const val=document.getElementById('venda-val');
+if(!overlay)return;
+msg.textContent='Nova Venda: '+nome+'!';
+const vn=parseFloat(valor)||0;
+val.textContent='R$ '+vn.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+overlay.classList.add('open');
+// Auto fechar em 15s
+clearTimeout(window._vendaTimeout);
+window._vendaTimeout=setTimeout(closeVendaAlert,15000);
+// Som de notificacao
+try{const ctx=new AudioContext();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(523,ctx.currentTime);o.frequency.setValueAtTime(659,ctx.currentTime+0.1);o.frequency.setValueAtTime(784,ctx.currentTime+0.2);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);o.start(ctx.currentTime);o.stop(ctx.currentTime+0.6);}catch(e){}
+}
+
+function closeVendaAlert(){
+const overlay=document.getElementById('venda-overlay');
+if(overlay)overlay.classList.remove('open');
+clearTimeout(window._vendaTimeout);
+}
+
+async function pollNtfy(){
+try{
+const since=_lastNtfy>0?_lastNtfy:Math.floor(Date.now()/1000)-300;
+const r=await fetch('https://ntfy.sh/'+NTFY_TOPIC+'/json?since='+since+'&poll=1');
+const text=await r.text();
+if(!text.trim())return;
+const lines=text.trim().split('\n');
+lines.forEach(line=>{
+try{
+const ev=JSON.parse(line);
+if(ev.event!=='message')return;
+if(ev.time<=_lastNtfy)return;
+_lastNtfy=ev.time;
+const body=JSON.parse(ev.message||'{}');
+const nome=body.nome_cliente||'Cliente';
+const valor=body.valor_venda||0;
+showVendaAlert(nome,valor);
+}catch(e){}
+});
+}catch(e){console.warn('pollNtfy',e);}
+}
+
+// Poll a cada 10 segundos
+setInterval(pollNtfy,10000);
+pollNtfy();
+// ======= FIM WEBHOOK =======
 
 loadAll();
 setInterval(loadAll,90000);
